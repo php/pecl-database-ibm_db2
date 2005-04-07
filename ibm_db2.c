@@ -1958,7 +1958,7 @@ int _php_db2_execute_helper(stmt_handle *stmt_res, zval **data, int bind_cmp_lis
 					bound using db2_bind_param. Need to describe the
 					parameter and then bind it.
 				*/
-				param_no = stmt_res->num_params + 1;
+				param_no = ++stmt_res->num_params;
 
 				rc = SQLDescribeParam((SQLHSTMT)stmt_res->hstmt, param_no,
 					(SQLSMALLINT*)&data_type, &precision, (SQLSMALLINT*)&scale,
