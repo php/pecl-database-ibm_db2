@@ -22,7 +22,7 @@ if test "$PHP_IBM_DB2" != "no"; then
 
   if test -r $PHP_IBM_DB2/; then
      AC_MSG_CHECKING([for DB2 CLI files in $PHP_IBM_DB2])
-     if test -r $PHP_IBM_DB2/lib/libdb2.so || test -r $i/lib/libdb2.a ; then
+     if test -r $PHP_IBM_DB2/lib/libdb2.so || test -r $PHP_IBM_DB2/lib/libdb2.a ; then
        if test -r "$PHP_IBM_DB2/include/sqlcli1.h" ; then
 	 IBM_DB2_DIR=$PHP_IBM_DB2
 	 AC_MSG_RESULT(yes)
