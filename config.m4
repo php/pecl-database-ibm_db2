@@ -54,15 +54,15 @@ if test "$PHP_IBM_DB2" != "no"; then
   LIBNAME=db2
   LIBSYMBOL=SQLConnect
 
-  PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
-  [
+dnl #  PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
+dnl #  [
     PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $IBM_DB2_DIR/lib, IBM_DB2_SHARED_LIBADD)
     AC_DEFINE(HAVE_DB2CLILIB,1,[ ])
-  ],[
-    AC_MSG_ERROR([wrong DB2 CLI lib version or lib not found])
-  ],[
-    -L$IBM_DB2_DIR/lib -lm -ldl
-  ])
+dnl #  ],[
+dnl #    AC_MSG_ERROR([wrong DB2 CLI lib version or lib not found])
+dnl #  ],[
+dnl #    -L$IBM_DB2_DIR/lib -lm -ldl
+dnl #  ])
 
   PHP_NEW_EXTENSION(ibm_db2, ibm_db2.c, $ext_shared)
 
