@@ -1,7 +1,7 @@
 /*
 
   +----------------------------------------------------------------------+
-  | (C) Copyright IBM Corporation 2005.                                  | 
+  | Copyright IBM Corporation 2005.                                      | 
   +----------------------------------------------------------------------+
   |                                                                      |
   | Licensed under the Apache License, Version 2.0 (the "License"); you  | 
@@ -15,8 +15,7 @@
   | implied. See the License for the specific language governing         |
   | permissions and limitations under the License.                       |
   +----------------------------------------------------------------------+
-  | Authors: Sushant Koduru, Lynh Nguyen, Kanchana Padmanabhan,          |
-  |          Dan Scott, Helmut Tessarek                                  |
+  | Author: Sushant Koduru                                               |
   +----------------------------------------------------------------------+
 
   $Id$ 
@@ -43,8 +42,7 @@ extern zend_module_entry ibm_db2_module_entry;
 #include "TSRM.h"
 #endif
 
-#define MAX_OPTION_LEN 10
-#define MAX_ERR_MSG_LEN (SQL_MAX_MESSAGE_LENGTH + SQL_SQLSTATE_SIZE + 1)
+#define DB2_MAX_ERR_MSG_LEN (SQL_MAX_MESSAGE_LENGTH + SQL_SQLSTATE_SIZE + 1)
 
 /* Used in _php_parse_options */
 #define DB2_ERRMSG 1 
@@ -75,8 +73,6 @@ extern zend_module_entry ibm_db2_module_entry;
 
 PHP_MINIT_FUNCTION(ibm_db2);
 PHP_MSHUTDOWN_FUNCTION(ibm_db2);
-PHP_RINIT_FUNCTION(ibm_db2);
-PHP_RSHUTDOWN_FUNCTION(ibm_db2);
 PHP_MINFO_FUNCTION(ibm_db2);
 
 PHP_FUNCTION(db2_connect);
@@ -92,7 +88,6 @@ PHP_FUNCTION(db2_foreignkeys);
 PHP_FUNCTION(db2_foreign_keys);
 PHP_FUNCTION(db2_primarykeys);
 PHP_FUNCTION(db2_primary_keys);
-PHP_FUNCTION(db2_procedurecolumns);
 PHP_FUNCTION(db2_procedure_columns);
 PHP_FUNCTION(db2_procedures);
 PHP_FUNCTION(db2_specialcolumns);
@@ -127,34 +122,21 @@ PHP_FUNCTION(db2_fetch_row);
 PHP_FUNCTION(db2_fetch_assoc);
 PHP_FUNCTION(db2_fetch_into);
 PHP_FUNCTION(db2_fetch_both);
+PHP_FUNCTION(db2_result_all);
 PHP_FUNCTION(db2_free_result);
-
-/* IBM_DB2 extension Helper functions */
-
-void _php_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int rc, int cpy_to_global, char* ret_str, int API, SQLSMALLINT recno TSRMLS_DC );
-void _php_assign_options( void* handle, int type, char* opt_key, long data );
-int _php_parse_options( zval* options, int type, void* handle );
-
-int _php_db2_foreign_keys_helper(INTERNAL_FUNCTION_PARAMETERS);
-int _php_db2_column_privileges_helper(INTERNAL_FUNCTION_PARAMETERS);
-int _php_db2_primary_keys_helper(INTERNAL_FUNCTION_PARAMETERS);
-int _php_db2_special_columns_helper(INTERNAL_FUNCTION_PARAMETERS);
-int _php_db2_table_privileges_helper(INTERNAL_FUNCTION_PARAMETERS);
-int _php_db2_procedure_columns_helper(INTERNAL_FUNCTION_PARAMETERS);
-
-/* *********** */
+PHP_FUNCTION(db2_set_option);
 
 /* 
-	Declare any global variables you may need between the BEGIN
-	and END macros here:
+  	Declare any global variables you may need between the BEGIN
+	and END macros here:     
 */
 ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 	SQLHANDLE 	henv;
-	int		bin_mode;
-	char		__php_conn_err_msg[MAX_ERR_MSG_LEN];
-	char		__php_conn_err_state[SQL_SQLSTATE_SIZE + 1];
-	char		__php_stmt_err_msg[MAX_ERR_MSG_LEN];
-	char		__php_stmt_err_state[SQL_SQLSTATE_SIZE + 1];
+	int    		bin_mode;
+	char		__php_conn_err_msg[DB2_MAX_ERR_MSG_LEN];
+	char            __php_conn_err_state[SQL_SQLSTATE_SIZE + 1];
+	char            __php_stmt_err_msg[DB2_MAX_ERR_MSG_LEN];
+	char            __php_stmt_err_state[SQL_SQLSTATE_SIZE + 1];
 ZEND_END_MODULE_GLOBALS(ibm_db2)
 
 /* In every utility function you add that needs to use variables 
