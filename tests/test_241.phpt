@@ -13,12 +13,12 @@ $result = db2_exec($conn, "select * from sales");
 $result2 = db2_exec($conn, "select * from staff");
 $result3 = db2_exec($conn, "select * from emp_photo");
 
-for ($i=0; $i <= db2_num_fields($result); $i++) 
+for ($i=0; $i < db2_num_fields($result); $i++) 
 {
    var_dump( db2_field_width($result,$i) );
 }
 print "\n-----\n";
-for ($i=0; $i <= db2_num_fields($result2); $i++) 
+for ($i=0; $i < db2_num_fields($result2); $i++) 
 {
    var_dump( db2_field_width($result2,db2_field_name($result2,$i)) );
 }
@@ -29,7 +29,6 @@ int(10)
 int(15)
 int(15)
 int(11)
-int(0)
 
 -----
 int(6)
@@ -39,4 +38,3 @@ int(5)
 int(6)
 int(9)
 int(9)
-int(0)

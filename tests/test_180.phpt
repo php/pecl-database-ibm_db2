@@ -9,30 +9,31 @@ require_once('connection.inc');
 
 $conn = db2_connect($db,$username,$password);
 if ($conn) {
-	$result = @db2_exec($conn,"insert int0 t_string values(123,1.222333,'one to one')");
-	if ($result) {
-		$cols = db2_num_fields($result);
-		echo 'col: ' . $cols . ',';
-		$rows = db2_num_rows($result);
-		echo 'affected row: ' . $rows ;
-	}	
-	else {
-		echo db2_stmt_errormsg();	
-	}
-	$result = @db2_exec($conn,"delete from t_string where a=123");
-	if ($result) {
-		$cols = db2_num_fields($result);
-		echo 'col: ' . $cols . ',';
-		$rows = db2_num_rows($result);
-		echo 'affected row: ' . $rows ;
-	}	
-	else {
-		echo db2_stmt_errormsg();	
-	}
+    require_once('prepare_t_string.inc');
+    $result = @db2_exec($conn,"insert int0 t_string values(123,1.222333,'one to one')");
+    if ($result) {
+        $cols = db2_num_fields($result);
+        echo 'col: ' . $cols . ',';
+        $rows = db2_num_rows($result);
+        echo 'affected row: ' . $rows ;
+    }    
+    else {
+        echo db2_stmt_errormsg();    
+    }
+    $result = @db2_exec($conn,"delete from t_string where a=123");
+    if ($result) {
+        $cols = db2_num_fields($result);
+        echo 'col: ' . $cols . ',';
+        $rows = db2_num_rows($result);
+        echo 'affected row: ' . $rows ;
+    }    
+    else {
+        echo db2_stmt_errormsg();    
+    }
 
 }
 else {
-	echo 'no connection';	
+    echo 'no connection';    
 }
 
 ?>

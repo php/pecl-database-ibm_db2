@@ -1,5 +1,5 @@
 --TEST--
-IBM-DB2: db2_fetch_assoc() - positioned with scrollable cursor
+IBM-DB2: db2_fetch_assoc() - positioned without scrollable cursor (error)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -11,7 +11,7 @@ $conn = db2_connect($db,$username,$password);
 if ($conn) {
     require_once('prepare.inc');
     $sql = "SELECT id, name, breed, weight FROM animals ORDER BY breed";
-    $result = db2_exec($conn, $sql, array('cursor' => DB2_SCROLLABLE));
+    $result = db2_exec($conn, $sql);
 
     $i=2;
     while ($row = db2_fetch_assoc($result, $i)) {
@@ -23,7 +23,5 @@ if ($conn) {
 }
 
 ?>
---EXPECT--
-0     Pook             cat                                    3.20
-5     Rickety Ride     goat                                   9.70
-2     Smarty           horse                                350.00
+--EXPECTF--
+PHP Warning:  db2_fetch_assoc(): Fetch Failure in %s on line %d 
