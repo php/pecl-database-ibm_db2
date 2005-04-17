@@ -56,17 +56,17 @@ if ($conn) {
   }
 
   print "Fetching third result set\n";
-  $res = db2_next_result($stmt);
-  if ($res) {
-    while ($row = db2_fetch_into($res)) {
+  $res2 = db2_next_result($stmt);
+  if ($res2) {
+    while ($row = db2_fetch_into($res2)) {
       var_dump($row);
     }
   }
 
   print "Fetching fourth result set (should fail)\n";
-  $res = db2_next_result($stmt);
-  if ($res) {
-    while ($row = db2_fetch_into($res)) {
+  $res3 = db2_next_result($stmt);
+  if ($res3) {
+    while ($row = db2_fetch_into($res3)) {
       var_dump($row);
     }
   }
