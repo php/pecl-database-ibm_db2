@@ -1496,7 +1496,7 @@ PHP_FUNCTION(db2_procedure_columns)
 }
 /* }}} */
 
-/* {{{ proto resource db2_procedures(resource connection, string qualifier, string owner, string table_name, string column_name)
+/* {{{ proto resource db2_procedures(resource connection, string qualifier, string owner, string proc_name)
 Returns a result set listing the stored procedures registered in a database */
 PHP_FUNCTION(db2_procedures)
 {
@@ -1584,7 +1584,6 @@ PHP_FUNCTION(db2_special_columns)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto resource db2_statistics(resource connection, string qualifier, string owner, string table_name, string column_name)
 Returns a result set listing the index and statistics for a table */
@@ -2022,9 +2021,10 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 			break;
 
 		case IS_NULL:
+			Z_LVAL_P(curr->value) = SQL_NULL_DATA;
 			rc = SQLBindParameter(stmt_res->hstmt, curr->param_num,
 				curr->param_type, SQL_C_DEFAULT, curr->data_type, curr->param_size,
-				curr->scale, &(curr->value), 0, (SQLINTEGER *)SQL_NULL_DATA);
+				curr->scale, &(curr->value), 0, &((curr->value)->value.lval));
 			break;
 
 		default:
@@ -2847,11 +2847,7 @@ PHP_FUNCTION(db2_cursor_type)
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
 	}
 
-	if (stmt_res->cursor_type == DB2_FORWARD_ONLY) {
-		RETURN_LONG(0);
-	} else {
-		RETURN_LONG(1);
-	}
+	RETURN_LONG(stmt_res->cursor_type != DB2_FORWARD_ONLY);
 }
 /* }}} */
 
@@ -3295,7 +3291,7 @@ PHP_FUNCTION(db2_fetch_both)
 /* }}} */
 
 /* {{{ proto bool db2_set_option(resource stmt, array options, int type)
-Sets the specified option in the resource */
+Sets the specified option in the resource. TYPE field specifies the resource type (1 = Connection) */
 PHP_FUNCTION(db2_set_option)
 {
 	int argc = ZEND_NUM_ARGS();
@@ -3318,6 +3314,7 @@ PHP_FUNCTION(db2_set_option)
 			rc = _php_db2_parse_options( options, SQL_HANDLE_STMT, conn_res TSRMLS_CC );
 			if (rc == SQL_ERROR) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Options Array must have string indexes");
+				RETURN_FALSE;
 			}
 		} else {
 			ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &resc, id, "Statement Resource", le_stmt_struct);
@@ -3325,9 +3322,14 @@ PHP_FUNCTION(db2_set_option)
 			rc = _php_db2_parse_options( options, SQL_HANDLE_DBC, stmt_res TSRMLS_CC );
 			if (rc == SQL_ERROR) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Options Array must have string indexes");
+				RETURN_FALSE;
 			}
 		}
-	}
+
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+    }
 }
 /* }}} */
 
