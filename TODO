@@ -1,6 +1,3 @@
 TODO:
-Implement persistent connections.
 Implement binary data type support (BLOB, FOR BIT DATA, GRAPHIC DATA).
-Implement db2_cursor_type, db2_free_stmt functions.
-Implement remaining metadata functions.
 Add tests for more data types in more fetch methods.
