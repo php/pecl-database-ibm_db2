@@ -69,7 +69,6 @@ typedef struct _conn_handle_struct {
 	SQLSMALLINT error_recno_tracker;
 	SQLSMALLINT errormsg_recno_tracker;
 	int flag_pconnect; /* Indicates that this connection is persistent */
-	char *pconnect_key; /* hash key used in pconnections, NULL in normal mode */
 } conn_handle;
 
 typedef union {
@@ -173,6 +172,8 @@ function_entry ibm_db2_functions[] = {
 	PHP_FE(db2_fetch_both,	NULL)
 	PHP_FE(db2_free_result,	NULL)
 	PHP_FE(db2_set_option,	NULL)
+	PHP_FALIAS(db2_setoption, db2_set_option,	NULL)
+	PHP_FE(db2_fetch_object,	NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in ibm_db2_functions[] */
 };
 /* }}} */
@@ -235,21 +236,14 @@ static void _php_db2_free_conn_struct(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		rc = SQLDisconnect((SQLHDBC)handle->hdbc);
 		rc = SQLFreeHandle(SQL_HANDLE_DBC, handle->hdbc);
 	}
-	if (handle->flag_pconnect ) {
-		/* Important to use regular free, we don't want the handled collected by efree */
-		if (handle->pconnect_key) {
-			/* Clean up has entry first */
-			/* I'm not sure why we don't have to delete this variable, if you uncomment the link below */
-			/* it crashes (hangs) PHP */
-			/* zend_hash_del(&EG(persistent_list), handle->pconnect_key, strlen(handle->pconnect_key) + 1);  */
-			free(handle->pconnect_key);
+	if ( handle != NULL ) {
+		if ( handle->flag_pconnect ) {
+			/* Important to use regular free, we don't want the handled collected by efree */
+			pefree(handle, 1);
+		} else {
+			efree(handle);
 		}
-		free(handle);
-
-	} else {
-		efree(handle);
 	}
-
 }
 /* }}} */
 
@@ -452,10 +446,14 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 	SQLCHAR errMsg[DB2_MAX_ERR_MSG_LEN];
 	SQLINTEGER sqlcode;
 	SQLSMALLINT length;
+	char *p;
 
 	if ( SQLGetDiagRec(hType, handle, recno, sqlstate, &sqlcode, msg,
 		SQL_MAX_MESSAGE_LENGTH + 1, &length ) == SQL_SUCCESS) {
-		sprintf(errMsg, "Msg:%s Err Code: %d", msg, (int)sqlcode);
+		p = strchr( msg, '\n' );
+		if (p) *p = '\0';
+		sprintf(errMsg, "%s SQLCODE=%d", msg, (int)sqlcode);
+		errMsg[DB2_MAX_ERR_MSG_LEN] = '\0';
 
 		switch (rc) {
 			case SQL_ERROR:
@@ -815,10 +813,10 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 		/* Check if we already have a connection for this userID & database combination */
 		if (isPersistent) {
 			list_entry *entry;
-			hKeyLen = strlen(database) + strlen(uid) + 8;
-			hKey = (char *) malloc(hKeyLen);
+			hKeyLen = strlen(database) + strlen(uid) + strlen(password) + 9;
+			hKey = (char *) emalloc(hKeyLen);
 
-			sprintf(hKey, "__db2_%s.%s", uid, database);
+			sprintf(hKey, "__db2_%s.%s.%s", uid, database, password);
 
 			if (zend_hash_find(&EG(persistent_list), hKey, hKeyLen, (void **) &entry) == SUCCESS) {
 				/* Need to reinitialize connection */
@@ -830,7 +828,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 		}
 		if (*pconn_res == NULL) {
 			conn_res = *pconn_res =
-				(conn_handle *) (isPersistent ?  malloc(sizeof(conn_handle)) : emalloc(sizeof(conn_handle)));
+				(conn_handle *) (isPersistent ?  pemalloc(sizeof(conn_handle), 1) : emalloc(sizeof(conn_handle)));
 			memset((void *) conn_res, '\0', sizeof(conn_handle));
 		}
 		/* We need to set this early, in case we get an error below,
@@ -910,14 +908,9 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 			if (zend_hash_update(&EG(persistent_list), hKey, hKeyLen, (void *) &newEntry, sizeof(list_entry), NULL)==FAILURE) {
 				rc = SQL_ERROR;
 				/* TBD: What error to return?, for now just generic SQL_ERROR */
-			} else {
-				conn_res->pconnect_key = hKey;
 			}
 		}
-		if (conn_res->pconnect_key == NULL) {
-			/* we are not reusing the connection, no need to free key */
-			free(hKey);
-		}
+		efree(hKey);
 	}
 	return rc;
 }
@@ -982,14 +975,11 @@ PHP_FUNCTION(db2_pconnect)
 
 		/* free memory */
 		if (conn_res != NULL) {
-			if (conn_res->pconnect_key != NULL) {
-				free(conn_res->pconnect_key);
-			}
-			free(conn_res);
+			pefree(conn_res, 1);
 		}
 
-	RETVAL_FALSE;
-	return;
+		RETVAL_FALSE;
+		return;
 	} else {
 		ZEND_REGISTER_RESOURCE(return_value, conn_res, le_pconn_struct);
 	}
@@ -3274,6 +3264,18 @@ PHP_FUNCTION(db2_fetch_assoc)
 }
 /* }}} */
 
+/* {{{ proto object db2_fetch_object(resource stmt [, int row_number])
+Returns an object with properties that correspond to the fetched row */
+PHP_FUNCTION(db2_fetch_object)
+{
+	_php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, DB2_FETCH_ASSOC);
+
+	if (Z_TYPE_P(return_value) == IS_ARRAY) {
+		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
+	}
+}
+/* }}} */
+
 /* {{{ proto array db2_fetch_into(resource stmt [, int row_number])
 Returns an array, indexed by column position, representing a row in a result set */
 PHP_FUNCTION(db2_fetch_into)
@@ -3311,7 +3313,7 @@ PHP_FUNCTION(db2_set_option)
 		if ( type == 1 ) {
 			ZEND_FETCH_RESOURCE(conn_res, conn_handle*, &resc, id, "Connection Resource", le_conn_struct);
 
-			rc = _php_db2_parse_options( options, SQL_HANDLE_STMT, conn_res TSRMLS_CC );
+			rc = _php_db2_parse_options( options, SQL_HANDLE_DBC, conn_res TSRMLS_CC );
 			if (rc == SQL_ERROR) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Options Array must have string indexes");
 				RETURN_FALSE;
@@ -3319,7 +3321,7 @@ PHP_FUNCTION(db2_set_option)
 		} else {
 			ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &resc, id, "Statement Resource", le_stmt_struct);
 
-			rc = _php_db2_parse_options( options, SQL_HANDLE_DBC, stmt_res TSRMLS_CC );
+			rc = _php_db2_parse_options( options, SQL_HANDLE_STMT, stmt_res TSRMLS_CC );
 			if (rc == SQL_ERROR) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Options Array must have string indexes");
 				RETURN_FALSE;
