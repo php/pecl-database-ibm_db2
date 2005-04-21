@@ -1,10 +1,10 @@
 /*
 
   +----------------------------------------------------------------------+
-  | Copyright IBM Corporation 2005.                                      | 
+  | Copyright IBM Corporation 2005.                                      |
   +----------------------------------------------------------------------+
   |                                                                      |
-  | Licensed under the Apache License, Version 2.0 (the "License"); you  | 
+  | Licensed under the Apache License, Version 2.0 (the "License"); you  |
   | may not use this file except in compliance with the License. You may |
   | obtain a copy of the License at                                      |
   | http://www.apache.org/licenses/LICENSE-2.0                           |
@@ -18,7 +18,7 @@
   | Author: Sushant Koduru                                               |
   +----------------------------------------------------------------------+
 
-  $Id$ 
+  $Id$
 */
 
 #ifndef PHP_IBM_DB2_H
@@ -45,19 +45,19 @@ extern zend_module_entry ibm_db2_module_entry;
 #define DB2_MAX_ERR_MSG_LEN (SQL_MAX_MESSAGE_LENGTH + SQL_SQLSTATE_SIZE + 1)
 
 /* Used in _php_parse_options */
-#define DB2_ERRMSG 1 
+#define DB2_ERRMSG 1
 #define DB2_ERR 2
 
 /******** Makes code compatible with the options used by the user */
-#define DB2_BINARY 0 
-#define DB2_CONVERT 1 
-#define DB2_PASSTHRU 2 
+#define DB2_BINARY 0
+#define DB2_CONVERT 1
+#define DB2_PASSTHRU 2
 
 #define DB2_SCROLLABLE SQL_SCROLL_DYNAMIC
 #define DB2_FORWARD_ONLY SQL_SCROLL_FORWARD_ONLY
 
 #define DB2_AUTOCOMMIT_ON SQL_AUTOCOMMIT_ON
-#define DB2_AUTOCOMMIT_OFF SQL_AUTOCOMMIT_OFF 
+#define DB2_AUTOCOMMIT_OFF SQL_AUTOCOMMIT_OFF
 
 #define DB2_PARAM_IN SQL_PARAM_INPUT
 #define DB2_PARAM_OUT SQL_PARAM_OUTPUT
@@ -125,10 +125,12 @@ PHP_FUNCTION(db2_fetch_both);
 PHP_FUNCTION(db2_result_all);
 PHP_FUNCTION(db2_free_result);
 PHP_FUNCTION(db2_set_option);
+PHP_FUNCTION(db2_setoption);
+PHP_FUNCTION(db2_fetch_object);
 
-/* 
+/*
   	Declare any global variables you may need between the BEGIN
-	and END macros here:     
+	and END macros here:
 */
 ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 	SQLHANDLE 	henv;
@@ -139,12 +141,12 @@ ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 	char            __php_stmt_err_state[SQL_SQLSTATE_SIZE + 1];
 ZEND_END_MODULE_GLOBALS(ibm_db2)
 
-/* In every utility function you add that needs to use variables 
-   in php_ibm_db2_globals, call TSRMLS_FETCH(); after declaring other 
+/* In every utility function you add that needs to use variables
+   in php_ibm_db2_globals, call TSRMLS_FETCH(); after declaring other
    variables used by that function, or better yet, pass in TSRMLS_CC
    after the last function argument and declare your utility function
    with TSRMLS_DC after the last declared argument.  Always refer to
-   the globals in your function as IBM_DB2_G(variable).  You are 
+   the globals in your function as IBM_DB2_G(variable).  You are
    encouraged to rename these macros something shorter, see
    examples in any other php module directory.
 */
