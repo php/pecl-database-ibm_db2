@@ -1,5 +1,4 @@
 <?php
-/* Adjust connection values accordingly */
 
 $database = 'SAMPLE';
 $user = 'db2inst1';
