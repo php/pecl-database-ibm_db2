@@ -19,5 +19,4 @@ else {
 
 ?>
 --EXPECT--
-Msg:[IBM][CLI Driver] SQL1013N  The database alias name or database name "X" could not be found.  SQLSTATE=42705
- Err Code: -1013
+[IBM][CLI Driver] SQL1013N  The database alias name or database name "X" could not be found.  SQLSTATE=42705 SQLCODE=-1013

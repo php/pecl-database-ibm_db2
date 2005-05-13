@@ -1,5 +1,9 @@
 <?php
 
+// Drop the test view, in case it exists
+$drop = 'DROP TABLE anime_cat';
+$result = @db2_exec($conn, $drop);
+
 // Drop the test table, in case it exists
 $drop = 'DROP TABLE animals';
 $result = @db2_exec($conn, $drop);
@@ -36,5 +40,10 @@ foreach ($animals as $animal) {
         $animal[2] . "', " . 
         $animal[3] . ")");
 }
+
+// Create test view
+db2_exec($conn, 'CREATE VIEW anime_cat AS
+    SELECT name, breed FROM animals
+    WHERE id = 0');
 
 ?>

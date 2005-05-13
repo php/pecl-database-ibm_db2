@@ -22,8 +22,8 @@ if ($conn) {
     $stmt = db2_exec( $conn, "SELECT * FROM ftest" );
 
     $num1 = db2_field_num( $stmt, "TEST" );
-    $num2 = db2_field_num( $stmt, '"test"' );
-    $num3 = db2_field_num( $stmt, '"Test"' );
+    $num2 = db2_field_num( $stmt, 'test' );
+    $num3 = db2_field_num( $stmt, 'Test' );
         
     var_dump( $num1 );
     var_dump( $num2 );
@@ -36,6 +36,6 @@ else {
 
 ?>
 --EXPECT--
+int(0)
 int(1)
 int(2)
-int(3)

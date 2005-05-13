@@ -26,8 +26,8 @@ if ($conn) {
     $num3 = db2_field_name( $stmt, 2 );
     
     $num4 = db2_field_name( $stmt, "TEST" );
-    $num5 = db2_field_name( $stmt, '"test"' );
-    $num6 = db2_field_name( $stmt, '"Test"' );
+    $num5 = db2_field_name( $stmt, 'test' );
+    $num6 = db2_field_name( $stmt, 'Test' );
         
     var_dump( $num1 );
     var_dump( $num2 );

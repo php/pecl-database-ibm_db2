@@ -20,7 +20,7 @@ if test "$PHP_IBM_DB2" != "no"; then
   dnl # --with-IBM_DB2 -> check with-path
   SEARCH_PATH="$DB2PATH $DB2DIR /opt/IBM/db2/V8.1/ /home/db2inst1/sqllib /usr/local /usr"
 
-  if test -r $PHP_IBM_DB2/; then
+  if test -r $PHP_IBM_DB2/ && test -n "$PHP_IBM_DB2" ; then
      AC_MSG_CHECKING([for DB2 CLI files in $PHP_IBM_DB2])
      if test -r $PHP_IBM_DB2/lib/libdb2.so || test -r $PHP_IBM_DB2/lib/libdb2.a ; then
        if test -r "$PHP_IBM_DB2/include/sqlcli1.h" ; then
@@ -31,6 +31,7 @@ if test "$PHP_IBM_DB2" != "no"; then
    else
      AC_MSG_CHECKING([for DB2 CLI files in default path])
      for i in $SEARCH_PATH ; do
+     AC_MSG_CHECKING([in $i])
        if test -r $i/lib/libdb2.so || test -r $i/lib/libdb2.a ; then
 	 if test -r "$i/include/sqlcli1.h" ; then
 	   IBM_DB2_DIR=$i

@@ -9,7 +9,7 @@ require_once('connection.inc');
 $conn = db2_connect($database, $user, $password);
 
 $insert = "INSERT INTO animals (id, breed, name, weight)
-    VALUES (NULL, 'ghost', NULL, NULL)";
+    VALUES (?, ?, ?, ?)";
 $select = 'SELECT id, breed, name, weight
     FROM animals WHERE weight IS NULL';
 
@@ -17,7 +17,7 @@ if ($conn) {
     require_once('prepare.inc');
     $stmt = db2_prepare( $conn, $insert);
 
-    if (db2_execute($stmt)) {
+    if (db2_execute($stmt, array(NULL, 'ghost', NULL, NULL))) {
         $stmt = db2_exec($conn, $select);
 	while ($row = db2_fetch_into($stmt)) {
             var_dump($row);

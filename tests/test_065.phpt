@@ -1,5 +1,5 @@
 --TEST--
-IBM-DB2: db2_tables() - 6
+IBM-DB2: db2_tables() - Filter by table name
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -21,18 +21,17 @@ $result = @db2_exec($conn, $create);
 $create = 'CREATE TABLE t.t4( c1 integer, c2 varchar(40))';
 $result = @db2_exec($conn, $create);
 
-$result = db2_tables($conn, NULL, NULL, "T3");
+$result = db2_tables($conn, NULL, '%', "T3");
 
-for ($i=0; $i<db2_num_fields($result); $i++) 
-{
+$columns = db2_num_fields($result);
+
+for ($i=0; $i < $columns; $i++) {
    print db2_field_name($result, $i) . ", ";	
 }
 print "\n\n";
 
-while ($row=db2_fetch_into($result))
-{
-   for ($i=0; $i<db2_num_fields($result); $i++) 
-   {
+while ($row = db2_fetch_into($result)) {
+   for ($i=0; $i < $columns; $i++) {
       print $row[$i] . ", ";	
    }
    print "\n";

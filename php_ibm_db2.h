@@ -49,9 +49,9 @@ extern zend_module_entry ibm_db2_module_entry;
 #define DB2_ERR 2
 
 /******** Makes code compatible with the options used by the user */
-#define DB2_BINARY 0
-#define DB2_CONVERT 1
-#define DB2_PASSTHRU 2
+#define DB2_BINARY 1
+#define DB2_CONVERT 2
+#define DB2_PASSTHRU 3
 
 #define DB2_SCROLLABLE SQL_SCROLL_DYNAMIC
 #define DB2_FORWARD_ONLY SQL_SCROLL_FORWARD_ONLY

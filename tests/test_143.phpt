@@ -17,7 +17,7 @@ if ($conn) {
     $stmt = db2_prepare( $conn, $insert);
 
     $animal = NULL;
-    db2_bind_param($stmt, 1, 'animal');
+    db2_bind_param($stmt, 1, "animal");
 
     if (db2_execute($stmt)) {
         $stmt = db2_exec($conn, $select);
