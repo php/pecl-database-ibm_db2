@@ -1,12 +1,13 @@
 ARG_WITH("ibm_db2", "Native support for IBM DB2", "no");
 
 if (PHP_IBM_DB2 != "no") {
-	if (CHECK_LIB("db2cli.lib", "ibm_db2")) {
+	if (CHECK_LIB("db2cli.lib", "ibm_db2") &&
+			CHECK_HEADER_ADD_INCLUDE('sql.h', 'CFLAGS_IBM_DB2', PHP_PHP_BUILD + "\\include\\db2") &&
+			CHECK_HEADER_ADD_INCLUDE('sqlext.h', 'CFLAGS_IBM_DB2', PHP_PHP_BUILD + "\\include\\db2") &&
+			CHECK_HEADER_ADD_INCLUDE('sqlcli1.h', 'CFLAGS_IBM_DB2', PHP_PHP_BUILD + "\\include\\db2")
+		) {
 		EXTENSION("ibm_db2", "ibm_db2.c");
-		CHECK_HEADER_ADD_INCLUDE('sql.h', 'CFLAGS_IBM_DB2');
-		CHECK_HEADER_ADD_INCLUDE('sqlext.h', 'CFLAGS_IBM_DB2');
-		CHECK_HEADER_ADD_INCLUDE('sqlcli1.h', 'CFLAGS_IBM_DB2');
-		ADD_FLAG('CFLAGS_IBM_DB2', "/I ..\\pecl");
+		AC_DEFINE('HAVE_IBM_DB2', 1, 'Have IBM DB2 client library');
 	}
 }
 
