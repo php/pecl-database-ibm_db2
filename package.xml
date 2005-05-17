@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<package version="1.0">
+ <name>ibm_db2</name>
+ <summary>Extension for IBM DB2 Universal Database, IBM Cloudscape, and Apache Derby</summary>
+ <description>
+  This extension supports IBM DB2 Universal Database, IBM Cloudscape, and
+  Apache Derby databases.
+ </description>
+ <license>Apache License 2.0</license>
+ <maintainers>
+  <maintainer>
+   <user>skoduru</user>
+   <name>Sushant Koduru</name>
+   <email>skoduru@us.ibm.com</email>
+   <role>lead</role>
+  </maintainer>
+  <maintainer>
+   <user>dbs</user>
+   <name>Dan Scott</name>
+   <email>dan.scott@ca.ibm.com</email>
+   <role>developer</role>
+  </maintainer>
+ </maintainers>
+
+ <release>
+  <version>1.0.1</version>
+  <date>2005-05-17</date>
+  <state>beta</state>
+  <notes>
+   Enable binary data types. Handle string truncation errors gracefully.
+   Enable verbose output in phpinfo().
+  </notes>
+  <configureoptions>
+   <configureoption name="with-IBM-DB2" prompt="DB2 Installation Directory?" />
+  </configureoptions>
+  <filelist>
+   <dir name="/" baseinstalldir="ibm_db2">
+    <file role="src">ibm_db2.c</file>
+    <file role="src">php_ibm_db2.h</file>
+    <file role="src">config.m4</file>
+    <file role="doc">TODO</file>
+   </dir>
+   <dir name="tests" role="test">
+    <file>connection.inc</file>
+    <file>prepare.inc</file>
+    <file>prepare_t_string.inc</file>
+    <file>skipif.inc</file>
+    <file>test_001.phpt</file>
+    <file>test_002.phpt</file>
+    <file>test_003.phpt</file>
+    <file>test_004.phpt</file>
+    <file>test_005.phpt</file>
+    <file>test_010.phpt</file>
+    <file>test_011.phpt</file>
+    <file>test_012.phpt</file>
+    <file>test_013.phpt</file>
+    <file>test_014.phpt</file>
+    <file>test_015.phpt</file>
+    <file>test_016.phpt</file>
+    <file>test_020.phpt</file>
+    <file>test_021.phpt</file>
+    <file>test_022.phpt</file>
+    <file>test_030.phpt</file>
+    <file>test_031.phpt</file>
+    <file>test_032.phpt</file>
+    <file>test_033.phpt</file>
+    <file>test_034.phpt</file>
+    <file>test_035.phpt</file>
+    <file>test_036.phpt</file>
+    <file>test_037.phpt</file>
+    <file>test_038.phpt</file>
+    <file>test_039.phpt</file>
+    <file>test_03a.phpt</file>
+    <file>test_040.phpt</file>
+    <file>test_041.phpt</file>
+    <file>test_042.phpt</file>
+    <file>test_043.phpt</file>
+    <file>test_045.phpt</file>
+    <file>test_046.phpt</file>
+    <file>test_047.phpt</file>
+    <file>test_048.phpt</file>
+    <file>test_049.phpt</file>
+    <file>test_050.phpt</file>
+    <file>test_051.phpt</file>
+    <file>test_052.phpt</file>
+    <file>test_060.phpt</file>
+    <file>test_061.phpt</file>
+    <file>test_062.phpt</file>
+    <file>test_063.phpt</file>
+    <file>test_064.phpt</file>
+    <file>test_065.phpt</file>
+    <file>test_070.phpt</file>
+    <file>test_071.phpt</file>
+    <file>test_080.phpt</file>
+    <file>test_081.phpt</file>
+    <file>test_082.phpt</file>
+    <file>test_090.phpt</file>
+    <file>test_091.phpt</file>
+    <file>test_092.phpt</file>
+    <file>test_100.phpt</file>
+    <file>test_101.phpt</file>
+    <file>test_102.phpt</file>
+    <file>test_103.phpt</file>
+    <file>test_110.phpt</file>
+    <file>test_111.phpt</file>
+    <file>test_112.phpt</file>
+    <file>test_120.phpt</file>
+    <file>test_121.phpt</file>
+    <file>test_122.phpt</file>
+    <file>test_123.phpt</file>
+    <file>test_124.phpt</file>
+    <file>test_125.phpt</file>
+    <file>test_130.phpt</file>
+    <file>test_131.phpt</file>
+    <file>test_132.phpt</file>
+    <file>test_133.phpt</file>
+    <file>test_140.phpt</file>
+    <file>test_141.phpt</file>
+    <file>test_142.phpt</file>
+    <file>test_143.phpt</file>
+    <file>test_150.phpt</file>
+    <file>test_151.phpt</file>
+    <file>test_152.phpt</file>
+    <file>test_153.phpt</file>
+    <file>test_154.phpt</file>
+    <file>test_155.phpt</file>
+    <file>test_156.phpt</file>
+    <file>test_157.phpt</file>
+    <file>test_157a.phpt</file>
+    <file>test_157b.phpt</file>
+    <file>test_158.phpt</file>
+    <file>test_159.phpt</file>
+    <file>test_159a.phpt</file>
+    <file>test_160.phpt</file>
+    <file>test_161.phpt</file>
+    <file>test_162.phpt</file>
+    <file>test_180.phpt</file>
+    <file>test_190.phpt</file>
+    <file>test_191.phpt</file>
+    <file>test_192.phpt</file>
+    <file>test_200.phpt</file>
+    <file>test_201.phpt</file>
+    <file>test_210.phpt</file>
+    <file>test_211.phpt</file>
+    <file>test_212.phpt</file>
+    <file>test_213.phpt</file>
+    <file>test_220.phpt</file>
+    <file>test_221.phpt</file>
+    <file>test_230.phpt</file>
+    <file>test_231.phpt</file>
+    <file>test_232.phpt</file>
+    <file>test_240.phpt</file>
+    <file>test_241.phpt</file>
+    <file>test_250.phpt</file>
+    <file>test_251.phpt</file>
+   </dir>
+  </filelist>
+ </release>
+ <changelog>
+  <release>
+   <version>1.0</version>
+   <date>2005-05-06</date>
+   <state>beta</state>
+   <notes>
+    Initial release.
+   </notes>
+  </release>
+ </changelog>
+</package>
