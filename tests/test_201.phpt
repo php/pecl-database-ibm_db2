@@ -41,14 +41,14 @@ if ($conn) {
   $stmt = db2_exec($conn, 'CALL multiResults()');
 
   print "Fetching first result set\n";
-  while ($row = db2_fetch_into($stmt)) {
+  while ($row = db2_fetch_array($stmt)) {
     var_dump($row);
   }
 
   print "Fetching second result set\n";
   $res = db2_next_result($stmt);
   if ($res) {
-    while ($row = db2_fetch_into($res)) {
+    while ($row = db2_fetch_array($res)) {
       var_dump($row);
     }
   }
@@ -56,7 +56,7 @@ if ($conn) {
   print "Fetching third result set\n";
   $res2 = db2_next_result($stmt);
   if ($res2) {
-    while ($row = db2_fetch_into($res2)) {
+    while ($row = db2_fetch_array($res2)) {
       var_dump($row);
     }
   }

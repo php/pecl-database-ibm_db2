@@ -45,11 +45,11 @@ var_dump( $t );
 
 ?>
 --EXPECT--
-sales_person size 15
+sales_person size 0
 REGION size 15
-REgion size 15
+REgion size 0
 HELMUT size 0
 bool(false)
 bool(false)
-int(15)
+bool(false)
 int(10)

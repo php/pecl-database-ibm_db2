@@ -17,7 +17,7 @@ if ($conn) {
     $stmt = db2_prepare( $conn, $sql);
 
     if (db2_execute($stmt, array(0, 'Pook'))) {
-        while ($row = db2_fetch_into($stmt)) {
+        while ($row = db2_fetch_array($stmt)) {
             var_dump($row);
         }
     }

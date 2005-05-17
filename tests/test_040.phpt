@@ -1,5 +1,5 @@
 --TEST--
-IBM-DB2: db2_fetch_into one row
+IBM-DB2: db2_fetch_array one row
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -23,7 +23,7 @@ db2_exec( $conn, $insert );
 
 $stmt = db2_exec( $conn, "select * from animals" );
 
-$onerow = db2_fetch_into( $stmt );
+$onerow = db2_fetch_array( $stmt );
 
 var_dump( $onerow );
 

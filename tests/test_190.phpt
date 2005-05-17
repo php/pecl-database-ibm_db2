@@ -12,7 +12,7 @@ $conn = db2_connect($db,$username,$password);
 if ($conn) 
 {
    $result = db2_columns($conn,NULL,NULL,"EMPLOYEE");
-   while ($row = db2_fetch_into($result))
+   while ($row = db2_fetch_array($result))
    {
       $str = $row[1] ."/". $row[3];	
       print $str . "\n";

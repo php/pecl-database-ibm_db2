@@ -120,7 +120,7 @@ PHP_FUNCTION(db2_free_stmt);
 PHP_FUNCTION(db2_result);
 PHP_FUNCTION(db2_fetch_row);
 PHP_FUNCTION(db2_fetch_assoc);
-PHP_FUNCTION(db2_fetch_into);
+PHP_FUNCTION(db2_fetch_array);
 PHP_FUNCTION(db2_fetch_both);
 PHP_FUNCTION(db2_result_all);
 PHP_FUNCTION(db2_free_result);

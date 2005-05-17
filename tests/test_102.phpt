@@ -12,7 +12,7 @@ if ($conn)
 {
    $result = db2_exec($conn, "select * from staff, employee, org order by employee.salary, org.location, staff.id");
    $cols = db2_num_fields($result);
-   while ($row = db2_fetch_into($result)) 
+   while ($row = db2_fetch_array($result)) 
    {
       for ($i=0; $i<$cols; $i++) 
       {

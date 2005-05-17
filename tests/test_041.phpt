@@ -1,5 +1,5 @@
 --TEST--
-IBM-DB2: db2_fetch_into several rows
+IBM-DB2: db2_fetch_array several rows
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -15,7 +15,7 @@ if ($conn) {
 
     $i = 0;
 
-    while( $cols = db2_fetch_into( $stmt ) ) {
+    while( $cols = db2_fetch_array( $stmt ) ) {
         foreach ($cols as $col) {
             print "$col ";
         }

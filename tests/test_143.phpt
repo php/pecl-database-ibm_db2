@@ -21,7 +21,7 @@ if ($conn) {
 
     if (db2_execute($stmt)) {
         $stmt = db2_exec($conn, $select);
-	while ($row = db2_fetch_into($stmt)) {
+	while ($row = db2_fetch_array($stmt)) {
             var_dump($row);
         }
     }

@@ -1,5 +1,5 @@
 --TEST--
-IBM-DB2: db2_fetch_into() - several rows 4
+IBM-DB2: db2_fetch_array() - several rows 4
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -12,7 +12,7 @@ $conn = db2_connect($db,$username,$password);
 
 if (isset($_GET['EMPNO']) && isset($_GET['FORMAT'])) {
 	$result = db2_exec($conn, "select photo_format, picture, length(picture) from emp_photo where photo_format='" . $_GET['FORMAT'] . "' and empno='".$_GET['EMPNO']."'");
-	$row = db2_fetch_into($result); 			
+	$row = db2_fetch_array($result); 			
 	if ($row) {
 		// We'll be outputting a 		
 		header('Content-type: image/'. $row[0]);
@@ -26,7 +26,7 @@ if (isset($_GET['EMPNO']) && isset($_GET['FORMAT'])) {
 }
 else {
 	$result = db2_exec($conn, "select EMPNO, PHOTO_FORMAT, length(PICTURE) from emp_photo");	
-	while ($row = db2_fetch_into($result)) {
+	while ($row = db2_fetch_array($result)) {
 		printf ("<a href='test_046.php?EMPNO=%s&FORMAT=%s' target=_blank>%s - %s - %s bytes</a><br>",$row['0'], $row[1], $row['0'], $row[1], $row[2]);
 		print "\n";
 	}

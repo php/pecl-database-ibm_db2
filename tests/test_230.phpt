@@ -55,5 +55,5 @@ print "5:" . db2_field_type($result2,5) . "\n";
 2:blob
 
 -----
-region:string
+region:
 5:real

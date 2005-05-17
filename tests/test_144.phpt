@@ -23,7 +23,7 @@ if ($conn)
     
     $stmt = db2_prepare( $conn, "INSERT INTO pictures VALUES (0, ?)" );
    
-    $rc = db2_bind_param( $stmt, 1, "picture", DB2_PARAM_FILE );
+    $rc = db2_bind_param( $stmt, 1, "picture", DB2_PARAM_FILE, DB2_BINARY );
     $picture = "./pic1.jpg";
 
     $rc = db2_execute( $stmt );

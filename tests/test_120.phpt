@@ -46,4 +46,4 @@ bool(false)
 string(2) "ID"
 bool(false)
 string(2) "ID"
-string(6) "WEIGHT"
+bool(false)

@@ -15,7 +15,7 @@ if ($conn) {
     $result = db2_execute($stmt);
 
     $i=2;
-    while ($row = db2_fetch_assoc($result, $i)) {
+    while ($row = db2_fetch_assoc($stmt, $i)) {
         printf ("%-5d %-16s %-32s %10s\n", 
             $row['ID'], $row['NAME'], $row['BREED'], $row['WEIGHT']);
     

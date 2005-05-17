@@ -1,5 +1,5 @@
 --TEST--
-IBM-DB2: db2_fetch_into() - several rows 6
+IBM-DB2: db2_fetch_array() - several rows 6
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -11,7 +11,7 @@ $conn = db2_connect($db,$user,$password);
 
 $result = db2_exec($conn, "select * from staff,project,org");
 
-while ($row=db2_fetch_into($result))
+while ($row=db2_fetch_array($result))
 {
    print $row[0]  . "," . $row[5];	
 }

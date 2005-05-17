@@ -30,7 +30,7 @@ for ($i=0; $i < $columns; $i++) {
 }
 print "\n\n";
 
-while ($row = db2_fetch_into($result)) {
+while ($row = db2_fetch_array($result)) {
    for ($i=0; $i < $columns; $i++) {
       print $row[$i] . ", ";	
    }

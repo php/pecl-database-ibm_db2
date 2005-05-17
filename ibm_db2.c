@@ -168,7 +168,7 @@ function_entry ibm_db2_functions[] = {
 	PHP_FE(db2_result,	NULL)
 	PHP_FE(db2_fetch_row,	NULL)
 	PHP_FE(db2_fetch_assoc,	NULL)
-	PHP_FE(db2_fetch_into,	NULL)
+	PHP_FE(db2_fetch_array,	NULL)
 	PHP_FE(db2_fetch_both,	NULL)
 	PHP_FE(db2_free_result,	NULL)
 	PHP_FE(db2_set_option,  NULL)
@@ -205,7 +205,7 @@ ZEND_GET_MODULE(ibm_db2)
 /* {{{ PHP_INI
 */
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("ibm_db2.binmode", "0", PHP_INI_ALL, ONUPDATEFUNCTION,
+	STD_PHP_INI_ENTRY("ibm_db2.binmode", "1", PHP_INI_ALL, ONUPDATEFUNCTION,
 		bin_mode, zend_ibm_db2_globals, ibm_db2_globals)
 PHP_INI_END()
 /* }}} */
@@ -421,9 +421,22 @@ PHP_MINFO_FUNCTION(ibm_db2)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "ibm_db2 support", "enabled");
+
+	switch (IBM_DB2_G(bin_mode)) {
+		case DB2_BINARY:
+			php_info_print_table_row(2, "ibm_db2.binmode", "DB2_BINARY");
+		break;	
+
+		case DB2_CONVERT:
+			php_info_print_table_row(2, "ibm_db2.binmode", "DB2_CONVERT");
+		break;	
+
+		case DB2_PASSTHRU:
+			php_info_print_table_row(2, "ibm_db2.binmode", "DB2_PASSTHRU");
+		break;	
+	}
 	php_info_print_table_end();
 
-	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
 
@@ -2271,9 +2284,10 @@ PHP_FUNCTION(db2_execute)
 		rc = SQLExecute((SQLHSTMT)stmt_res->hstmt);
 		if ( rc == SQL_ERROR ) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Execute Failed");
-			RETURN_FALSE;
+			RETVAL_FALSE;
 		}
 
+		/* cleanup dynamic bindings if present */
 		if ( bind_params == 1 ) {
 			/* Free param cache list */
 			curr_ptr = stmt_res->head_cache_list;
@@ -2312,7 +2326,9 @@ PHP_FUNCTION(db2_execute)
 			}
 		}
 
-		RETURN_TRUE;
+		if ( rc != SQL_ERROR ) {
+			RETURN_TRUE;
+		}
 	}
 }
 /* }}} */
@@ -2587,15 +2603,8 @@ static int _php_db2_get_column_by_name(stmt_handle *stmt_res, char *col_name, in
 	/* should start from 0 */
 	i=0;
 	while (i < stmt_res->num_columns) {
-		if ( strchr(stmt_res->column_info[i].name, '"') != NULL ) {
-
-			if (strcmp(stmt_res->column_info[i].name,col_name) == 0) {
-				return i;
-			}
-		} else {
-			if (STRCASECMP(stmt_res->column_info[i].name,col_name) == 0) {
-                return i;
-            }
+		if (strcmp(stmt_res->column_info[i].name,col_name) == 0) {
+			return i;
 		}
 		i++;
 	}
@@ -3432,9 +3441,9 @@ PHP_FUNCTION(db2_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto array db2_fetch_into(resource stmt [, int row_number])
+/* {{{ proto array db2_fetch_array(resource stmt [, int row_number])
 Returns an array, indexed by column position, representing a row in a result set */
-PHP_FUNCTION(db2_fetch_into)
+PHP_FUNCTION(db2_fetch_array)
 {
 	_php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, DB2_FETCH_INDEX);
 }

@@ -14,7 +14,7 @@ if ($conn)
    $result = db2_exec($conn, "select * from org, project order by org.location, project.projname");
    $cols = db2_num_fields($result);
    $j=0;
-   while ($row = db2_fetch_into($result)) 
+   while ($row = db2_fetch_array($result)) 
    {
       print $j .") ";
       for ($i=0; $i<$cols; $i++) 

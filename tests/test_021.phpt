@@ -13,7 +13,7 @@ if ($conn) {
     require_once('prepare.inc');
     
     $stmt = db2_exec( $conn, "SELECT count(*) FROM animals" );
-    $res = db2_fetch_into( $stmt );
+    $res = db2_fetch_array( $stmt );
     $rows = $res[0];
     echo $rows."\n";
     
@@ -27,14 +27,14 @@ if ($conn) {
     db2_exec( $conn, "DELETE FROM animals" );
     
     $stmt = db2_exec( $conn, "SELECT count(*) FROM animals" );
-    $res = db2_fetch_into( $stmt );
+    $res = db2_fetch_array( $stmt );
     $rows = $res[0];
     echo $rows."\n";
     
     db2_commit( $conn );
     
     $stmt = db2_exec( $conn, "SELECT count(*) FROM animals" );
-    $res = db2_fetch_into( $stmt );
+    $res = db2_fetch_array( $stmt );
     $rows = $res[0];
     echo $rows."\n";
     db2_close($conn);

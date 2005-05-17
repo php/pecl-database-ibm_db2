@@ -28,7 +28,7 @@ while ($row = db2_fetch_assoc($result))
       $row2['DEPTNO'], $row2['DEPTNAME'], $row2['MGRNO'],
       $row2['ADMRDEPT'], $row2['LOCATION']);	
       $result3 = db2_exec($conn,"select * from employee");
-      while ($row3=db2_fetch_into($result3)) 
+      while ($row3=db2_fetch_array($result3)) 
       {
          printf("\t\t\t%s,%s,%s\n", $row3[0] , $row3[3], $row3[5]);
       }
