@@ -207,6 +207,7 @@ ZEND_GET_MODULE(ibm_db2)
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("ibm_db2.binmode", "1", PHP_INI_ALL, ONUPDATEFUNCTION,
 		bin_mode, zend_ibm_db2_globals, ibm_db2_globals)
+	PHP_INI_ENTRY("ibm_db2.instance_name", NULL, PHP_INI_SYSTEM, NULL)
 PHP_INI_END()
 /* }}} */
 
@@ -370,6 +371,9 @@ static void _php_db2_free_stmt_struct(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 */
 PHP_MINIT_FUNCTION(ibm_db2)
 {
+	/* Declare variables for DB2 instance settings */
+	char * instance_name;
+
 	ZEND_INIT_MODULE_GLOBALS(ibm_db2, php_ibm_db2_init_globals, NULL);
 
 	REGISTER_LONG_CONSTANT("DB2_BINARY", 1, CONST_CS | CONST_PERSISTENT);
@@ -393,6 +397,15 @@ PHP_MINIT_FUNCTION(ibm_db2)
 	REGISTER_LONG_CONSTANT("DB2_CHAR", SQL_CHAR, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_INI_ENTRIES();
+
+#ifndef PHP_WIN32
+	if (NULL != INI_STR("ibm_db2.instance_name")) {
+		instance_name = (char *)emalloc(strlen(DB2_VAR_INSTANCE) + strlen(INI_STR("ibm_db2.instance_home")) + 1);
+		strcpy(instance_name, DB2_VAR_INSTANCE);
+		strcat(instance_name, INI_STR("ibm_db2.instance_name"));
+		putenv(instance_name);
+	}
+#endif
 
 	le_conn_struct = zend_register_list_destructors_ex( _php_db2_free_conn_struct, NULL, "conn struct", module_number);
 	le_pconn_struct = zend_register_list_destructors_ex(NULL, _php_db2_free_pconn_struct, "pconn struct", module_number);
@@ -435,6 +448,7 @@ PHP_MINFO_FUNCTION(ibm_db2)
 			php_info_print_table_row(2, "ibm_db2.binmode", "DB2_PASSTHRU");
 		break;	
 	}
+	php_info_print_table_row(2, "ibm_db2.instance_name", INI_STR("ibm_db2.instance_name"));
 	php_info_print_table_end();
 
 }

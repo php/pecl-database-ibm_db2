@@ -48,6 +48,9 @@ extern zend_module_entry ibm_db2_module_entry;
 #define DB2_ERRMSG 1
 #define DB2_ERR 2
 
+/* DB2 instance environment variable */
+#define DB2_VAR_INSTANCE "DB2INSTANCE="
+
 /******** Makes code compatible with the options used by the user */
 #define DB2_BINARY 1
 #define DB2_CONVERT 2
