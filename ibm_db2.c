@@ -372,6 +372,7 @@ static void _php_db2_free_stmt_struct(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 PHP_MINIT_FUNCTION(ibm_db2)
 {
 	/* Declare variables for DB2 instance settings */
+	char * tmp_name;
 	char * instance_name;
 
 	ZEND_INIT_MODULE_GLOBALS(ibm_db2, php_ibm_db2_init_globals, NULL);
@@ -399,10 +400,11 @@ PHP_MINIT_FUNCTION(ibm_db2)
 	REGISTER_INI_ENTRIES();
 
 #ifndef PHP_WIN32
-	if (NULL != INI_STR("ibm_db2.instance_name")) {
-		instance_name = (char *)emalloc(strlen(DB2_VAR_INSTANCE) + strlen(INI_STR("ibm_db2.instance_home")) + 1);
+	tmp_name = INI_STR("ibm_db2.instance_name");
+	if (NULL != tmp_name) {
+		instance_name = (char *)emalloc(strlen(DB2_VAR_INSTANCE) + strlen(tmp_name) + 1);
 		strcpy(instance_name, DB2_VAR_INSTANCE);
-		strcat(instance_name, INI_STR("ibm_db2.instance_name"));
+		strcat(instance_name, tmp_name);
 		putenv(instance_name);
 	}
 #endif
@@ -454,8 +456,7 @@ PHP_MINFO_FUNCTION(ibm_db2)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
-static void _php_db2_init_error_info(stmt_handle *stmt_res)
+/* {{{ static void _php_db2_init_error_info(stmt_handle *stmt_res)
 */
 static void _php_db2_init_error_info(stmt_handle *stmt_res)
 {
