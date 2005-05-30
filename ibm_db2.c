@@ -218,6 +218,7 @@ static void php_ibm_db2_init_globals(zend_ibm_db2_globals *ibm_db2_globals)
 	/* env handle */
 	ibm_db2_globals->henv = 0;
 	ibm_db2_globals->bin_mode = 0;
+	ibm_db2_globals->instance = NULL;
 
 	memset(ibm_db2_globals->__php_conn_err_msg, 0, DB2_MAX_ERR_MSG_LEN);
 	memset(ibm_db2_globals->__php_stmt_err_msg, 0, DB2_MAX_ERR_MSG_LEN);
@@ -402,10 +403,11 @@ PHP_MINIT_FUNCTION(ibm_db2)
 #ifndef PHP_WIN32
 	tmp_name = INI_STR("ibm_db2.instance_name");
 	if (NULL != tmp_name) {
-		instance_name = (char *)emalloc(strlen(DB2_VAR_INSTANCE) + strlen(tmp_name) + 1);
+		instance_name = (char *)malloc(strlen(DB2_VAR_INSTANCE) + strlen(tmp_name) + 1);
 		strcpy(instance_name, DB2_VAR_INSTANCE);
 		strcat(instance_name, tmp_name);
 		putenv(instance_name);
+		IBM_DB2_G(instance) = instance_name;
 	}
 #endif
 
@@ -424,6 +426,9 @@ PHP_MSHUTDOWN_FUNCTION(ibm_db2)
 
 	if ( IBM_DB2_G(henv) ) {
 		SQLFreeHandle ( SQL_HANDLE_ENV, IBM_DB2_G(henv) );
+	}
+	if (IBM_DB2_G(instance)) {
+		free(IBM_DB2_G(instance));
 	}
 
 	return SUCCESS;

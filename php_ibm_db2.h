@@ -138,6 +138,7 @@ PHP_FUNCTION(db2_fetch_object);
 ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 	SQLHANDLE 	henv;
 	int    		bin_mode;
+	char	*	instance;
 	char		__php_conn_err_msg[DB2_MAX_ERR_MSG_LEN];
 	char            __php_conn_err_state[SQL_SQLSTATE_SIZE + 1];
 	char            __php_stmt_err_msg[DB2_MAX_ERR_MSG_LEN];
