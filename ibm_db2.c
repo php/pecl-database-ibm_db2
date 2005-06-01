@@ -46,7 +46,7 @@ static void _php_db2_assign_options( void* handle, int type, char* opt_key, long
 static int _php_db2_parse_options( zval* options, int type, void* handle TSRMLS_DC );
 static void _php_db2_clear_conn_err_cache(TSRMLS_D);
 static void _php_db2_clear_stmt_err_cache(TSRMLS_D);
-static const char * _php_db2_instance_name;
+static char * _php_db2_instance_name;
 
 /* Defines a linked list structure for caching param data */
 typedef struct _param_cache_node {
@@ -428,7 +428,8 @@ PHP_MSHUTDOWN_FUNCTION(ibm_db2)
 		SQLFreeHandle ( SQL_HANDLE_ENV, IBM_DB2_G(henv) );
 	}
 	if (NULL != _php_db2_instance_name) {
-		free((char *)_php_db2_instance_name);
+		free(_php_db2_instance_name);
+		_php_db2_instance_name = NULL;
 	}
 
 	return SUCCESS;
