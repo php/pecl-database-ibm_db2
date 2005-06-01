@@ -46,6 +46,7 @@ static void _php_db2_assign_options( void* handle, int type, char* opt_key, long
 static int _php_db2_parse_options( zval* options, int type, void* handle TSRMLS_DC );
 static void _php_db2_clear_conn_err_cache(TSRMLS_D);
 static void _php_db2_clear_stmt_err_cache(TSRMLS_D);
+static const char * _php_db2_instance_name;
 
 /* Defines a linked list structure for caching param data */
 typedef struct _param_cache_node {
@@ -218,7 +219,6 @@ static void php_ibm_db2_init_globals(zend_ibm_db2_globals *ibm_db2_globals)
 	/* env handle */
 	ibm_db2_globals->henv = 0;
 	ibm_db2_globals->bin_mode = 0;
-	ibm_db2_globals->instance = NULL;
 
 	memset(ibm_db2_globals->__php_conn_err_msg, 0, DB2_MAX_ERR_MSG_LEN);
 	memset(ibm_db2_globals->__php_stmt_err_msg, 0, DB2_MAX_ERR_MSG_LEN);
@@ -407,7 +407,7 @@ PHP_MINIT_FUNCTION(ibm_db2)
 		strcpy(instance_name, DB2_VAR_INSTANCE);
 		strcat(instance_name, tmp_name);
 		putenv(instance_name);
-		IBM_DB2_G(instance) = instance_name;
+		_php_db2_instance_name = instance_name;
 	}
 #endif
 
@@ -427,8 +427,8 @@ PHP_MSHUTDOWN_FUNCTION(ibm_db2)
 	if ( IBM_DB2_G(henv) ) {
 		SQLFreeHandle ( SQL_HANDLE_ENV, IBM_DB2_G(henv) );
 	}
-	if (IBM_DB2_G(instance)) {
-		free(IBM_DB2_G(instance));
+	if (NULL != _php_db2_instance_name) {
+		free((char *)_php_db2_instance_name);
 	}
 
 	return SUCCESS;
