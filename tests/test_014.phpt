@@ -1,5 +1,5 @@
 --TEST--
-IBM-DB2: db2_num_rows - select - scrollable cursor 2
+IBM-DB2: scrollable cursor; retrieve negative row
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
