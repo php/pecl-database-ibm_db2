@@ -42,7 +42,8 @@ extern zend_module_entry ibm_db2_module_entry;
 #include "TSRM.h"
 #endif
 
-#define DB2_MAX_ERR_MSG_LEN (SQL_MAX_MESSAGE_LENGTH + SQL_SQLSTATE_SIZE + 1)
+/* strlen(" SQLCODE=") added in */
+#define DB2_MAX_ERR_MSG_LEN (SQL_MAX_MESSAGE_LENGTH + SQL_SQLSTATE_SIZE + 10)
 
 /* Used in _php_parse_options */
 #define DB2_ERRMSG 1

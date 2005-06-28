@@ -55,6 +55,7 @@ typedef struct _param_cache_node {
 	SQLSMALLINT nullable;			/* is Nullable */
 	SQLSMALLINT	scale;				/* Decimal scale */
 	SQLUINTEGER file_options;		/* File options if DB2_PARAM_FILE */
+	SQLINTEGER	bind_indicator;		/* indicator variable for SQLBindParameter */
 	int			param_num;			/* param number in stmt */
 	int			param_type;			/* Type of param - INP/OUT/INP-OUT/FILE */
 	char		*varname;			/* bound variable name */
@@ -280,6 +281,10 @@ static void _php_db2_free_result_struct(stmt_handle* handle)
 				efree((prev_ptr->value)->value.str.val);
 			}
 
+			if ( prev_ptr->value ) {
+				efree(prev_ptr->value);
+			}
+
 			efree(prev_ptr);
 
 			prev_ptr = curr_ptr;
@@ -372,9 +377,11 @@ static void _php_db2_free_stmt_struct(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 */
 PHP_MINIT_FUNCTION(ibm_db2)
 {
+#ifndef PHP_WIN32
 	/* Declare variables for DB2 instance settings */
 	char * tmp_name;
 	char * instance_name;
+#endif
 
 	ZEND_INIT_MODULE_GLOBALS(ibm_db2, php_ibm_db2_init_globals, NULL);
 
@@ -858,14 +865,17 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	long password_len;
 	zval *options = NULL;
 	int rc = 0;
-	SQLINTEGER conn_alive = 1;
+	SQLINTEGER conn_alive;
 	conn_handle *conn_res = *pconn_res;
 	int reused = 0;
 	int hKeyLen = 0;
 	char *hKey = NULL;
-
+	char buffer[11];
+	int dbFlag = 0;
 
 	SQLHANDLE pHenv = 0;
+	memset(buffer, 0, 11);
+	conn_alive = 1;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "sss|a", &database, &database_len,&uid,
 		&uid_len, &password, &password_len, &options) == FAILURE) {
@@ -883,11 +893,17 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 			if (zend_hash_find(&EG(persistent_list), hKey, hKeyLen, (void **) &entry) == SUCCESS) {
 				conn_res = *pconn_res = (conn_handle *) entry->ptr;
 
+				rc = SQLGetInfo(conn_res->hdbc, SQL_DBMS_VER, (SQLPOINTER)buffer, 11, NULL);
+				if (rc == SQL_SUCCESS && buffer >= "08.02.0000") {
+					dbFlag = 1;
+				}
+#if dbFlag
 				/* Need to reinitialize connection? */
 				rc = SQLGetConnectAttr(conn_res->hdbc, SQL_ATTR_PING_DB, (SQLPOINTER)&conn_alive, 0, NULL); 
 				if ( (rc == SQL_SUCCESS) && conn_alive ) {
 					reused = 1;
 				} /* else will re-connect since connection is dead */
+#endif
 			}
 		} else {
 			/* Need to check for max pconnections? */
@@ -907,8 +923,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 				_php_db2_check_sql_errors( pHenv, SQL_HANDLE_ENV, rc, 1, NULL, -1, 1 TSRMLS_CC);
 				break;
 			}
-			/* enable connection pooling */
-			rc = SQLSetEnvAttr((SQLHENV)pHenv, SQL_ATTR_CONNECTION_POOLING, (void*)SQL_CP_ONE_PER_HENV, 0);
+
 			rc = SQLSetEnvAttr((SQLHENV)pHenv, SQL_ATTR_ODBC_VERSION, (void *)SQL_OV_ODBC3, 0);
 
 			IBM_DB2_G(henv) = pHenv;
@@ -940,7 +955,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 		conn_res->handle_active = 0;
 
 		/* Set Options */
-		if ( options != NULL ) {
+		if ( options != NULL && !isPersistent ) {
 			rc = _php_db2_parse_options( options, SQL_HANDLE_DBC, conn_res TSRMLS_CC );
 			if (rc == SQL_ERROR) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Options Array must have string indexes");
@@ -1094,15 +1109,14 @@ PHP_FUNCTION(db2_autocommit)
 */
 static void _php_db2_add_param_cache( stmt_handle *stmt_res, int param_no, char *varname, int varname_len, int param_type, SQLSMALLINT data_type, SQLUINTEGER precision, SQLSMALLINT scale, SQLSMALLINT nullable )
 {
-	param_node *tmp_curr = NULL, *prev = NULL, *curr = stmt_res->head_cache_list;
+	param_node *tmp_curr = NULL, *prev = stmt_res->head_cache_list, *curr = stmt_res->head_cache_list;
 
 	while ( (curr != NULL) && (curr->param_num < param_no) ) {
 		prev = curr;
 		curr = curr->next;
 	}
 
-	/* TODO: Combine the following two if's into a single block */
-	if ( prev == NULL ) {
+	if ( curr == NULL || curr->param_num != param_no ) {
 		/* Allocate memory and make new node to be added */
 		tmp_curr = (param_node *)emalloc(sizeof(param_node));
 		/* assign values */
@@ -1113,74 +1127,49 @@ static void _php_db2_add_param_cache( stmt_handle *stmt_res, int param_no, char 
 		tmp_curr->param_num = param_no;
 		tmp_curr->file_options = SQL_FILE_READ;
 		tmp_curr->param_type = param_type;
-		/* Set this flag is stmt_res if a FILE INPUT is present */
+
+		/* Set this flag in stmt_res if a FILE INPUT is present */
 		if ( param_type == DB2_PARAM_FILE) {
 			stmt_res->file_param = 1;
 		}
 
-		MAKE_STD_ZVAL(tmp_curr->value);
-
-		if( varname != NULL) {
+		if ( varname != NULL) {
 			tmp_curr->varname = estrndup(varname, varname_len);
 		}
+		MAKE_STD_ZVAL(tmp_curr->value);
 
+		/* link pointers for the list */
+		if ( prev == NULL ) {
+			stmt_res->head_cache_list = tmp_curr;
+		} else {
+			prev->next = tmp_curr;
+		}
 		tmp_curr->next = curr;
-		stmt_res->head_cache_list = tmp_curr;
 
 		/* Increment num params added */
 		stmt_res->num_params++;
 	} else {
-		if (prev->param_num != param_no) {
-			/* Allocate memory and make new node to be added */
-			tmp_curr = (param_node *)emalloc(sizeof(param_node));
-			/* assign values */
-			tmp_curr->data_type = data_type;
-			tmp_curr->param_size = precision;
-			tmp_curr->nullable = nullable;
-			tmp_curr->scale = scale;
-			tmp_curr->param_num = param_no;
-			tmp_curr->file_options = SQL_FILE_READ;
-			tmp_curr->param_type = param_type;
+		/* Both the nodes are for the same param no */
+		/* Replace Information */
+		curr->data_type = data_type;
+		curr->param_size = precision;
+		curr->nullable = nullable;
+		curr->scale = scale;
+		curr->param_num = param_no;
+		curr->file_options = SQL_FILE_READ;
+		curr->param_type = param_type;
 
-			/* Set this flag in stmt_res if a FILE INPUT is present */
-			if ( param_type == DB2_PARAM_FILE) {
-				stmt_res->file_param = 1;
-			}
+		/* Set this flag in stmt_res if a FILE INPUT is present */
+		if ( param_type == DB2_PARAM_FILE) {
+			stmt_res->file_param = 1;
+		}
 
-			if ( varname != NULL) {
-				tmp_curr->varname = estrndup(varname, varname_len);
-			}
-
-			MAKE_STD_ZVAL(tmp_curr->value);
-
-			tmp_curr->next = curr;
-			prev->next = tmp_curr;
-
-			/* Increment num params added */
-			stmt_res->num_params++;
-		} else {
-			/* Both the nodes are for the same param no */
-			/* Replace Information */
-			curr->data_type = data_type;
-			curr->param_size = precision;
-			curr->nullable = nullable;
-			curr->scale = scale;
-			curr->param_num = param_no;
-			curr->file_options = SQL_FILE_READ;
-			curr->param_type = param_type;
-
-			/* Set this flag in stmt_res if a FILE INPUT is present */
-			if ( param_type == DB2_PARAM_FILE) {
-				stmt_res->file_param = 1;
-			}
-
-			/* Free and assign the variable name again */
-			/* Var lengths can be variable and different in both cases. */
-			/* This shouldn't happen often anyway */
-			if ( varname != NULL) {
-				efree(curr->varname);
-				curr->varname = estrndup(varname, varname_len);
-			}
+		/* Free and assign the variable name again */
+		/* Var lengths can be variable and different in both cases. */
+		/* This shouldn't happen often anyway */
+		if ( varname != NULL) {
+			efree(curr->varname);
+			curr->varname = estrndup(varname, varname_len);
 		}
 	}
 }
@@ -2024,6 +2013,8 @@ static param_node* build_list( stmt_handle *stmt_res, int param_no, SQLSMALLINT 
 static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **bind_data)
 {
 	int rc;
+	SQLSMALLINT valueType;
+	SQLPOINTER	paramValuePtr;
 
 	/* copy data over from bind_data */
 	*(curr->value) = **bind_data;
@@ -2043,20 +2034,21 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 			return SQL_ERROR;
 		}
 
+		curr->bind_indicator = 0;
 		/* Bind file name string */
 		rc = SQLBindFileToParam((SQLHSTMT)stmt_res->hstmt, curr->param_num,
 			curr->data_type, ((curr->value)->value.str.val),
-			(SQLSMALLINT *)((curr->value)->value.str.len), &(curr->file_options),
-			Z_STRLEN_P(curr->value), 0);
+			(SQLSMALLINT *)&((curr->value)->value.str.len), &(curr->file_options),
+			Z_STRLEN_P(curr->value), &(curr->bind_indicator));
 
-		return 0;
+		return rc;
 	}
 
 	switch(Z_TYPE_PP(bind_data)) {
 		case IS_LONG:
 			rc = SQLBindParameter(stmt_res->hstmt, curr->param_num,
-				curr->param_type, SQL_C_LONG, curr->data_type, curr->param_size,
-				curr->scale, &((curr->value)->value.lval), 0, NULL);
+				curr->param_type, SQL_C_LONG, curr->data_type, 
+				curr->param_size, curr->scale, &((curr->value)->value.lval), 0, NULL);
 			break;
 
 		/* Convert BOOLEAN types to LONG for DB2 / Cloudscape */
@@ -2073,10 +2065,39 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 			break;
 
 		case IS_STRING:
+			switch ( curr->data_type ) {
+				case SQL_CLOB:
+					curr->bind_indicator = SQL_DATA_AT_EXEC;
+					valueType = SQL_C_CHAR;
+					/* The correct dataPtr will be set during SQLPutData with the len from this struct */
+					paramValuePtr = (SQLPOINTER)&((curr->value)->value);
+					break;
+
+				case SQL_BLOB:
+					curr->bind_indicator = SQL_DATA_AT_EXEC;
+					valueType = SQL_C_BINARY;
+					paramValuePtr = (SQLPOINTER)&((curr->value)->value);
+					break;
+
+				case SQL_BINARY:
+				case SQL_LONGVARBINARY:
+				case SQL_VARBINARY:
+					/* account for bin_mode settings as well */
+					curr->bind_indicator = SQL_NTS;
+					valueType = SQL_C_BINARY;
+					paramValuePtr = (SQLPOINTER)((curr->value)->value.str.val);
+					break;
+
+				/* This option should handle most other types such as DATE, VARCHAR etc */
+				default:
+					valueType = SQL_C_CHAR;
+					curr->bind_indicator = SQL_NTS;
+					paramValuePtr = (SQLPOINTER)((curr->value)->value.str.val);
+			}
+
 			rc = SQLBindParameter(stmt_res->hstmt, curr->param_num,
-				curr->param_type, SQL_C_CHAR, curr->data_type, curr->param_size,
-				curr->scale, ((curr->value)->value.str.val),
-				Z_STRLEN_P(curr->value), NULL);
+				curr->param_type, valueType, curr->data_type, curr->param_size,
+				curr->scale, paramValuePtr, Z_STRLEN_P(curr->value), &(curr->bind_indicator));
 			break;
 
 		case IS_NULL:
@@ -2196,6 +2217,7 @@ PHP_FUNCTION(db2_execute)
 	stmt_handle *stmt_res;
 	int rc, numOpts, i, bind_params = 0;
 	SQLSMALLINT num;
+	SQLPOINTER valuePtr;
 
 	/* This is used to loop over the param cache */
 	param_node *tmp_curr, *prev_ptr, *curr_ptr;
@@ -2306,6 +2328,17 @@ PHP_FUNCTION(db2_execute)
 		if ( rc == SQL_ERROR ) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Execute Failed");
 			RETVAL_FALSE;
+		}
+
+		if ( rc == SQL_NEED_DATA ) {
+			while ( (SQLParamData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER *)&valuePtr)) == SQL_NEED_DATA ) {
+				/* passing data value for a parameter */
+          		rc = SQLPutData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER)(((zvalue_value*)valuePtr)->str.val), ((zvalue_value*)valuePtr)->str.len);
+				if ( rc == SQL_ERROR ) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sending data failed");
+					RETVAL_FALSE;
+				}
+			}
 		}
 
 		/* cleanup dynamic bindings if present */

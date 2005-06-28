@@ -8,13 +8,13 @@ IBM-DB2: db2_bind_param: INSERT statement - NULL parameter
 require_once('connection.inc');
 $conn = db2_connect($database, $user, $password);
 
-$insert = "INSERT INTO animals (id, breed, name, weight)
+$insert1 = "INSERT INTO animals (id, breed, name, weight)
     VALUES (NULL, 'ghost', NULL, ?)";
 $select = 'SELECT id, breed, name, weight FROM animals WHERE weight IS NULL';
 
 if ($conn) {
     require_once('prepare.inc');
-    $stmt = db2_prepare( $conn, $insert);
+    $stmt = db2_prepare( $conn, $insert1);
 
     $animal = NULL;
     db2_bind_param($stmt, 1, "animal");
