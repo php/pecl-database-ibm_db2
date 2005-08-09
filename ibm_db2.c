@@ -408,6 +408,7 @@ PHP_MINIT_FUNCTION(ibm_db2)
 	REGISTER_INI_ENTRIES();
 
 #ifndef PHP_WIN32
+	/* Tell DB2 where to find its libraries */
 	tmp_name = INI_STR("ibm_db2.instance_name");
 	if (NULL != tmp_name) {
 		instance_name = (char *)malloc(strlen(DB2_VAR_INSTANCE) + strlen(tmp_name) + 1);
@@ -416,6 +417,12 @@ PHP_MINIT_FUNCTION(ibm_db2)
 		putenv(instance_name);
 		_php_db2_instance_name = instance_name;
 	}
+#endif
+
+#ifdef _AIX
+	/* atexit() handler in the DB2/AIX library segfaults in PHP CLI */
+	/* DB2NOEXITLIST env variable prevents DB2 from invoking atexit() */
+	putenv("DB2NOEXITLIST=TRUE");
 #endif
 
 	le_conn_struct = zend_register_list_destructors_ex( _php_db2_free_conn_struct, NULL, "conn struct", module_number);
@@ -546,6 +553,7 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 static void _php_db2_assign_options( void *handle, int type, char *opt_key, long data TSRMLS_DC )
 {
 	int rc = 0;
+	SQLINTEGER autocommit;
 
 	if ( !STRCASECMP(opt_key, "cursor")) {
 		if ( type == SQL_HANDLE_STMT ) {
@@ -583,12 +591,14 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 							with this option.
 						*/
 						((conn_handle*)handle)->auto_commit = 1;
-						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_NTS);
+						autocommit = SQL_AUTOCOMMIT_ON;
+						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)autocommit, SQL_NTS);
 						break;
 
 					case DB2_AUTOCOMMIT_OFF:
 						((conn_handle*)handle)->auto_commit = 0;
-						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_OFF, SQL_NTS);
+						autocommit = SQL_AUTOCOMMIT_OFF;
+						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)autocommit, SQL_NTS);
 						break;
 
 					default:
@@ -601,7 +611,6 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 		}
 	} else if (!STRCASECMP(opt_key, "binmode")) {
 		switch (data) {
-			/* TODO: Assign the Binary options here using CLI calls */
 			case DB2_BINARY:
 				switch (type) {
 					case SQL_HANDLE_DBC:
@@ -874,7 +883,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	int dbFlag = 0;
 
 	SQLHANDLE pHenv = 0;
-	memset(buffer, 0, 11);
+	memset(buffer, 0, sizeof(buffer));
 	conn_alive = 1;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "sss|a", &database, &database_len,&uid,
@@ -942,10 +951,9 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 
 		/* Set this after the connection handle has been allocated to avoid
 		unnecessary network flows. Initialize the structure to default values */
-		conn_res->auto_commit = DB2_AUTOCOMMIT_ON;
-		rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_NTS);
+		conn_res->auto_commit = SQL_AUTOCOMMIT_ON;
+		rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(conn_res->auto_commit), SQL_NTS);
 
-		/* TODO: Set this option with the DB2 CLI at this point as well */
 		conn_res->c_bin_mode = IBM_DB2_G(bin_mode);
 
 		conn_res->error_recno_tracker = 1;
@@ -1076,7 +1084,7 @@ PHP_FUNCTION(db2_autocommit)
 {
 	int argc = ZEND_NUM_ARGS();
 	int connection_id = -1;
-	zval value;
+	zend_bool value;
 	zval *connection = NULL;
 	conn_handle *conn_res;
 	int rc;
@@ -1092,7 +1100,7 @@ PHP_FUNCTION(db2_autocommit)
 
 		/* If value in handle is different from value passed in */
 		if (argc == 2) {
-			autocommit = Z_BVAL(value);
+			autocommit = value;
 			if(autocommit != (conn_res->auto_commit)) {
 				rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)autocommit, SQL_IS_INTEGER);
 				conn_res->auto_commit = autocommit;
@@ -1644,7 +1652,7 @@ char *qualifier = NULL;
 	int qualifier_len;
 	int owner_len;
 	int table_name_len;
-	zval unique;
+	zend_bool unique;
 	zval *connection = NULL;
 	int connection_id = -1;
 	int rc = 0;
@@ -1662,7 +1670,7 @@ char *qualifier = NULL;
 		ZEND_FETCH_RESOURCE(conn_res, conn_handle*, &connection, connection_id, "Connection Resource", le_conn_struct);
 
 		stmt_res = _db2_new_stmt_struct(conn_res);
-		sql_unique = Z_BVAL(unique);
+		sql_unique = unique;
 
 		rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &(stmt_res->hstmt));
 		if (rc == SQL_ERROR) {
