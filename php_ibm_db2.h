@@ -131,18 +131,20 @@ PHP_FUNCTION(db2_free_result);
 PHP_FUNCTION(db2_set_option);
 PHP_FUNCTION(db2_setoption);
 PHP_FUNCTION(db2_fetch_object);
+PHP_FUNCTION(db2_server_info);
+PHP_FUNCTION(db2_client_info);
 
 /*
-  	Declare any global variables you may need between the BEGIN
+	Declare any global variables you may need between the BEGIN
 	and END macros here:
 */
 ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 	SQLHANDLE 	henv;
-	int    		bin_mode;
+	int		bin_mode;
 	char		__php_conn_err_msg[DB2_MAX_ERR_MSG_LEN];
-	char            __php_conn_err_state[SQL_SQLSTATE_SIZE + 1];
-	char            __php_stmt_err_msg[DB2_MAX_ERR_MSG_LEN];
-	char            __php_stmt_err_state[SQL_SQLSTATE_SIZE + 1];
+	char		__php_conn_err_state[SQL_SQLSTATE_SIZE + 1];
+	char		__php_stmt_err_msg[DB2_MAX_ERR_MSG_LEN];
+	char		__php_stmt_err_state[SQL_SQLSTATE_SIZE + 1];
 ZEND_END_MODULE_GLOBALS(ibm_db2)
 
 /* In every utility function you add that needs to use variables

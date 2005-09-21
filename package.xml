@@ -9,26 +9,19 @@
  <license>Apache License 2.0</license>
  <maintainers>
   <maintainer>
-   <user>skoduru</user>
-   <name>Sushant Koduru</name>
-   <email>skoduru@us.ibm.com</email>
-   <role>lead</role>
-  </maintainer>
-  <maintainer>
    <user>dbs</user>
    <name>Dan Scott</name>
    <email>dan.scott@ca.ibm.com</email>
-   <role>developer</role>
+   <role>lead</role>
   </maintainer>
  </maintainers>
 
  <release>
-  <version>1.0.1</version>
-  <date>2005-05-17</date>
-  <state>beta</state>
+  <version>1.1.1</version>
+  <date>2005-09-21</date>
+  <state>stable</state>
   <notes>
-   Enable binary data types. Handle string truncation errors gracefully.
-   Enable verbose output in phpinfo().
+    Adds db2_client_info() and db2_server_info() functions.
   </notes>
   <configureoptions>
    <configureoption name="with-IBM-DB2" prompt="DB2 Installation Directory?" />
@@ -36,6 +29,7 @@
   <filelist>
    <dir name="/" baseinstalldir="ibm_db2">
     <file role="src">ibm_db2.c</file>
+    <file role="src">ibm_db2.dsp</file>
     <file role="src">php_ibm_db2.h</file>
     <file role="src">config.m4</file>
     <file role="doc">TODO</file>
@@ -153,17 +147,11 @@
     <file>test_241.phpt</file>
     <file>test_250.phpt</file>
     <file>test_251.phpt</file>
+    <file>test_260.phpt</file>
+    <file>test_261.phpt</file>
+    <file>test_300.phpt</file>
+    <file>test_310.phpt</file>
    </dir>
   </filelist>
  </release>
- <changelog>
-  <release>
-   <version>1.0</version>
-   <date>2005-05-06</date>
-   <state>beta</state>
-   <notes>
-    Initial release.
-   </notes>
-  </release>
- </changelog>
 </package>

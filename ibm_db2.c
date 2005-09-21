@@ -176,6 +176,8 @@ function_entry ibm_db2_functions[] = {
 	PHP_FE(db2_set_option,  NULL)
 	PHP_FALIAS(db2_setoption, db2_set_option,   NULL)
 	PHP_FE(db2_fetch_object,    NULL)
+	PHP_FE(db2_server_info,	NULL)
+	PHP_FE(db2_client_info,	NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in ibm_db2_functions[] */
 };
 /* }}} */
@@ -460,15 +462,15 @@ PHP_MINFO_FUNCTION(ibm_db2)
 	switch (IBM_DB2_G(bin_mode)) {
 		case DB2_BINARY:
 			php_info_print_table_row(2, "ibm_db2.binmode", "DB2_BINARY");
-		break;	
+		break;
 
 		case DB2_CONVERT:
 			php_info_print_table_row(2, "ibm_db2.binmode", "DB2_CONVERT");
-		break;	
+		break;
 
 		case DB2_PASSTHRU:
 			php_info_print_table_row(2, "ibm_db2.binmode", "DB2_PASSTHRU");
-		break;	
+		break;
 	}
 	php_info_print_table_row(2, "ibm_db2.instance_name", INI_STR("ibm_db2.instance_name"));
 	php_info_print_table_end();
@@ -501,7 +503,7 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 
 		p = strchr( msg, '\n' );
 		if (p) *p = '\0';
-		
+
 		sprintf(errMsg, "%s SQLCODE=%d", msg, (int)sqlcode);
 		errMsg[DB2_MAX_ERR_MSG_LEN] = '\0';
 
@@ -778,14 +780,14 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
 				if ( stmt_res->s_bin_mode == DB2_CONVERT ) {
 					in_length = 2*(stmt_res->column_info[i].size)+1;
 					row_data->str_val = (char*)emalloc(in_length);
-	
+
 					rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
 						SQL_C_CHAR, row_data->str_val, in_length,
 						(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
 				} else {
 					in_length = stmt_res->column_info[i].size+1;
 					row_data->str_val = (char*)emalloc(in_length);
-	
+
 					rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
 						SQL_C_DEFAULT, row_data->str_val, in_length,
 						(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
@@ -908,7 +910,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 				}
 #if dbFlag
 				/* Need to reinitialize connection? */
-				rc = SQLGetConnectAttr(conn_res->hdbc, SQL_ATTR_PING_DB, (SQLPOINTER)&conn_alive, 0, NULL); 
+				rc = SQLGetConnectAttr(conn_res->hdbc, SQL_ATTR_PING_DB, (SQLPOINTER)&conn_alive, 0, NULL);
 				if ( (rc == SQL_SUCCESS) && conn_alive ) {
 					reused = 1;
 				} /* else will re-connect since connection is dead */
@@ -2055,7 +2057,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 	switch(Z_TYPE_PP(bind_data)) {
 		case IS_LONG:
 			rc = SQLBindParameter(stmt_res->hstmt, curr->param_num,
-				curr->param_type, SQL_C_LONG, curr->data_type, 
+				curr->param_type, SQL_C_LONG, curr->data_type,
 				curr->param_size, curr->scale, &((curr->value)->value.lval), 0, NULL);
 			break;
 
@@ -2173,7 +2175,7 @@ static int _php_db2_execute_helper(stmt_handle *stmt_res, zval **data, int bind_
 					bound using db2_bind_param. Need to describe the
 					parameter and then bind it.
 				*/
-				
+
 				param_no = ++stmt_res->num_params;
 
 				rc = SQLDescribeParam((SQLHSTMT)stmt_res->hstmt, param_no,
@@ -2341,7 +2343,7 @@ PHP_FUNCTION(db2_execute)
 		if ( rc == SQL_NEED_DATA ) {
 			while ( (SQLParamData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER *)&valuePtr)) == SQL_NEED_DATA ) {
 				/* passing data value for a parameter */
-          		rc = SQLPutData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER)(((zvalue_value*)valuePtr)->str.val), ((zvalue_value*)valuePtr)->str.len);
+				rc = SQLPutData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER)(((zvalue_value*)valuePtr)->str.val), ((zvalue_value*)valuePtr)->str.len);
 				if ( rc == SQL_ERROR ) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sending data failed");
 					RETVAL_FALSE;
@@ -3365,7 +3367,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 								}
 								if ( op & DB2_FETCH_INDEX ) {
 										add_index_null(return_value, i);
-								}	
+								}
 								break;
 
 							case DB2_CONVERT:
@@ -3376,7 +3378,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 							case DB2_BINARY:
 								out_ptr = (SQLPOINTER)emalloc(tmp_length);
 								memset(out_ptr, 0, tmp_length);
-	
+
 								if ( out_ptr == NULL ) {
 									php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for LOB Data");
 									RETURN_FALSE;
@@ -3385,7 +3387,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 								if (rc == SQL_ERROR) {
 									RETURN_FALSE;
 								}
-	
+
 								if ( op & DB2_FETCH_ASSOC ) {
 									add_assoc_stringl(return_value, stmt_res->column_info[i].name, out_ptr, out_length, 0);
 								}
@@ -3558,7 +3560,497 @@ PHP_FUNCTION(db2_set_option)
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
-    }
+	}
+}
+/* }}} */
+
+/* {{{ proto object db2_server_info(resource connection)
+Returns an object with properties that describe the DB2 database server */
+PHP_FUNCTION(db2_server_info)
+{
+	int argc = ZEND_NUM_ARGS();
+	int connection_id = -1;
+	zval *connection = NULL;
+	conn_handle *conn_res;
+	int rc = 0;
+	SQLCHAR buffer11[11];
+	SQLCHAR buffer255[255];
+	SQLCHAR buffer2k[2048];
+	SQLSMALLINT bufferint16;
+	SQLUINTEGER bufferint32;
+	SQLINTEGER bitmask;
+
+	object_init(return_value);
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "r", &connection) == FAILURE) {
+		return;
+	}
+
+	if (connection) {
+		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id,
+			"Connection Resource", le_conn_struct, le_pconn_struct);
+
+		/* DBMS_NAME */
+		memset(buffer255, 0, sizeof(buffer255));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_DBMS_NAME, (SQLPOINTER)buffer255, sizeof(buffer255), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_stringl(return_value, "DBMS_NAME", buffer255, strlen(buffer255), 1);
+		}
+
+		/* DBMS_VER */
+		memset(buffer11, 0, sizeof(buffer11));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_DBMS_VER, (SQLPOINTER)buffer11, sizeof(buffer11), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_stringl(return_value, "DBMS_VER", buffer11, strlen(buffer11), 1);
+		}
+
+		/* DB_CODEPAGE */
+		bufferint32 = 0;
+		rc = SQLGetInfo(conn_res->hdbc, SQL_DATABASE_CODEPAGE, &bufferint32, sizeof(bufferint32), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_long(return_value, "DB_CODEPAGE", bufferint32);
+		}
+
+		/* DB_NAME */
+		memset(buffer255, 0, sizeof(buffer255));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_DATABASE_NAME, (SQLPOINTER)buffer255, sizeof(buffer255), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_stringl(return_value, "DB_NAME", buffer255, strlen(buffer255), 1);
+		}
+
+		/* INST_NAME */
+		memset(buffer255, 0, sizeof(buffer255));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_SERVER_NAME, (SQLPOINTER)buffer255, sizeof(buffer255), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_stringl(return_value, "INST_NAME", buffer255, strlen(buffer255), 1);
+		}
+
+		/* SPECIAL_CHARS */
+		memset(buffer255, 0, sizeof(buffer255));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_SPECIAL_CHARACTERS, (SQLPOINTER)buffer255, sizeof(buffer255), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_stringl(return_value, "SPECIAL_CHARS", buffer255, strlen(buffer255), 1);
+		}
+
+		/* KEYWORDS */
+		memset(buffer2k, 0, sizeof(buffer2k));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_KEYWORDS, (SQLPOINTER)buffer2k, sizeof(buffer2k), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			char *keyword, *last;
+			int key = 0;
+			zval *karray;
+
+			MAKE_STD_ZVAL(karray);
+
+			array_init(karray);
+
+			keyword = strtok_r(buffer2k, ",", &last);
+			while (keyword) {
+				add_index_stringl(karray, key++, keyword, strlen(keyword), 1);
+				keyword = strtok_r(NULL, ",", &last);
+			}
+
+			add_property_zval(return_value, "KEYWORDS", karray);
+		}
+
+		/* DFT_ISOLATION */
+		bitmask = 0; memset(buffer11, 0, sizeof(buffer11));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_DEFAULT_TXN_ISOLATION, &bitmask, sizeof(bitmask), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			if( bitmask & SQL_TXN_READ_UNCOMMITTED ) {
+				strcpy(buffer11, "UR");
+			}
+			if( bitmask & SQL_TXN_READ_COMMITTED ) {
+				strcpy(buffer11, "CS");
+			}
+			if( bitmask & SQL_TXN_REPEATABLE_READ ) {
+				strcpy(buffer11, "RS");
+			}
+			if( bitmask & SQL_TXN_SERIALIZABLE ) {
+				strcpy(buffer11, "RR");
+			}
+			if( bitmask & SQL_TXN_NOCOMMIT ) {
+				strcpy(buffer11, "NC");
+			}
+
+			add_property_stringl(return_value, "DFT_ISOLATION", buffer11, strlen(buffer11), 1);
+		}
+
+		/* ISOLATION_OPTION */
+		bitmask = 0; memset(buffer11, 0, sizeof(buffer11));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_TXN_ISOLATION_OPTION, &bitmask, sizeof(bitmask), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			int key = 0;
+			zval *array;
+
+			MAKE_STD_ZVAL(array);
+
+			array_init(array);
+
+			if( bitmask & SQL_TXN_READ_UNCOMMITTED ) {
+				add_index_stringl(array, key++, "UR", 2, 1);
+			}
+			if( bitmask & SQL_TXN_READ_COMMITTED ) {
+				add_index_stringl(array, key++, "CS", 2, 1);
+			}
+			if( bitmask & SQL_TXN_REPEATABLE_READ ) {
+				add_index_stringl(array, key++, "RS", 2, 1);
+			}
+			if( bitmask & SQL_TXN_SERIALIZABLE ) {
+				add_index_stringl(array, key++, "RR", 2, 1);
+			}
+			if( bitmask & SQL_TXN_NOCOMMIT ) {
+				add_index_stringl(array, key++, "NC", 2, 1);
+			}
+
+			add_property_zval(return_value, "ISOLATION_OPTION", array);
+		}
+
+		/* SQL_CONFORMANCE */
+		bufferint32 = 0; memset(buffer255, 0, sizeof(buffer255));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_ODBC_SQL_CONFORMANCE, &bufferint32, sizeof(bufferint32), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			switch (bufferint32) {
+				case SQL_SC_SQL92_ENTRY:
+					strcpy(buffer255, "ENTRY");
+					break;
+				case SQL_SC_FIPS127_2_TRANSITIONAL:
+					strcpy(buffer255, "FIPS127");
+					break;
+				case SQL_SC_SQL92_FULL:
+					strcpy(buffer255, "FULL");
+					break;
+				case SQL_SC_SQL92_INTERMEDIATE:
+					strcpy(buffer255, "INTERMEDIATE");
+					break;
+				default:
+					break;
+			}
+			add_property_stringl(return_value, "SQL_CONFORMANCE", buffer255, strlen(buffer255), 1);
+		}
+
+		/* PROCEDURES */
+		memset(buffer11, 0, sizeof(buffer11));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_PROCEDURES, (SQLPOINTER)buffer11, sizeof(buffer11), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			if( strcmp(buffer11, "Y") == 0 ) {
+				add_property_bool(return_value, "PROCEDURES", 1);
+			} else {
+				add_property_bool(return_value, "PROCEDURES", 0);
+			}
+		}
+
+		/* IDENTIFIER_QUOTE_CHAR */
+		memset(buffer11, 0, sizeof(buffer11));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_IDENTIFIER_QUOTE_CHAR, (SQLPOINTER)buffer11, sizeof(buffer11), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_stringl(return_value, "IDENTIFIER_QUOTE_CHAR", buffer11, strlen(buffer11), 1);
+		}
+
+		/* LIKE_ESCAPE_CLAUSE */
+		memset(buffer11, 0, sizeof(buffer11));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_LIKE_ESCAPE_CLAUSE, (SQLPOINTER)buffer11, sizeof(buffer11), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			if( strcmp(buffer11, "Y") == 0 ) {
+				add_property_bool(return_value, "LIKE_ESCAPE_CLAUSE", 1);
+			} else {
+				add_property_bool(return_value, "LIKE_ESCAPE_CLAUSE", 0);
+			}
+		}
+
+		/* MAX_COL_NAME_LEN */
+		bufferint16 = 0;
+		rc = SQLGetInfo(conn_res->hdbc, SQL_MAX_COLUMN_NAME_LEN, &bufferint16, sizeof(bufferint16), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_long(return_value, "MAX_COL_NAME_LEN", bufferint16);
+		}
+
+		/* MAX_ROW_SIZE */
+		bufferint32 = 0;
+		rc = SQLGetInfo(conn_res->hdbc, SQL_MAX_ROW_SIZE, &bufferint32, sizeof(bufferint32), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_long(return_value, "MAX_ROW_SIZE", bufferint32);
+		}
+
+		/* MAX_IDENTIFIER_LEN */
+		bufferint16 = 0;
+		rc = SQLGetInfo(conn_res->hdbc, SQL_MAX_IDENTIFIER_LEN, &bufferint16, sizeof(bufferint16), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_long(return_value, "MAX_IDENTIFIER_LEN", bufferint16);
+		}
+
+		/* MAX_INDEX_SIZE */
+		bufferint32 = 0;
+		rc = SQLGetInfo(conn_res->hdbc, SQL_MAX_INDEX_SIZE, &bufferint32, sizeof(bufferint32), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_long(return_value, "MAX_INDEX_SIZE", bufferint32);
+		}
+
+		/* MAX_PROC_NAME_LEN */
+		bufferint16 = 0;
+		rc = SQLGetInfo(conn_res->hdbc, SQL_MAX_PROCEDURE_NAME_LEN, &bufferint16, sizeof(bufferint16), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_long(return_value, "MAX_PROC_NAME_LEN", bufferint16);
+		}
+
+		/* MAX_SCHEMA_NAME_LEN */
+		bufferint16 = 0;
+		rc = SQLGetInfo(conn_res->hdbc, SQL_MAX_SCHEMA_NAME_LEN, &bufferint16, sizeof(bufferint16), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_long(return_value, "MAX_SCHEMA_NAME_LEN", bufferint16);
+		}
+
+		/* MAX_STATEMENT_LEN */
+		bufferint32 = 0;
+		rc = SQLGetInfo(conn_res->hdbc, SQL_MAX_STATEMENT_LEN, &bufferint32, sizeof(bufferint32), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_long(return_value, "MAX_STATEMENT_LEN", bufferint32);
+		}
+
+		/* MAX_TABLE_NAME_LEN */
+		bufferint16 = 0;
+		rc = SQLGetInfo(conn_res->hdbc, SQL_MAX_TABLE_NAME_LEN, &bufferint16, sizeof(bufferint16), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_long(return_value, "MAX_TABLE_NAME_LEN", bufferint16);
+		}
+
+		/* NON_NULLABLE_COLUMNS */
+		bufferint16 = 0;
+		rc = SQLGetInfo(conn_res->hdbc, SQL_NON_NULLABLE_COLUMNS, &bufferint16, sizeof(bufferint16), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			int rv;
+			switch (bufferint16) {
+				case SQL_NNC_NON_NULL:
+					rv = 1;
+					break;
+				case SQL_NNC_NULL:
+					rv = 0;
+					break;
+				default:
+					break;
+			}
+			add_property_bool(return_value, "NON_NULLABLE_COLUMNS", rv);
+		}
+
+	return;
+	}
+}
+/* }}} */
+
+/* {{{ proto object db2_client_info(resource connection)
+Returns an object with properties that describe the DB2 database client */
+PHP_FUNCTION(db2_client_info)
+{
+	int argc = ZEND_NUM_ARGS();
+	int connection_id = -1;
+	zval *connection = NULL;
+	conn_handle *conn_res;
+	int rc = 0;
+	SQLCHAR buffer255[255];
+	SQLSMALLINT bufferint16;
+	SQLUINTEGER bufferint32;
+
+	object_init(return_value);
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "r", &connection) == FAILURE) {
+		return;
+	}
+
+	if (connection) {
+		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id,
+			"Connection Resource", le_conn_struct, le_pconn_struct);
+
+		/* DRIVER_NAME */
+		memset(buffer255, 0, sizeof(buffer255));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_DRIVER_NAME, (SQLPOINTER)buffer255, sizeof(buffer255), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_stringl(return_value, "DRIVER_NAME", buffer255, strlen(buffer255), 1);
+		}
+
+		/* DRIVER_VER */
+		memset(buffer255, 0, sizeof(buffer255));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_DRIVER_VER, (SQLPOINTER)buffer255, sizeof(buffer255), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_stringl(return_value, "DRIVER_VER", buffer255, strlen(buffer255), 1);
+		}
+
+		/* DATA_SOURCE_NAME */
+		memset(buffer255, 0, sizeof(buffer255));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_DATA_SOURCE_NAME, (SQLPOINTER)buffer255, sizeof(buffer255), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_stringl(return_value, "DATA_SOURCE_NAME", buffer255, strlen(buffer255), 1);
+		}
+
+		/* DRIVER_ODBC_VER */
+		memset(buffer255, 0, sizeof(buffer255));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_DRIVER_ODBC_VER, (SQLPOINTER)buffer255, sizeof(buffer255), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_stringl(return_value, "DRIVER_ODBC_VER", buffer255, strlen(buffer255), 1);
+		}
+
+		/* ODBC_VER */
+		memset(buffer255, 0, sizeof(buffer255));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_ODBC_VER, (SQLPOINTER)buffer255, sizeof(buffer255), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_stringl(return_value, "ODBC_VER", buffer255, strlen(buffer255), 1);
+		}
+
+		/* ODBC_SQL_CONFORMANCE */
+		bufferint16 = 0; memset(buffer255, 0, sizeof(buffer255));
+		rc = SQLGetInfo(conn_res->hdbc, SQL_ODBC_SQL_CONFORMANCE, &bufferint16, sizeof(bufferint16), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			switch (bufferint16) {
+				case SQL_OSC_MINIMUM:
+					strcpy(buffer255, "MINIMUM");
+					break;
+				case SQL_OSC_CORE:
+					strcpy(buffer255, "CORE");
+					break;
+				case SQL_OSC_EXTENDED:
+					strcpy(buffer255, "EXTENDED");
+					break;
+				default:
+					break;
+			}
+			add_property_stringl(return_value, "ODBC_SQL_CONFORMANCE", buffer255, strlen(buffer255), 1);
+		}
+
+		/* APPL_CODEPAGE */
+		bufferint32 = 0;
+		rc = SQLGetInfo(conn_res->hdbc, SQL_APPLICATION_CODEPAGE, &bufferint32, sizeof(bufferint32), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_long(return_value, "APPL_CODEPAGE", bufferint32);
+		}
+
+		/* CONN_CODEPAGE */
+		bufferint32 = 0;
+		rc = SQLGetInfo(conn_res->hdbc, SQL_CONNECT_CODEPAGE, &bufferint32, sizeof(bufferint32), NULL);
+
+		if ( rc == SQL_ERROR ) {
+			RETURN_FALSE;
+			return;
+		} else {
+			add_property_long(return_value, "CONN_CODEPAGE", bufferint32);
+		}
+
+	return;
+	}
 }
 /* }}} */
 

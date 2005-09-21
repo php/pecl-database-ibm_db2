@@ -23,22 +23,12 @@ $animals = array(
     array(6, 'llama', 'Sweater', 150)
 );
 
-/* Use this approach once prepare/execute work properly
 $insert = 'INSERT INTO animals (id, breed, name, weight) VALUES (?, ?, ?, ?)';
 $stmt = db2_prepare($conn, $insert);
 if ($stmt) {
     foreach ($animals as $animal) {
         $result = db2_execute($stmt, $animal);
     }
-}
-*/
-
-foreach ($animals as $animal) {
-    db2_exec($conn, "INSERT INTO animals (id, breed, name, weight) VALUES (" .
-        $animal[0] . ", '" . 
-        $animal[1] . "', '" . 
-        $animal[2] . "', " . 
-        $animal[3] . ")");
 }
 
 // Create test view
