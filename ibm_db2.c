@@ -904,17 +904,11 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 			if (zend_hash_find(&EG(persistent_list), hKey, hKeyLen, (void **) &entry) == SUCCESS) {
 				conn_res = *pconn_res = (conn_handle *) entry->ptr;
 
-				rc = SQLGetInfo(conn_res->hdbc, SQL_DBMS_VER, (SQLPOINTER)buffer, 11, NULL);
-				if (rc == SQL_SUCCESS && buffer >= "08.02.0000") {
-					dbFlag = 1;
-				}
-#if dbFlag
 				/* Need to reinitialize connection? */
 				rc = SQLGetConnectAttr(conn_res->hdbc, SQL_ATTR_PING_DB, (SQLPOINTER)&conn_alive, 0, NULL);
 				if ( (rc == SQL_SUCCESS) && conn_alive ) {
 					reused = 1;
 				} /* else will re-connect since connection is dead */
-#endif
 			}
 		} else {
 			/* Need to check for max pconnections? */
