@@ -17,12 +17,12 @@
  </maintainers>
 
  <release>
-  <version>1.1.1</version>
-  <date>2005-09-21</date>
+  <version>1.1.2</version>
+  <date>2005-09-24</date>
   <license>Apache License 2.0</license>
   <state>stable</state>
   <notes>
-    Adds db2_client_info() and db2_server_info() functions.
+   Fix win32 build problem.
   </notes>
   <configureoptions>
    <configureoption name="with-IBM-DB2" prompt="DB2 Installation Directory?" />
