@@ -3666,10 +3666,10 @@ PHP_FUNCTION(db2_server_info)
 
 			array_init(karray);
 
-			keyword = strtok_r(buffer2k, ",", &last);
+			keyword = php_strtok_r(buffer2k, ",", &last);
 			while (keyword) {
 				add_index_stringl(karray, key++, keyword, strlen(keyword), 1);
-				keyword = strtok_r(NULL, ",", &last);
+				keyword = php_strtok_r(NULL, ",", &last);
 			}
 
 			add_property_zval(return_value, "KEYWORDS", karray);
