@@ -19,6 +19,7 @@
  <release>
   <version>1.1.1</version>
   <date>2005-09-21</date>
+  <license>Apache License 2.0</license>
   <state>stable</state>
   <notes>
     Adds db2_client_info() and db2_server_info() functions.
@@ -27,130 +28,130 @@
    <configureoption name="with-IBM-DB2" prompt="DB2 Installation Directory?" />
   </configureoptions>
   <filelist>
-   <dir name="/" baseinstalldir="ibm_db2">
-    <file role="src">ibm_db2.c</file>
-    <file role="src">ibm_db2.dsp</file>
-    <file role="src">php_ibm_db2.h</file>
-    <file role="src">config.m4</file>
-    <file role="doc">TODO</file>
+   <dir name="/" baseinstalldir="ibm_db2" role="src">
+    <file name="ibm_db2.c" role="src" />
+    <file name="ibm_db2.dsp" role="src" />
+    <file name="php_ibm_db2.h" role="src" />
+    <file name="config.m4" role="src" />
+    <file name="TODO" role="doc" />
    </dir>
    <dir name="tests" role="test">
-    <file>connection.inc</file>
-    <file>prepare.inc</file>
-    <file>prepare_t_string.inc</file>
-    <file>skipif.inc</file>
-    <file>test_001.phpt</file>
-    <file>test_002.phpt</file>
-    <file>test_003.phpt</file>
-    <file>test_004.phpt</file>
-    <file>test_005.phpt</file>
-    <file>test_010.phpt</file>
-    <file>test_011.phpt</file>
-    <file>test_012.phpt</file>
-    <file>test_013.phpt</file>
-    <file>test_014.phpt</file>
-    <file>test_015.phpt</file>
-    <file>test_016.phpt</file>
-    <file>test_020.phpt</file>
-    <file>test_021.phpt</file>
-    <file>test_022.phpt</file>
-    <file>test_030.phpt</file>
-    <file>test_031.phpt</file>
-    <file>test_032.phpt</file>
-    <file>test_033.phpt</file>
-    <file>test_034.phpt</file>
-    <file>test_035.phpt</file>
-    <file>test_036.phpt</file>
-    <file>test_037.phpt</file>
-    <file>test_038.phpt</file>
-    <file>test_039.phpt</file>
-    <file>test_03a.phpt</file>
-    <file>test_040.phpt</file>
-    <file>test_041.phpt</file>
-    <file>test_042.phpt</file>
-    <file>test_043.phpt</file>
-    <file>test_045.phpt</file>
-    <file>test_046.phpt</file>
-    <file>test_047.phpt</file>
-    <file>test_048.phpt</file>
-    <file>test_049.phpt</file>
-    <file>test_050.phpt</file>
-    <file>test_051.phpt</file>
-    <file>test_052.phpt</file>
-    <file>test_060.phpt</file>
-    <file>test_061.phpt</file>
-    <file>test_062.phpt</file>
-    <file>test_063.phpt</file>
-    <file>test_064.phpt</file>
-    <file>test_065.phpt</file>
-    <file>test_070.phpt</file>
-    <file>test_071.phpt</file>
-    <file>test_080.phpt</file>
-    <file>test_081.phpt</file>
-    <file>test_082.phpt</file>
-    <file>test_090.phpt</file>
-    <file>test_091.phpt</file>
-    <file>test_092.phpt</file>
-    <file>test_100.phpt</file>
-    <file>test_101.phpt</file>
-    <file>test_102.phpt</file>
-    <file>test_103.phpt</file>
-    <file>test_110.phpt</file>
-    <file>test_111.phpt</file>
-    <file>test_112.phpt</file>
-    <file>test_120.phpt</file>
-    <file>test_121.phpt</file>
-    <file>test_122.phpt</file>
-    <file>test_123.phpt</file>
-    <file>test_124.phpt</file>
-    <file>test_125.phpt</file>
-    <file>test_130.phpt</file>
-    <file>test_131.phpt</file>
-    <file>test_132.phpt</file>
-    <file>test_133.phpt</file>
-    <file>test_140.phpt</file>
-    <file>test_141.phpt</file>
-    <file>test_142.phpt</file>
-    <file>test_143.phpt</file>
-    <file>test_150.phpt</file>
-    <file>test_151.phpt</file>
-    <file>test_152.phpt</file>
-    <file>test_153.phpt</file>
-    <file>test_154.phpt</file>
-    <file>test_155.phpt</file>
-    <file>test_156.phpt</file>
-    <file>test_157.phpt</file>
-    <file>test_157a.phpt</file>
-    <file>test_157b.phpt</file>
-    <file>test_158.phpt</file>
-    <file>test_159.phpt</file>
-    <file>test_159a.phpt</file>
-    <file>test_160.phpt</file>
-    <file>test_161.phpt</file>
-    <file>test_162.phpt</file>
-    <file>test_180.phpt</file>
-    <file>test_190.phpt</file>
-    <file>test_191.phpt</file>
-    <file>test_192.phpt</file>
-    <file>test_200.phpt</file>
-    <file>test_201.phpt</file>
-    <file>test_210.phpt</file>
-    <file>test_211.phpt</file>
-    <file>test_212.phpt</file>
-    <file>test_213.phpt</file>
-    <file>test_220.phpt</file>
-    <file>test_221.phpt</file>
-    <file>test_230.phpt</file>
-    <file>test_231.phpt</file>
-    <file>test_232.phpt</file>
-    <file>test_240.phpt</file>
-    <file>test_241.phpt</file>
-    <file>test_250.phpt</file>
-    <file>test_251.phpt</file>
-    <file>test_260.phpt</file>
-    <file>test_261.phpt</file>
-    <file>test_300.phpt</file>
-    <file>test_310.phpt</file>
+    <file name="connection.inc" role="test" />
+    <file name="prepare.inc" role="test" />
+    <file name="prepare_t_string.inc" role="test" />
+    <file name="skipif.inc" role="test" />
+    <file name="test_001.phpt" role="test" />
+    <file name="test_002.phpt" role="test" />
+    <file name="test_003.phpt" role="test" />
+    <file name="test_004.phpt" role="test" />
+    <file name="test_005.phpt" role="test" />
+    <file name="test_010.phpt" role="test" />
+    <file name="test_011.phpt" role="test" />
+    <file name="test_012.phpt" role="test" />
+    <file name="test_013.phpt" role="test" />
+    <file name="test_014.phpt" role="test" />
+    <file name="test_015.phpt" role="test" />
+    <file name="test_016.phpt" role="test" />
+    <file name="test_020.phpt" role="test" />
+    <file name="test_021.phpt" role="test" />
+    <file name="test_022.phpt" role="test" />
+    <file name="test_030.phpt" role="test" />
+    <file name="test_031.phpt" role="test" />
+    <file name="test_032.phpt" role="test" />
+    <file name="test_033.phpt" role="test" />
+    <file name="test_034.phpt" role="test" />
+    <file name="test_035.phpt" role="test" />
+    <file name="test_036.phpt" role="test" />
+    <file name="test_037.phpt" role="test" />
+    <file name="test_038.phpt" role="test" />
+    <file name="test_039.phpt" role="test" />
+    <file name="test_03a.phpt" role="test" />
+    <file name="test_040.phpt" role="test" />
+    <file name="test_041.phpt" role="test" />
+    <file name="test_042.phpt" role="test" />
+    <file name="test_043.phpt" role="test" />
+    <file name="test_045.phpt" role="test" />
+    <file name="test_046.phpt" role="test" />
+    <file name="test_047.phpt" role="test" />
+    <file name="test_048.phpt" role="test" />
+    <file name="test_049.phpt" role="test" />
+    <file name="test_050.phpt" role="test" />
+    <file name="test_051.phpt" role="test" />
+    <file name="test_052.phpt" role="test" />
+    <file name="test_060.phpt" role="test" />
+    <file name="test_061.phpt" role="test" />
+    <file name="test_062.phpt" role="test" />
+    <file name="test_063.phpt" role="test" />
+    <file name="test_064.phpt" role="test" />
+    <file name="test_065.phpt" role="test" />
+    <file name="test_070.phpt" role="test" />
+    <file name="test_071.phpt" role="test" />
+    <file name="test_080.phpt" role="test" />
+    <file name="test_081.phpt" role="test" />
+    <file name="test_082.phpt" role="test" />
+    <file name="test_090.phpt" role="test" />
+    <file name="test_091.phpt" role="test" />
+    <file name="test_092.phpt" role="test" />
+    <file name="test_100.phpt" role="test" />
+    <file name="test_101.phpt" role="test" />
+    <file name="test_102.phpt" role="test" />
+    <file name="test_103.phpt" role="test" />
+    <file name="test_110.phpt" role="test" />
+    <file name="test_111.phpt" role="test" />
+    <file name="test_112.phpt" role="test" />
+    <file name="test_120.phpt" role="test" />
+    <file name="test_121.phpt" role="test" />
+    <file name="test_122.phpt" role="test" />
+    <file name="test_123.phpt" role="test" />
+    <file name="test_124.phpt" role="test" />
+    <file name="test_125.phpt" role="test" />
+    <file name="test_130.phpt" role="test" />
+    <file name="test_131.phpt" role="test" />
+    <file name="test_132.phpt" role="test" />
+    <file name="test_133.phpt" role="test" />
+    <file name="test_140.phpt" role="test" />
+    <file name="test_141.phpt" role="test" />
+    <file name="test_142.phpt" role="test" />
+    <file name="test_143.phpt" role="test" />
+    <file name="test_150.phpt" role="test" />
+    <file name="test_151.phpt" role="test" />
+    <file name="test_152.phpt" role="test" />
+    <file name="test_153.phpt" role="test" />
+    <file name="test_154.phpt" role="test" />
+    <file name="test_155.phpt" role="test" />
+    <file name="test_156.phpt" role="test" />
+    <file name="test_157.phpt" role="test" />
+    <file name="test_157a.phpt" role="test" />
+    <file name="test_157b.phpt" role="test" />
+    <file name="test_158.phpt" role="test" />
+    <file name="test_159.phpt" role="test" />
+    <file name="test_159a.phpt" role="test" />
+    <file name="test_160.phpt" role="test" />
+    <file name="test_161.phpt" role="test" />
+    <file name="test_162.phpt" role="test" />
+    <file name="test_180.phpt" role="test" />
+    <file name="test_190.phpt" role="test" />
+    <file name="test_191.phpt" role="test" />
+    <file name="test_192.phpt" role="test" />
+    <file name="test_200.phpt" role="test" />
+    <file name="test_201.phpt" role="test" />
+    <file name="test_210.phpt" role="test" />
+    <file name="test_211.phpt" role="test" />
+    <file name="test_212.phpt" role="test" />
+    <file name="test_213.phpt" role="test" />
+    <file name="test_220.phpt" role="test" />
+    <file name="test_221.phpt" role="test" />
+    <file name="test_230.phpt" role="test" />
+    <file name="test_231.phpt" role="test" />
+    <file name="test_232.phpt" role="test" />
+    <file name="test_240.phpt" role="test" />
+    <file name="test_241.phpt" role="test" />
+    <file name="test_250.phpt" role="test" />
+    <file name="test_251.phpt" role="test" />
+    <file name="test_260.phpt" role="test" />
+    <file name="test_261.phpt" role="test" />
+    <file name="test_300.phpt" role="test" />
+    <file name="test_310.phpt" role="test" />
    </dir>
   </filelist>
  </release>
