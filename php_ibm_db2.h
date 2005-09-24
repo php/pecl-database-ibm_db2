@@ -15,7 +15,8 @@
   | implied. See the License for the specific language governing         |
   | permissions and limitations under the License.                       |
   +----------------------------------------------------------------------+
-  | Author: Sushant Koduru                                               |
+  | Authors: Sushant Koduru, Lynh Nguyen, Kanchana Padmanabhan,          |
+  |          Dan Scott, Helmut Tessarek                                  |
   +----------------------------------------------------------------------+
 
   $Id$
