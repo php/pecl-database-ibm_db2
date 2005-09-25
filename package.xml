@@ -25,7 +25,7 @@
    Fix win32 build problem.
   </notes>
   <configureoptions>
-   <configureoption name="with-IBM-DB2" prompt="DB2 Installation Directory?" />
+   <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
   </configureoptions>
   <filelist>
    <dir name="/" baseinstalldir="ibm_db2" role="src">
