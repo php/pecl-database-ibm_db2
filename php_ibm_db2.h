@@ -75,6 +75,10 @@ extern zend_module_entry ibm_db2_module_entry;
 #define DB2_FETCH_ASSOC	0x02
 #define DB2_FETCH_BOTH	0x03
 
+/* Change column case */
+#define DB2_CASE_NATURAL 0
+#define DB2_CASE_LOWER 1
+#define DB2_CASE_UPPER 2
 
 PHP_MINIT_FUNCTION(ibm_db2);
 PHP_MSHUTDOWN_FUNCTION(ibm_db2);

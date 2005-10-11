@@ -28,6 +28,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "../ext/standard/info.h"
+#include "../ext/standard/php_string.h"
 #include "php_ibm_db2.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(ibm_db2)
@@ -67,6 +68,7 @@ typedef struct _conn_handle_struct {
 	SQLHANDLE hdbc;
 	long auto_commit;
 	long c_bin_mode;
+	long c_case_mode;
 	int handle_active;
 	SQLSMALLINT error_recno_tracker;
 	SQLSMALLINT errormsg_recno_tracker;
@@ -100,6 +102,7 @@ typedef struct _stmt_handle_struct {
 	SQLHANDLE hstmt;
 	long s_bin_mode;
 	long cursor_type;
+	long s_case_mode;
 	SQLSMALLINT error_recno_tracker;
 	SQLSMALLINT errormsg_recno_tracker;
 
@@ -196,7 +199,7 @@ zend_module_entry ibm_db2_module_entry = {
 	NULL,	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(ibm_db2),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.1", /* Replace with version number for your extension */
+	"1.1.3", /* Replace with version number for your extension */
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
@@ -340,6 +343,7 @@ static stmt_handle *_db2_new_stmt_struct(conn_handle* conn_res)
 	stmt_res->hdbc = conn_res->hdbc;
 	stmt_res->s_bin_mode = conn_res->c_bin_mode;
 	stmt_res->cursor_type = DB2_FORWARD_ONLY;
+	stmt_res->s_case_mode = conn_res->c_case_mode;
 
 	stmt_res->head_cache_list = NULL;
 	stmt_res->current_node = NULL;
@@ -406,6 +410,10 @@ PHP_MINIT_FUNCTION(ibm_db2)
 	/* This is how CLI defines SQL_C_LONG */
 	REGISTER_LONG_CONSTANT("DB2_LONG", SQL_INTEGER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DB2_CHAR", SQL_CHAR, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("DB2_CASE_NATURAL", 0, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_CASE_LOWER", 1, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_CASE_UPPER", 2, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_INI_ENTRIES();
 
@@ -576,12 +584,12 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 						break;
 
 					default:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Incorrect value passed in");
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURSOR statement attribute value must be one of DB2_SCROLLABLE or DB2_FORWARD_ONLY");
 						break;
 				}
 			}
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Incorrect Resource passed in");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURSOR statement attribute can only be set on statement resources");
 		}
 	} else if (!STRCASECMP(opt_key, "autocommit")) {
 		if (type == SQL_HANDLE_DBC ) {
@@ -604,12 +612,12 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 						break;
 
 					default:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Incorrect value passed in");
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "AUTOCOMMIT connection attribute value must be one of DB2_AUTOCOMMIT_ON or DB2_AUTOCOMMIT_OFF");
 						break;
 				}
 			}
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Incorrect Resource passed in");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "AUTOCOMMIT connection attribute can only be set on connection resources");
 		}
 	} else if (!STRCASECMP(opt_key, "binmode")) {
 		switch (data) {
@@ -624,7 +632,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 						break;
 
 					default:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Incorrect resource passed in\n");
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "BINMODE attribute can only be set on connection or statement resources");
 				}
 				break;
 			case DB2_PASSTHRU:
@@ -638,7 +646,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 						break;
 
 					default:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Incorrect resource passed in\n");
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "BINMODE attribute can only be set on connection or statement resources");
 				}
 				break;
 			case DB2_CONVERT:
@@ -652,9 +660,44 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 						break;
 
 					default:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Incorrect resource passed in\n");
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "BINMODE attribute can only be set on connection or statement resources");
 				}
 				break;
+		}
+	} else if (!STRCASECMP(opt_key, "db2_attr_case")) {
+		switch (type) {
+			case SQL_HANDLE_DBC:
+				switch (data) {
+					case DB2_CASE_LOWER:
+						((conn_handle*)handle)->c_case_mode = DB2_CASE_LOWER;
+						break;
+					case DB2_CASE_UPPER:
+						((conn_handle*)handle)->c_case_mode = DB2_CASE_UPPER;
+						break;
+					case DB2_CASE_NATURAL:
+						((conn_handle*)handle)->c_case_mode = DB2_CASE_NATURAL;
+						break;
+					default:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "DB2_ATTR_CASE attribute must be one of DB2_CASE_LOWER, DB2_CASE_UPPER, or DB2_CASE_NATURAL");
+				}	
+				break;
+			case SQL_HANDLE_STMT:
+				switch (data) {
+					case DB2_CASE_LOWER:
+						((stmt_handle*)handle)->s_case_mode = DB2_CASE_LOWER;
+						break;
+					case DB2_CASE_UPPER:
+						((stmt_handle*)handle)->s_case_mode = DB2_CASE_UPPER;
+						break;
+					case DB2_CASE_NATURAL:
+						((stmt_handle*)handle)->s_case_mode = DB2_CASE_NATURAL;
+						break;
+					default:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "DB2_ATTR_CASE attribute must be one of DB2_CASE_LOWER, DB2_CASE_UPPER, or DB2_CASE_NATURAL");
+				}	
+				break;
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "DB2_ATTR_CASE attribute can only be set on connection or statement resources");
 		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Incorrect option setting passed in");
@@ -739,7 +782,6 @@ static int _php_db2_get_result_set_info(stmt_handle *stmt_res)
 		} else {
 			stmt_res->column_info[i].name = estrdup(tmp_name);
 		}
-
 	}
 	return 0;
 }
@@ -2564,6 +2606,7 @@ PHP_FUNCTION(db2_next_result)
 		new_stmt_res = (stmt_handle *)emalloc(sizeof(stmt_handle));
 		new_stmt_res->s_bin_mode = stmt_res->s_bin_mode;
 		new_stmt_res->cursor_type = stmt_res->cursor_type;
+		new_stmt_res->s_case_mode = stmt_res->s_case_mode;
 		new_stmt_res->head_cache_list = NULL;
 		new_stmt_res->current_node = NULL;
 		new_stmt_res->num_params = 0;
@@ -3251,6 +3294,19 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 		column_type = stmt_res->column_info[i].type;
 		row_data = &stmt_res->row_data[i].data;
 		out_length = stmt_res->row_data[i].out_length;
+
+		switch(stmt_res->s_case_mode) {
+			case DB2_CASE_LOWER:
+				stmt_res->column_info[i].name = php_strtolower(stmt_res->column_info[i].name, strlen(stmt_res->column_info[i].name));
+				break;
+			case DB2_CASE_UPPER:
+				stmt_res->column_info[i].name = php_strtoupper(stmt_res->column_info[i].name, strlen(stmt_res->column_info[i].name));
+				break;
+			case DB2_CASE_NATURAL:
+			default:
+				break;
+		}
+
 		if (out_length == SQL_NULL_DATA) {
 			if ( op & DB2_FETCH_ASSOC ) {
 				add_assoc_null(return_value, stmt_res->column_info[i].name);
