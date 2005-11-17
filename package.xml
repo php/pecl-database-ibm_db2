@@ -17,15 +17,12 @@
  </maintainers>
 
  <release>
-  <version>1.1.3</version>
-  <date>2005-10-11</date>
+  <version>1.1.5</version>
+  <date>2005-11-17</date>
   <license>Apache License 2.0</license>
-  <state>beta</state>
+  <state>stable</state>
   <notes>
-   Add option to force column names to lower case or upper case:
-     * pass 'DB2_ATTR_CASE' => DB2_CASE_LOWER for lower case
-     * pass 'DB2_ATTR_CASE' => DB2_CASE_UPPER for upper case
-     * pass 'DB2_ATTR_CASE' => DB2_CASE_NATURAL for natural case (default)
+    Fix condition where db2_connect() returns a bogus connection resource.
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
@@ -120,7 +117,6 @@
     <file name="test_151.phpt" role="test" />
     <file name="test_152.phpt" role="test" />
     <file name="test_153.phpt" role="test" />
-    <file name="test_154.phpt" role="test" />
     <file name="test_155.phpt" role="test" />
     <file name="test_156.phpt" role="test" />
     <file name="test_157.phpt" role="test" />

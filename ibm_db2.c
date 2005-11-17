@@ -21,6 +21,8 @@
   $Id$
 */
 
+#define	MODULE_RELEASE	"1.1.5"
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -199,7 +201,7 @@ zend_module_entry ibm_db2_module_entry = {
 	NULL,	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(ibm_db2),
 #if ZEND_MODULE_API_NO >= 20010901
-	"1.1.3", /* Replace with version number for your extension */
+	MODULE_RELEASE, /* Replace with version number for your extension */
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
@@ -465,22 +467,25 @@ PHP_MSHUTDOWN_FUNCTION(ibm_db2)
 PHP_MINFO_FUNCTION(ibm_db2)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "ibm_db2 support", "enabled");
+	php_info_print_table_header(2, "IBM DB2, Cloudscape and Apache Derby support", "enabled");
+	php_info_print_table_row(2, "Module release", MODULE_RELEASE);
 
 	switch (IBM_DB2_G(bin_mode)) {
 		case DB2_BINARY:
-			php_info_print_table_row(2, "ibm_db2.binmode", "DB2_BINARY");
+			php_info_print_table_row(2, "Binary data mode (ibm_db2.binmode)", "DB2_BINARY");
 		break;
 
 		case DB2_CONVERT:
-			php_info_print_table_row(2, "ibm_db2.binmode", "DB2_CONVERT");
+			php_info_print_table_row(2, "Binary data mode (ibm_db2.binmode)", "DB2_CONVERT");
 		break;
 
 		case DB2_PASSTHRU:
-			php_info_print_table_row(2, "ibm_db2.binmode", "DB2_PASSTHRU");
+			php_info_print_table_row(2, "Binary data mode (ibm_db2.binmode)", "DB2_PASSTHRU");
 		break;
 	}
-	php_info_print_table_row(2, "ibm_db2.instance_name", INI_STR("ibm_db2.instance_name"));
+#ifndef PHP_WIN32
+	php_info_print_table_row(2, "DB2 instance name (ibm_db2.instance_name)", INI_STR("ibm_db2.instance_name"));
+#endif
 	php_info_print_table_end();
 
 }
@@ -679,7 +684,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 						break;
 					default:
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "DB2_ATTR_CASE attribute must be one of DB2_CASE_LOWER, DB2_CASE_UPPER, or DB2_CASE_NATURAL");
-				}	
+				}
 				break;
 			case SQL_HANDLE_STMT:
 				switch (data) {
@@ -694,7 +699,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 						break;
 					default:
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "DB2_ATTR_CASE attribute must be one of DB2_CASE_LOWER, DB2_CASE_UPPER, or DB2_CASE_NATURAL");
-				}	
+				}
 				break;
 			default:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "DB2_ATTR_CASE attribute can only be set on connection or statement resources");
@@ -966,7 +971,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 		/* Allocate ENV handles if not present */
 		if ( !IBM_DB2_G(henv) ) {
 			rc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &pHenv);
-			if (rc == SQL_ERROR) {
+			if (rc != SQL_SUCCESS) {
 				_php_db2_check_sql_errors( pHenv, SQL_HANDLE_ENV, rc, 1, NULL, -1, 1 TSRMLS_CC);
 				break;
 			}
@@ -981,7 +986,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 		if (! reused) {
 			/* Alloc CONNECT Handle */
 			rc = SQLAllocHandle( SQL_HANDLE_DBC, pHenv, &(conn_res->hdbc));
-			if (rc == SQL_ERROR) {
+			if (rc != SQL_SUCCESS) {
 				_php_db2_check_sql_errors(pHenv, SQL_HANDLE_ENV, rc, 1, NULL, -1, 1 TSRMLS_CC);
 				break;
 			}
@@ -1003,7 +1008,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 		/* Set Options */
 		if ( options != NULL && !isPersistent ) {
 			rc = _php_db2_parse_options( options, SQL_HANDLE_DBC, conn_res TSRMLS_CC );
-			if (rc == SQL_ERROR) {
+			if (rc != SQL_SUCCESS) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Options Array must have string indexes");
 			}
 		}
@@ -1020,7 +1025,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 						(SQLCHAR *)password, (SQLSMALLINT)password_len );
 			}
 
-			if ( rc == SQL_ERROR) {
+			if ( rc != SQL_SUCCESS ) {
 				_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
 				break;
 			}
@@ -1029,7 +1034,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	} while (0);
 
 	if (hKey != NULL) {
-		if (! reused && rc != SQL_ERROR) {
+		if (! reused && rc == SQL_SUCCESS) {
 			/* If we created a new persistent connection, add it to the persistent_list */
 			list_entry newEntry;
 			memset(&newEntry, '\0', sizeof(newEntry));
@@ -1069,7 +1074,7 @@ PHP_FUNCTION(db2_connect)
 
 	rc = _php_db2_connect_helper( INTERNAL_FUNCTION_PARAM_PASSTHRU, &conn_res, 0 );
 
-	if ( rc == SQL_ERROR ) {
+	if ( rc != SQL_SUCCESS ) {
 		if (conn_res != NULL && conn_res->handle_active) {
 			rc = SQLFreeHandle( SQL_HANDLE_DBC, conn_res->hdbc);
 		}
