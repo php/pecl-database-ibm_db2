@@ -2,15 +2,15 @@
 
 // Drop the test view, in case it exists
 $drop = 'DROP TABLE anime_cat';
-$result = @db2_exec($conn, $drop);
+$result = @db2_exec($prepconn, $drop);
 
 // Drop the test table, in case it exists
 $drop = 'DROP TABLE animals';
-$result = @db2_exec($conn, $drop);
+$result = @db2_exec($prepconn, $drop);
 
 // Create the test table
 $create = 'CREATE TABLE animals (id INTEGER, breed VARCHAR(32), name CHAR(16), weight DECIMAL(7,2))';
-$result = db2_exec($conn, $create);
+$result = db2_exec($prepconn, $create);
 
 // Populate the test table
 $animals = array(
@@ -24,7 +24,7 @@ $animals = array(
 );
 
 $insert = 'INSERT INTO animals (id, breed, name, weight) VALUES (?, ?, ?, ?)';
-$stmt = db2_prepare($conn, $insert);
+$stmt = db2_prepare($prepconn, $insert);
 if ($stmt) {
     foreach ($animals as $animal) {
         $result = db2_execute($stmt, $animal);
@@ -32,7 +32,7 @@ if ($stmt) {
 }
 
 // Create test view
-db2_exec($conn, 'CREATE VIEW anime_cat AS
+db2_exec($prepconn, 'CREATE VIEW anime_cat AS
     SELECT name, breed FROM animals
     WHERE id = 0');
 
