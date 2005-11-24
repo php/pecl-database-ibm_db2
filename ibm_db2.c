@@ -2421,6 +2421,14 @@ PHP_FUNCTION(db2_execute)
 				switch(tmp_curr->param_type) {
 					case DB2_PARAM_OUT:
 					case DB2_PARAM_INOUT:
+						if( Z_TYPE_P( tmp_curr->value ) == IS_STRING && 
+							(tmp_curr->bind_indicator != SQL_NULL_DATA 
+							 && tmp_curr->bind_indicator != SQL_NO_TOTAL )){
+						    //if the length of the string out parameter is returned 
+						    //then correct the length of the corresponding php variable
+							tmp_curr->value->value.str.val[tmp_curr->bind_indicator] = 0;
+							tmp_curr->value->value.str.len = tmp_curr->bind_indicator;
+						}
 						/* cant use zend_hash_update because the symbol need not exist. It might need to be created */
 						ZEND_SET_SYMBOL(EG(active_symbol_table), tmp_curr->varname, tmp_curr->value);
 
