@@ -9,7 +9,6 @@ require_once('connection.inc');
 
 $conn = db2_connect($db,$username,$password);
 if ($conn) {
-    require_once('prepare.inc');
     $sql = "SELECT id, name, breed, weight FROM animals ORDER BY breed";
     $result = db2_exec($conn, $sql);
 

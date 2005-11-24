@@ -9,7 +9,6 @@ require_once('connection.inc');
 $conn = db2_connect($database, $user, $password);
 
 if ($conn) {
-    require_once('prepare.inc');
     $sql = 'UPDATE animals SET id = 9';
     $res = db2_exec($conn, $sql);
     print "Number of affected rows: " . db2_num_rows($res);

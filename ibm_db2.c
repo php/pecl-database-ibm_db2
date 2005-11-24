@@ -2424,8 +2424,10 @@ PHP_FUNCTION(db2_execute)
 						if( Z_TYPE_P( tmp_curr->value ) == IS_STRING && 
 							(tmp_curr->bind_indicator != SQL_NULL_DATA 
 							 && tmp_curr->bind_indicator != SQL_NO_TOTAL )){
-						    //if the length of the string out parameter is returned 
-						    //then correct the length of the corresponding php variable
+						    /*
+								if the length of the string out parameter is returned 
+						    	then correct the length of the corresponding php variable
+							*/
 							tmp_curr->value->value.str.val[tmp_curr->bind_indicator] = 0;
 							tmp_curr->value->value.str.len = tmp_curr->bind_indicator;
 						}
@@ -3284,13 +3286,8 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 		}
 	}
 	/* check if row_number is present */
-	if ( argc == 2 ) {
-		if ( row_number <= 0 ) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Fetch type out of range");
-			RETURN_FALSE;
-		} else {
-			rc = SQLFetchScroll((SQLHSTMT)stmt_res->hstmt, SQL_FETCH_ABSOLUTE, row_number);
-		}
+	if ( argc == 2 && row_number > 0) {
+		rc = SQLFetchScroll((SQLHSTMT)stmt_res->hstmt, SQL_FETCH_ABSOLUTE, row_number);
 	} else {
 		rc = SQLFetch((SQLHSTMT)stmt_res->hstmt);
 	}

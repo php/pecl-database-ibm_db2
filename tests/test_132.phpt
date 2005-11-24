@@ -13,7 +13,6 @@ $sql =  "SELECT id, breed, name, weight
 $conn = db2_connect($database, $user, $password);
 
 if ($conn) {
-    require_once('prepare.inc');
     $stmt = db2_prepare( $conn, $sql);
 
     if (db2_execute($stmt, array(0, 'Pook'))) {

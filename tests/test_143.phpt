@@ -13,7 +13,6 @@ $insert1 = "INSERT INTO animals (id, breed, name, weight)
 $select = 'SELECT id, breed, name, weight FROM animals WHERE weight IS NULL';
 
 if ($conn) {
-    require_once('prepare.inc');
     $stmt = db2_prepare( $conn, $insert1);
 
     $animal = NULL;

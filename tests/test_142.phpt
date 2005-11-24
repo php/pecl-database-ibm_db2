@@ -14,7 +14,6 @@ $sql = "SELECT id, breed, name, weight
 $conn = db2_connect($database, $user, $password);
 
 if ($conn) {
-    require_once('prepare.inc');
     $stmt = db2_prepare($conn, $sql);
 
     db2_bind_param($stmt, 1, 'weight', DB2_PARAM_IN);

@@ -6,7 +6,6 @@ IBM-DB2: connect to a database
 <?php
 
 require_once('connection.inc');
-
 $conn = db2_connect($database, $user, $password);
 
 if ($conn) {

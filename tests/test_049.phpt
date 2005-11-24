@@ -14,7 +14,6 @@ $select = 'SELECT id, breed, name, weight
     FROM animals WHERE weight IS NULL';
 
 if ($conn) {
-    require_once('prepare.inc');
     $stmt = db2_prepare( $conn, $insert);
 
     if (db2_execute($stmt, array(NULL, 'ghost', NULL, NULL))) {

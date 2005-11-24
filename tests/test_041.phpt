@@ -10,7 +10,6 @@ require_once('connection.inc');
 $conn = db2_connect($database, $user, $password);
 
 if ($conn) {
-    require_once('prepare.inc');
     $stmt = db2_exec( $conn, "select * from animals order by breed" );
 
     $i = 0;

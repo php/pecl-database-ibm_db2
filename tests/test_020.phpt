@@ -10,7 +10,6 @@ require_once('connection.inc');
 $conn = db2_connect($database, $user, $password);
 
 if ($conn) {
-    require_once('prepare.inc');
     
     $stmt = db2_exec( $conn, "SELECT count(*) FROM animals" );
     $res = db2_fetch_array( $stmt );

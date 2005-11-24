@@ -9,8 +9,6 @@ require_once('connection.inc');
 
 $conn = db2_connect($database, $user, $password);
 
-require_once('prepare.inc');
-
 $result = db2_tables($conn, NULL, strtoupper($user), 'ANIM%');
 
 while ($row = db2_fetch_object($result)) {

@@ -20,7 +20,6 @@ require_once('connection.inc');
 $conn = db2_connect($database, $user, $password);
 
 if ($conn) {
-    require_once('prepare.inc');
     require_once('prepare_sp.inc');
     $sql = 'CALL match_animal(?, ?, ?)';
     $stmt = db2_prepare($conn, $sql);

@@ -14,7 +14,6 @@ $sql = "SELECT breed, RTRIM(name) AS name
     WHERE id = ?";
 
 if ($conn) {
-    require_once('prepare.inc');
     $stmt = db2_prepare($conn, $sql);
     db2_execute($stmt, array(0));
     

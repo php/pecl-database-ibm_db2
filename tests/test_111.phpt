@@ -10,8 +10,6 @@ require_once('connection.inc');
 $conn = db2_connect($database, $user, $password);
 
 if ($conn) {
-    require_once('prepare.inc');
-    
     $insert = "INSERT INTO animals values (7, 'cat', 'Benji', 5.1)";
     db2_exec( $conn, $insert );
     
