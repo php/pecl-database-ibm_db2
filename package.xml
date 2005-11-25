@@ -17,12 +17,14 @@
  </maintainers>
 
  <release>
-  <version>1.1.5</version>
-  <date>2005-11-17</date>
+  <version>1.1.6</version>
+  <date>2005-11-25</date>
   <license>Apache License 2.0</license>
   <state>stable</state>
   <notes>
-    Fix condition where db2_connect() returns a bogus connection resource.
+   Better handling of persistent connection resources.
+   Better memory management for OUT and INOUT parameters.
+   More forgiving of NULL or 0 values for scrollable cursor positioning.
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
