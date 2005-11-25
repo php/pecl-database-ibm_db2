@@ -115,6 +115,9 @@
     <file name="test_141.phpt" role="test" />
     <file name="test_142.phpt" role="test" />
     <file name="test_143.phpt" role="test" />
+    <file name="test_144.phpt" role="test" />
+    <file name="test_145.phpt" role="test" />
+    <file name="test_146.phpt" role="test" />
     <file name="test_150.phpt" role="test" />
     <file name="test_151.phpt" role="test" />
     <file name="test_152.phpt" role="test" />
