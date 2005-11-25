@@ -145,8 +145,6 @@ PHP_FUNCTION(db2_client_info);
 */
 ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 	int		bin_mode;
-	int		case_mode;
-	int		cursor_mode;
 	char		__php_conn_err_msg[DB2_MAX_ERR_MSG_LEN];
 	char		__php_conn_err_state[SQL_SQLSTATE_SIZE + 1];
 	char		__php_stmt_err_msg[DB2_MAX_ERR_MSG_LEN];
