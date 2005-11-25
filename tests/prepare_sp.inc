@@ -5,7 +5,7 @@ $drop = 'DROP PROCEDURE match_animal';
 $result = @db2_exec($conn, $drop);
 
 // Create the stored procedure
-db2_exec($conn, "
+$result = db2_exec($conn, "
 CREATE PROCEDURE match_animal(IN first_name VARCHAR(128), INOUT second_name VARCHAR(128), OUT animal_weight DOUBLE)
 DYNAMIC RESULT SETS 1
 MODIFIES SQL DATA
@@ -41,5 +41,6 @@ BEGIN
 END
 ");
 
+$result = null;
 
 ?>

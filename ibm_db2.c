@@ -67,6 +67,7 @@ typedef struct _param_cache_node {
 } param_node;
 
 typedef struct _conn_handle_struct {
+	SQLHANDLE henv;
 	SQLHANDLE hdbc;
 	long auto_commit;
 	long c_bin_mode;
@@ -225,7 +226,6 @@ PHP_INI_END()
 static void php_ibm_db2_init_globals(zend_ibm_db2_globals *ibm_db2_globals)
 {
 	/* env handle */
-	ibm_db2_globals->henv = 0;
 	ibm_db2_globals->bin_mode = 0;
 
 	memset(ibm_db2_globals->__php_conn_err_msg, 0, DB2_MAX_ERR_MSG_LEN);
@@ -245,6 +245,7 @@ static void _php_db2_free_conn_struct(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	if ( handle->handle_active ) {
 		rc = SQLDisconnect((SQLHDBC)handle->hdbc);
 		rc = SQLFreeHandle(SQL_HANDLE_DBC, handle->hdbc);
+		rc = SQLFreeHandle(SQL_HANDLE_ENV, handle->henv);
 	}
 	if ( handle != NULL ) {
 		if ( handle->flag_pconnect ) {
@@ -964,7 +965,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 			so we know how to free the connection */
 		conn_res->flag_pconnect = isPersistent;
 		/* Allocate ENV handles if not present */
-		if ( !IBM_DB2_G(henv) ) {
+		if ( !conn_res->henv ) {
 			rc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &pHenv);
 			if (rc != SQL_SUCCESS) {
 				_php_db2_check_sql_errors( pHenv, SQL_HANDLE_ENV, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -973,9 +974,9 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 
 			rc = SQLSetEnvAttr((SQLHENV)pHenv, SQL_ATTR_ODBC_VERSION, (void *)SQL_OV_ODBC3, 0);
 
-			IBM_DB2_G(henv) = pHenv;
+			conn_res->henv = pHenv;
 		} else {
-			pHenv = IBM_DB2_G(henv);
+			pHenv = conn_res->henv;
 		}
 
 		if (! reused) {
