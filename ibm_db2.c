@@ -21,7 +21,7 @@
   $Id$
 */
 
-#define	MODULE_RELEASE	"1.1.5"
+#define	MODULE_RELEASE	"1.1.6"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -441,17 +441,6 @@ PHP_MINIT_FUNCTION(ibm_db2)
 	le_pconn_struct = zend_register_list_destructors_ex(NULL, _php_db2_free_pconn_struct, "pconn struct", module_number);
 	le_stmt_struct = zend_register_list_destructors_ex( _php_db2_free_stmt_struct, NULL, "stmt struct", module_number);
 	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_RSHUTDOWN_FUNCTION
-*/
-PHP_RSHUTDOWN_FUNCTION(ibm_db2)
-{
-	if ( IBM_DB2_G(henv) ) {
-		SQLFreeHandle ( SQL_HANDLE_ENV, IBM_DB2_G(henv) );
-		IBM_DB2_G(henv) = NULL;
-	}
 }
 /* }}} */
 
@@ -3287,9 +3276,13 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 		}
 	}
 	/* check if row_number is present */
-	if ( argc == 2 && row_number > 0) {
+	if (argc == 2 && row_number > 0) {
 		rc = SQLFetchScroll((SQLHSTMT)stmt_res->hstmt, SQL_FETCH_ABSOLUTE, row_number);
+	} else if (argc == 2 && row_number < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requested row number must be a positive value");
+		RETURN_FALSE;
 	} else {
+		/*row_number is NULL or 0; just fetch next row*/
 		rc = SQLFetch((SQLHSTMT)stmt_res->hstmt);
 	}
 
@@ -3527,11 +3520,16 @@ PHP_FUNCTION(db2_fetch_row)
 	}
 
 	/*check if row_number is present*/
-	if (argc == 2  && row_number > 0) {
-		rc = SQLFetchScroll((SQLHSTMT)stmt_res->hstmt, SQL_FETCH_ABSOLUTE, row_number );
+	if (argc == 2 && row_number > 0) {
+		rc = SQLFetchScroll((SQLHSTMT)stmt_res->hstmt, SQL_FETCH_ABSOLUTE, row_number);
+	} else if (argc == 2 && row_number < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requested row number must be a positive value");
+		RETURN_FALSE;
 	} else {
+		/*row_number is NULL or 0; just fetch next row*/
 		rc = SQLFetch((SQLHSTMT)stmt_res->hstmt);
 	}
+
 	if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
 		RETURN_TRUE;
 	} else {
