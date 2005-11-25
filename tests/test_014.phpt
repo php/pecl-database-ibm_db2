@@ -19,4 +19,4 @@ db2_close($conn);
 ?>
 --EXPECT--
 7
-Fetch row -1: false
+Fetch row -1: true

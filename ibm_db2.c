@@ -444,15 +444,24 @@ PHP_MINIT_FUNCTION(ibm_db2)
 }
 /* }}} */
 
+/* {{{ PHP_RSHUTDOWN_FUNCTION
+*/
+PHP_RSHUTDOWN_FUNCTION(ibm_db2)
+{
+	if ( IBM_DB2_G(henv) ) {
+		SQLFreeHandle ( SQL_HANDLE_ENV, IBM_DB2_G(henv) );
+		IBM_DB2_G(henv) = NULL;
+	}
+}
+/* }}} */
+
 /* {{{ PHP_MSHUTDOWN_FUNCTION
 */
 PHP_MSHUTDOWN_FUNCTION(ibm_db2)
 {
 	UNREGISTER_INI_ENTRIES();
 
-	if ( IBM_DB2_G(henv) ) {
-		SQLFreeHandle ( SQL_HANDLE_ENV, IBM_DB2_G(henv) );
-	}
+
 	if (NULL != _php_db2_instance_name) {
 		free(_php_db2_instance_name);
 		_php_db2_instance_name = NULL;
@@ -802,9 +811,8 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
 	db2_row_data_type *row_data;
 	int i, rc = SQL_SUCCESS;
 
-	stmt_res->row_data = (db2_row_type*) emalloc(sizeof(db2_row_type)
-		* stmt_res->num_columns);
-	memset(stmt_res->row_data,0x0,sizeof(db2_row_type)*stmt_res->num_columns);
+	stmt_res->row_data = (db2_row_type*) ecalloc(sizeof(db2_row_type)
+		* stmt_res->num_columns, 1);
 
 	for (i=0; i<stmt_res->num_columns; i++) {
 		column_type = stmt_res->column_info[i].type;
@@ -928,11 +936,10 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	int reused = 0;
 	int hKeyLen = 0;
 	char *hKey = NULL;
-	char buffer[11];
 	int dbFlag = 0;
+	list_entry newEntry;
 
 	SQLHANDLE pHenv = 0;
-	memset(buffer, 0, sizeof(buffer));
 	conn_alive = 1;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "sss|a", &database, &database_len,&uid,
@@ -962,8 +969,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 		}
 		if (*pconn_res == NULL) {
 			conn_res = *pconn_res =
-				(conn_handle *) (isPersistent ?  pemalloc(sizeof(conn_handle), 1) : emalloc(sizeof(conn_handle)));
-			memset((void *) conn_res, '\0', sizeof(conn_handle));
+				(conn_handle *) (isPersistent ?  pecalloc(sizeof(conn_handle), 1, 1) : ecalloc(sizeof(conn_handle), 1));
 		}
 		/* We need to set this early, in case we get an error below,
 			so we know how to free the connection */
@@ -1036,7 +1042,6 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	if (hKey != NULL) {
 		if (! reused && rc == SQL_SUCCESS) {
 			/* If we created a new persistent connection, add it to the persistent_list */
-			list_entry newEntry;
 			memset(&newEntry, '\0', sizeof(newEntry));
 			Z_TYPE(newEntry) = le_pconn_struct;
 			newEntry.ptr = conn_res;
@@ -2463,8 +2468,7 @@ PHP_FUNCTION(db2_conn_errormsg)
 	}
 
 	if (connection) {
-		return_str = (char*)emalloc(DB2_MAX_ERR_MSG_LEN);
-		memset(return_str, 0, DB2_MAX_ERR_MSG_LEN);
+		return_str = (char*)ecalloc(DB2_MAX_ERR_MSG_LEN, 1);
 
 		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id,
 			"Connection Resource", le_conn_struct, le_pconn_struct);
@@ -2496,8 +2500,7 @@ PHP_FUNCTION(db2_stmt_errormsg)
 	}
 
 	if (stmt) {
-		return_str = (char*)emalloc(DB2_MAX_ERR_MSG_LEN);
-		memset(return_str, 0, DB2_MAX_ERR_MSG_LEN);
+		return_str = (char*)ecalloc(DB2_MAX_ERR_MSG_LEN, 1);
 
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
 
@@ -2528,8 +2531,7 @@ PHP_FUNCTION(db2_conn_error)
 	}
 
 	if (connection) {
-		return_str = (char*)emalloc(SQL_SQLSTATE_SIZE + 1);
-		memset(return_str, 0, SQL_SQLSTATE_SIZE + 1);
+		return_str = (char*)ecalloc(SQL_SQLSTATE_SIZE + 1, 1);
 
 		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id,
 			"Connection Resource", le_conn_struct, le_pconn_struct);
@@ -2562,8 +2564,7 @@ PHP_FUNCTION(db2_stmt_error)
 	}
 
 	if (stmt) {
-		return_str = (char*)emalloc(SQL_SQLSTATE_SIZE + 1);
-		memset(return_str, 0, SQL_SQLSTATE_SIZE + 1);
+		return_str = (char*)ecalloc(SQL_SQLSTATE_SIZE + 1, 1);
 
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
 
@@ -3436,8 +3437,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 								/* fall-through */
 
 							case DB2_BINARY:
-								out_ptr = (SQLPOINTER)emalloc(tmp_length);
-								memset(out_ptr, 0, tmp_length);
+								out_ptr = (SQLPOINTER)ecalloc(tmp_length, 1);
 
 								if ( out_ptr == NULL ) {
 									php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for LOB Data");
@@ -3477,8 +3477,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 							add_index_null(return_value, i);
 						}
 					} else {
-						out_ptr = (SQLPOINTER)emalloc(tmp_length+1);
-						memset(out_ptr, 0, tmp_length+1);
+						out_ptr = (SQLPOINTER)ecalloc(tmp_length+1, 1);
 
 						if ( out_ptr == NULL ) {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for LOB Data");
@@ -3799,7 +3798,8 @@ PHP_FUNCTION(db2_server_info)
 		}
 
 		/* SQL_CONFORMANCE */
-		bufferint32 = 0; memset(buffer255, 0, sizeof(buffer255));
+		bufferint32 = 0;
+		memset(buffer255, 0, sizeof(buffer255));
 		rc = SQLGetInfo(conn_res->hdbc, SQL_ODBC_SQL_CONFORMANCE, &bufferint32, sizeof(bufferint32), NULL);
 
 		if ( rc == SQL_ERROR ) {
