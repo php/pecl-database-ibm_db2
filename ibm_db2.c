@@ -3528,12 +3528,8 @@ PHP_FUNCTION(db2_fetch_row)
 	}
 
 	/*check if row_number is present*/
-	if ( argc == 2 ) {
-		if ( row_number <= 0 ) {
-			RETURN_FALSE;
-		} else {
-			rc = SQLFetchScroll((SQLHSTMT)stmt_res->hstmt, SQL_FETCH_ABSOLUTE, row_number );
-		}
+	if (argc == 2  && row_number > 0) {
+		rc = SQLFetchScroll((SQLHSTMT)stmt_res->hstmt, SQL_FETCH_ABSOLUTE, row_number );
 	} else {
 		rc = SQLFetch((SQLHSTMT)stmt_res->hstmt);
 	}
