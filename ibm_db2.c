@@ -284,15 +284,7 @@ static void _php_db2_free_result_struct(stmt_handle* handle)
 				efree(prev_ptr->varname);
 			}
 
-			/* Free Values */
-			if ( Z_TYPE_P(prev_ptr->value) == IS_STRING ) {
-				efree((prev_ptr->value)->value.str.val);
-			}
-
-			if ( prev_ptr->value ) {
-				efree(prev_ptr->value);
-			}
-
+			zval_ptr_dtor(&prev_ptr->value);
 			efree(prev_ptr);
 
 			prev_ptr = curr_ptr;
