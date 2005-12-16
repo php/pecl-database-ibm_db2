@@ -26,7 +26,6 @@ foreach ($animals as $animal) {
     if (!$picture) {
       die("Could not retrieve picture '{$animal[1]}'.");
     }
-    print "Name: {$name} Size: " . strlen($picture) . ".\n";
     db2_bind_param($stmt, 1, 'name', DB2_PARAM_IN);
     db2_bind_param($stmt, 2, 'picture', DB2_PARAM_IN, DB2_BINARY);
     $result = db2_execute($stmt);
