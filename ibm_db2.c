@@ -79,12 +79,11 @@ typedef struct _conn_handle_struct {
 } conn_handle;
 
 typedef union {
-	int i_val;
-	long l_val;
-	double d_val;
-	float f_val;
-	short s_val;
-	char *str_val;
+	SQLINTEGER i_val;
+	SQLDOUBLE d_val;
+	SQLFLOAT f_val;
+	SQLSMALLINT s_val;
+	SQLCHAR *str_val;
 } db2_row_data_type;
 
 typedef struct {
@@ -918,7 +917,6 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	int reused = 0;
 	int hKeyLen = 0;
 	char *hKey = NULL;
-	int dbFlag = 0;
 	list_entry newEntry;
 
 	SQLHANDLE pHenv = 0;
@@ -3134,7 +3132,7 @@ PHP_FUNCTION(db2_result)
 
 			case SQL_SMALLINT:
 			case SQL_INTEGER:
-				rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_SLONG, &long_val, sizeof(long_val), &out_length);
+				rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_LONG, &long_val, sizeof(long_val), &out_length);
 				if ( rc == SQL_ERROR ) {
 					RETURN_FALSE;
 				}
