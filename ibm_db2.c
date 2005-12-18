@@ -21,7 +21,7 @@
   $Id$
 */
 
-#define	MODULE_RELEASE	"1.1.6"
+#define	MODULE_RELEASE	"1.2.0"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -331,7 +331,7 @@ static stmt_handle *_db2_new_stmt_struct(conn_handle* conn_res)
 {
 	stmt_handle *stmt_res;
 
-	stmt_res = (stmt_handle *)emalloc(sizeof(stmt_handle));
+	stmt_res = (stmt_handle *)ecalloc(1, sizeof(stmt_handle));
 
 	/* Initialize stmt resource so parsing assigns updated options if needed */
 	stmt_res->hdbc = conn_res->hdbc;
@@ -379,8 +379,8 @@ PHP_MINIT_FUNCTION(ibm_db2)
 {
 #ifndef PHP_WIN32
 	/* Declare variables for DB2 instance settings */
-	char * tmp_name;
-	char * instance_name;
+	char * tmp_name = NULL;
+	char * instance_name = NULL;
 #endif
 
 	ZEND_INIT_MODULE_GLOBALS(ibm_db2, php_ibm_db2_init_globals, NULL);
@@ -442,7 +442,6 @@ PHP_MSHUTDOWN_FUNCTION(ibm_db2)
 {
 	UNREGISTER_INI_ENTRIES();
 
-
 	if (NULL != _php_db2_instance_name) {
 		free(_php_db2_instance_name);
 		_php_db2_instance_name = NULL;
@@ -501,14 +500,15 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 	SQLSMALLINT length;
 	char *p;
 
+	memset(errMsg, '\0', DB2_MAX_ERR_MSG_LEN);
 	if ( SQLGetDiagRec(hType, handle, recno, sqlstate, &sqlcode, msg,
 			SQL_MAX_MESSAGE_LENGTH + 1, &length ) == SQL_SUCCESS) {
 
-		p = strchr( msg, '\n' );
-		if (p) *p = '\0';
+		while (p = strchr( (char *)msg, '\n' )) {
+			*p = ' ';
+		}
 
-		sprintf(errMsg, "%s SQLCODE=%d", msg, (int)sqlcode);
-		errMsg[DB2_MAX_ERR_MSG_LEN] = '\0';
+		sprintf((char *)errMsg, "%s SQLCODE=%d", msg, (int)sqlcode);
 
 		switch (rc) {
 			case SQL_ERROR:
@@ -516,13 +516,13 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 				if ( cpy_to_global ) {
 					switch (hType) {
 						case SQL_HANDLE_DBC:
-							strncpy(IBM_DB2_G(__php_conn_err_state), sqlstate, SQL_SQLSTATE_SIZE+1);
-							strncpy(IBM_DB2_G(__php_conn_err_msg), errMsg, DB2_MAX_ERR_MSG_LEN);
+							strncpy(IBM_DB2_G(__php_conn_err_state), (char *)sqlstate, SQL_SQLSTATE_SIZE+1);
+							strncpy(IBM_DB2_G(__php_conn_err_msg), (char *)errMsg, DB2_MAX_ERR_MSG_LEN);
 							break;
 
 						case SQL_HANDLE_STMT:
-							strncpy(IBM_DB2_G(__php_stmt_err_state), sqlstate, SQL_SQLSTATE_SIZE+1);
-							strncpy(IBM_DB2_G(__php_stmt_err_msg), errMsg, DB2_MAX_ERR_MSG_LEN);
+							strncpy(IBM_DB2_G(__php_stmt_err_state), (char *)sqlstate, SQL_SQLSTATE_SIZE+1);
+							strncpy(IBM_DB2_G(__php_stmt_err_msg), (char *)errMsg, DB2_MAX_ERR_MSG_LEN);
 							break;
 					}
 				}
@@ -532,12 +532,12 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 				switch (API) {
 					case DB2_ERR:
 						if ( ret_str != NULL ) {
-							strncpy(ret_str, sqlstate, SQL_SQLSTATE_SIZE+1);
+							strncpy(ret_str, (char *)sqlstate, SQL_SQLSTATE_SIZE+1);
 						}
 						return;
 					case DB2_ERRMSG:
 						if ( ret_str != NULL ) {
-							strncpy(ret_str, msg, DB2_MAX_ERR_MSG_LEN);
+							strncpy(ret_str, (char *)msg, DB2_MAX_ERR_MSG_LEN);
 						}
 						return;
 					default:
@@ -752,21 +752,21 @@ static int _php_db2_get_result_set_info(stmt_handle *stmt_res)
 		return -1;
 	}
 	stmt_res->num_columns = nResultCols;
-	stmt_res->column_info = (db2_result_set_info*)emalloc(sizeof(db2_result_set_info)*nResultCols);
+	stmt_res->column_info = (db2_result_set_info*)ecalloc(nResultCols, sizeof(db2_result_set_info));
 	/* return a set of attributes for a column */
 	for (i = 0 ; i < nResultCols; i++) {
 		rc = SQLDescribeCol((SQLHSTMT)stmt_res->hstmt, (SQLSMALLINT)(i + 1 ),
-			tmp_name, BUFSIZ, &name_length, &stmt_res->column_info[i].type,
+			(SQLCHAR *)tmp_name, BUFSIZ, &name_length, &stmt_res->column_info[i].type,
 			&stmt_res->column_info[i].size, &stmt_res->column_info[i].scale,
 			&stmt_res->column_info[i].nullable);
 		if ( rc == SQL_ERROR ) {
 			return -1;
 		}
 		if ( name_length <= 0 ) {
-			stmt_res->column_info[i].name = estrdup("");
+			stmt_res->column_info[i].name = (SQLCHAR *)estrdup("");
 		} else if (name_length >= BUFSIZ ) {
 			/* column name is longer than BUFSIZ*/
-			stmt_res->column_info[i].name = emalloc(name_length+1);
+			stmt_res->column_info[i].name = ecalloc(1, name_length+1);
 			rc = SQLDescribeCol((SQLHSTMT)stmt_res->hstmt, (SQLSMALLINT)(i + 1 ),
 				stmt_res->column_info[i].name, name_length, &name_length,
 				&stmt_res->column_info[i].type, &stmt_res->column_info[i].size,
@@ -775,7 +775,7 @@ static int _php_db2_get_result_set_info(stmt_handle *stmt_res)
 				return -1;
 			}
 		} else {
-			stmt_res->column_info[i].name = estrdup(tmp_name);
+			stmt_res->column_info[i].name = (SQLCHAR *)estrdup(tmp_name);
 		}
 	}
 	return 0;
@@ -787,13 +787,12 @@ static int _php_db2_get_result_set_info(stmt_handle *stmt_res)
 */
 static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
 {
-	SQLINTEGER in_length;
+	SQLINTEGER in_length = 0;
 	SQLSMALLINT column_type;
 	db2_row_data_type *row_data;
 	int i, rc = SQL_SUCCESS;
 
-	stmt_res->row_data = (db2_row_type*) ecalloc(sizeof(db2_row_type)
-		* stmt_res->num_columns, 1);
+	stmt_res->row_data = (db2_row_type*) ecalloc(stmt_res->num_columns, sizeof(db2_row_type));
 
 	for (i=0; i<stmt_res->num_columns; i++) {
 		column_type = stmt_res->column_info[i].type;
@@ -803,7 +802,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
 			case SQL_VARCHAR:
 			case SQL_LONGVARCHAR:
 				in_length = stmt_res->column_info[i].size+1;
-				row_data->str_val = (char*)emalloc(in_length);
+				row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
 
 				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
 					SQL_C_DEFAULT, row_data->str_val, in_length,
@@ -815,14 +814,14 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
 			case SQL_VARBINARY:
 				if ( stmt_res->s_bin_mode == DB2_CONVERT ) {
 					in_length = 2*(stmt_res->column_info[i].size)+1;
-					row_data->str_val = (char*)emalloc(in_length);
+					row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
 
 					rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
 						SQL_C_CHAR, row_data->str_val, in_length,
 						(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
 				} else {
 					in_length = stmt_res->column_info[i].size+1;
-					row_data->str_val = (char*)emalloc(in_length);
+					row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
 
 					rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
 						SQL_C_DEFAULT, row_data->str_val, in_length,
@@ -835,7 +834,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
 			case SQL_TYPE_TIMESTAMP:
 			case SQL_BIGINT:
 				in_length = stmt_res->column_info[i].size+1;
-				row_data->str_val = (char*)emalloc(in_length);
+				row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
 				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
 					SQL_C_CHAR, row_data->str_val, in_length,
 					(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
@@ -870,7 +869,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
 			case SQL_NUMERIC:
 				in_length = stmt_res->column_info[i].size +
 					stmt_res->column_info[i].scale + 2 + 1;
-				row_data->str_val = (char *)emalloc(in_length);
+				row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
 				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
 					SQL_C_CHAR, row_data->str_val, in_length,
 					(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
@@ -919,7 +918,6 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	char *hKey = NULL;
 	list_entry newEntry;
 
-	SQLHANDLE pHenv = 0;
 	conn_alive = 1;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "sss|a", &database, &database_len,&uid,
@@ -931,7 +929,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 		if (isPersistent) {
 			list_entry *entry;
 			hKeyLen = strlen(database) + strlen(uid) + strlen(password) + 9;
-			hKey = (char *) emalloc(hKeyLen);
+			hKey = (char *) ecalloc(1, hKeyLen);
 
 			sprintf(hKey, "__db2_%s.%s.%s", uid, database, password);
 
@@ -949,31 +947,27 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 		}
 		if (*pconn_res == NULL) {
 			conn_res = *pconn_res =
-				(conn_handle *) (isPersistent ?  pecalloc(sizeof(conn_handle), 1, 1) : ecalloc(sizeof(conn_handle), 1));
+				(conn_handle *) (isPersistent ?  pecalloc(1, sizeof(conn_handle), 1) : ecalloc(1, sizeof(conn_handle)));
 		}
 		/* We need to set this early, in case we get an error below,
 			so we know how to free the connection */
 		conn_res->flag_pconnect = isPersistent;
 		/* Allocate ENV handles if not present */
 		if ( !conn_res->henv ) {
-			rc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &pHenv);
+			rc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &(conn_res->henv));
 			if (rc != SQL_SUCCESS) {
-				_php_db2_check_sql_errors( pHenv, SQL_HANDLE_ENV, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				_php_db2_check_sql_errors( conn_res->henv, SQL_HANDLE_ENV, rc, 1, NULL, -1, 1 TSRMLS_CC);
 				break;
 			}
 
-			rc = SQLSetEnvAttr((SQLHENV)pHenv, SQL_ATTR_ODBC_VERSION, (void *)SQL_OV_ODBC3, 0);
-
-			conn_res->henv = pHenv;
-		} else {
-			pHenv = conn_res->henv;
+			rc = SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_ODBC_VERSION, (void *)SQL_OV_ODBC3, 0);
 		}
 
 		if (! reused) {
 			/* Alloc CONNECT Handle */
-			rc = SQLAllocHandle( SQL_HANDLE_DBC, pHenv, &(conn_res->hdbc));
+			rc = SQLAllocHandle( SQL_HANDLE_DBC, conn_res->henv, &(conn_res->hdbc));
 			if (rc != SQL_SUCCESS) {
-				_php_db2_check_sql_errors(pHenv, SQL_HANDLE_ENV, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				_php_db2_check_sql_errors(conn_res->henv, SQL_HANDLE_ENV, rc, 1, NULL, -1, 1 TSRMLS_CC);
 				break;
 			}
 		}
@@ -1022,7 +1016,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	if (hKey != NULL) {
 		if (! reused && rc == SQL_SUCCESS) {
 			/* If we created a new persistent connection, add it to the persistent_list */
-			memset(&newEntry, '\0', sizeof(newEntry));
+			memset(&newEntry, 0, sizeof(newEntry));
 			Z_TYPE(newEntry) = le_pconn_struct;
 			newEntry.ptr = conn_res;
 			if (zend_hash_update(&EG(persistent_list), hKey, hKeyLen, (void *) &newEntry, sizeof(list_entry), NULL)==FAILURE) {
@@ -1154,7 +1148,7 @@ static void _php_db2_add_param_cache( stmt_handle *stmt_res, int param_no, char 
 
 	if ( curr == NULL || curr->param_num != param_no ) {
 		/* Allocate memory and make new node to be added */
-		tmp_curr = (param_node *)emalloc(sizeof(param_node));
+		tmp_curr = (param_node *)ecalloc(1, sizeof(param_node));
 		/* assign values */
 		tmp_curr->data_type = data_type;
 		tmp_curr->param_size = precision;
@@ -1221,10 +1215,10 @@ PHP_FUNCTION(db2_bind_param)
 	int varname_len;
 	long param_type; /* set default here */
 	/* LONG types used for data being passed in */
-	long param_no;
-	long data_type;
-	long precision;
-	long scale;
+	SQLUSMALLINT param_no = 0;
+	long data_type = 0;
+	long precision = 0;
+	long scale = 0;
 	SQLSMALLINT sql_data_type = 0;
 	SQLUINTEGER sql_precision = 0;
 	SQLSMALLINT sql_scale = 0;
@@ -1346,20 +1340,20 @@ PHP_FUNCTION(db2_close)
 Returns a result set listing the columns and associated privileges for a table */
 PHP_FUNCTION(db2_column_privileges)
 {
-	char *qualifier = NULL;
-	char *owner = NULL;
-	char *table_name = NULL;
-	char *column_name = NULL;
+	SQLCHAR *qualifier = NULL;
+	SQLCHAR *owner = NULL;
+	SQLCHAR *table_name = NULL;
+	SQLCHAR *column_name = NULL;
 	int argc = ZEND_NUM_ARGS();
 	int connection_id = -1;
-	int qualifier_len;
-	int owner_len;
-	int table_name_len;
-	int column_name_len;
+	int qualifier_len = 0;
+	int owner_len = 0;
+	int table_name_len = 0;
+	int column_name_len = 0;
 	zval *connection = NULL;
 	conn_handle *conn_res;
 	stmt_handle *stmt_res;
-	int rc;
+	int rc = 0;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "r|ssss", &connection, &qualifier,
 		&qualifier_len, &owner, &owner_len, &table_name, &table_name_len,
@@ -1397,10 +1391,10 @@ PHP_FUNCTION(db2_column_privileges)
 Returns a result set listing the columns and associated metadata for a table */
 PHP_FUNCTION(db2_columns)
 {
-	char *qualifier = NULL;
-	char *owner = NULL;
-	char *table_name = NULL;
-	char *column_name = NULL;
+	SQLCHAR *qualifier = NULL;
+	SQLCHAR *owner = NULL;
+	SQLCHAR *table_name = NULL;
+	SQLCHAR *column_name = NULL;
 	int argc = ZEND_NUM_ARGS();
 	int connection_id = -1;
 	int qualifier_len;
@@ -1445,9 +1439,9 @@ Returns a result set listing the foreign keys for a table */
 
 PHP_FUNCTION(db2_foreign_keys)
 {
-	char *qualifier = NULL;
-	char *owner = NULL;
-	char *table_name = NULL;
+	SQLCHAR *qualifier = NULL;
+	SQLCHAR *owner = NULL;
+	SQLCHAR *table_name = NULL;
 	int argc = ZEND_NUM_ARGS();
 	int connection_id = -1;
 	int qualifier_len;
@@ -1475,8 +1469,8 @@ PHP_FUNCTION(db2_foreign_keys)
 			RETURN_FALSE;
 		}
 		rc = SQLForeignKeys((SQLHSTMT)stmt_res->hstmt, qualifier, SQL_NTS,
-						owner,SQL_NTS, table_name,SQL_NTS, "",SQL_NTS,
-						"",SQL_NTS,"",SQL_NTS);
+						owner,SQL_NTS, table_name,SQL_NTS, (SQLCHAR *)"",SQL_NTS,
+						(SQLCHAR *)"",SQL_NTS, (SQLCHAR *)"",SQL_NTS);
 		if (rc == SQL_ERROR ) {
 			RETURN_FALSE;
 		}
@@ -1493,9 +1487,9 @@ Returns a result set listing primary keys for a table */
 
 PHP_FUNCTION(db2_primary_keys)
 {
-	char *qualifier = NULL;
-	char *owner = NULL;
-	char *table_name = NULL;
+	SQLCHAR *qualifier = NULL;
+	SQLCHAR *owner = NULL;
+	SQLCHAR *table_name = NULL;
 	int argc = ZEND_NUM_ARGS();
 	int connection_id = -1;
 	int qualifier_len;
@@ -1538,10 +1532,10 @@ PHP_FUNCTION(db2_primary_keys)
 Returns a result set listing the input and output parameters for a stored procedure */
 PHP_FUNCTION(db2_procedure_columns)
 {
-	char *qualifier = NULL;
-	char *owner = NULL;
-	char *proc_name = NULL;
-	char *column_name = NULL;
+	SQLCHAR *qualifier = NULL;
+	SQLCHAR *owner = NULL;
+	SQLCHAR *proc_name = NULL;
+	SQLCHAR *column_name = NULL;
 	int argc = ZEND_NUM_ARGS();
 	int qualifier_len;
 	int owner_len;
@@ -1584,9 +1578,9 @@ PHP_FUNCTION(db2_procedure_columns)
 Returns a result set listing the stored procedures registered in a database */
 PHP_FUNCTION(db2_procedures)
 {
-	char *qualifier = NULL;
-	char *owner = NULL;
-	char *proc_name = NULL;
+	SQLCHAR *qualifier = NULL;
+	SQLCHAR *owner = NULL;
+	SQLCHAR *proc_name = NULL;
 	int argc = ZEND_NUM_ARGS();
 	int qualifier_len;
 	int owner_len;
@@ -1627,9 +1621,9 @@ PHP_FUNCTION(db2_procedures)
 Returns a result set listing the unique row identifier columns for a table */
 PHP_FUNCTION(db2_special_columns)
 {
-	char *qualifier = NULL;
-	char *owner = NULL;
-	char *table_name = NULL;
+	SQLCHAR *qualifier = NULL;
+	SQLCHAR *owner = NULL;
+	SQLCHAR *table_name = NULL;
 	int argc = ZEND_NUM_ARGS();
 	int connection_id = -1;
 	int qualifier_len;
@@ -1673,9 +1667,9 @@ PHP_FUNCTION(db2_special_columns)
 Returns a result set listing the index and statistics for a table */
 PHP_FUNCTION(db2_statistics)
 {
-char *qualifier = NULL;
-	char *owner = NULL;
-	char *table_name = NULL;
+SQLCHAR *qualifier = NULL;
+	SQLCHAR *owner = NULL;
+	SQLCHAR *table_name = NULL;
 	int argc = ZEND_NUM_ARGS();
 	int qualifier_len;
 	int owner_len;
@@ -1721,9 +1715,9 @@ Returns a result set listing the tables and associated privileges in a database 
 
 PHP_FUNCTION(db2_table_privileges)
 {
-	char *qualifier = NULL;
-	char *owner = NULL;
-	char *table_name = NULL;
+	SQLCHAR *qualifier = NULL;
+	SQLCHAR *owner = NULL;
+	SQLCHAR *table_name = NULL;
 	int argc = ZEND_NUM_ARGS();
 	int connection_id = -1;
 	int qualifier_len;
@@ -1769,10 +1763,10 @@ PHP_FUNCTION(db2_table_privileges)
 Returns a result set listing the tables and associated metadata in a database */
 PHP_FUNCTION(db2_tables)
 {
-	char *qualifier = NULL;
-	char *owner = NULL;
-	char *table_name = NULL;
-	char *table_type = NULL;
+	SQLCHAR *qualifier = NULL;
+	SQLCHAR *owner = NULL;
+	SQLCHAR *table_name = NULL;
+	SQLCHAR *table_type = NULL;
 	int argc = ZEND_NUM_ARGS();
 	int connection_id = -1;
 	int qualifier_len;
@@ -2016,7 +2010,7 @@ static param_node* build_list( stmt_handle *stmt_res, int param_no, SQLSMALLINT 
 	param_node *tmp_curr = NULL, *curr = stmt_res->head_cache_list, *prev = NULL;
 
 	/* Allocate memory and make new node to be added */
-	tmp_curr = (param_node *)emalloc(sizeof(param_node));
+	tmp_curr = (param_node *)ecalloc(1, sizeof(param_node));
 	/* assign values */
 	tmp_curr->data_type = data_type;
 	tmp_curr->param_size = precision;
@@ -2073,7 +2067,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 		curr->bind_indicator = 0;
 		/* Bind file name string */
 		rc = SQLBindFileToParam((SQLHSTMT)stmt_res->hstmt, curr->param_num,
-			curr->data_type, ((curr->value)->value.str.val),
+			curr->data_type, (SQLCHAR *)((curr->value)->value.str.val),
 			(SQLSMALLINT *)&((curr->value)->value.str.len), &(curr->file_options),
 			Z_STRLEN_P(curr->value), &(curr->bind_indicator));
 
@@ -2159,7 +2153,7 @@ static int _php_db2_execute_helper(stmt_handle *stmt_res, zval **data, int bind_
 	zval **bind_data;			/* Data value from symbol table */
 
 	/* Used in call to SQLDescribeParam if needed */
-	int param_no;
+	SQLUSMALLINT param_no;
 	SQLSMALLINT data_type;
 	SQLUINTEGER precision;
 	SQLSMALLINT scale;
@@ -2448,7 +2442,7 @@ PHP_FUNCTION(db2_conn_errormsg)
 	}
 
 	if (connection) {
-		return_str = (char*)ecalloc(DB2_MAX_ERR_MSG_LEN, 1);
+		return_str = (char*)ecalloc(1, DB2_MAX_ERR_MSG_LEN);
 
 		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id,
 			"Connection Resource", le_conn_struct, le_pconn_struct);
@@ -2480,7 +2474,7 @@ PHP_FUNCTION(db2_stmt_errormsg)
 	}
 
 	if (stmt) {
-		return_str = (char*)ecalloc(DB2_MAX_ERR_MSG_LEN, 1);
+		return_str = (char*)ecalloc(1, DB2_MAX_ERR_MSG_LEN);
 
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
 
@@ -2511,7 +2505,7 @@ PHP_FUNCTION(db2_conn_error)
 	}
 
 	if (connection) {
-		return_str = (char*)ecalloc(SQL_SQLSTATE_SIZE + 1, 1);
+		return_str = (char*)ecalloc(1, SQL_SQLSTATE_SIZE + 1);
 
 		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id,
 			"Connection Resource", le_conn_struct, le_pconn_struct);
@@ -2544,7 +2538,7 @@ PHP_FUNCTION(db2_stmt_error)
 	}
 
 	if (stmt) {
-		return_str = (char*)ecalloc(SQL_SQLSTATE_SIZE + 1, 1);
+		return_str = (char*)ecalloc(1, SQL_SQLSTATE_SIZE + 1);
 
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
 
@@ -2599,7 +2593,7 @@ PHP_FUNCTION(db2_next_result)
 
 		/* Initialize stmt resource members with default values. */
 		/* Parsing will update options if needed */
-		new_stmt_res = (stmt_handle *)emalloc(sizeof(stmt_handle));
+		new_stmt_res = (stmt_handle *)ecalloc(1, sizeof(stmt_handle));
 		new_stmt_res->s_bin_mode = stmt_res->s_bin_mode;
 		new_stmt_res->cursor_type = stmt_res->cursor_type;
 		new_stmt_res->s_case_mode = stmt_res->s_case_mode;
@@ -2700,7 +2694,7 @@ static int _php_db2_get_column_by_name(stmt_handle *stmt_res, char *col_name, in
 	/* should start from 0 */
 	i=0;
 	while (i < stmt_res->num_columns) {
-		if (strcmp(stmt_res->column_info[i].name,col_name) == 0) {
+		if (strcmp((char *)stmt_res->column_info[i].name,col_name) == 0) {
 			return i;
 		}
 		i++;
@@ -2737,7 +2731,7 @@ PHP_FUNCTION(db2_field_name)
 	if ( col < 0 ) {
 		RETURN_FALSE;
 	}
-	RETURN_STRING(stmt_res->column_info[col].name,1);
+	RETURN_STRING((char *)stmt_res->column_info[col].name,1);
 }
 /* }}} */
 
@@ -3113,7 +3107,7 @@ PHP_FUNCTION(db2_result)
 			case SQL_DECIMAL:
 			case SQL_NUMERIC:
 				in_length = stmt_res->column_info[col_num].size+1;
-				out_ptr = (SQLPOINTER)emalloc(in_length);
+				out_ptr = (SQLPOINTER)ecalloc(1, in_length);
 				if ( out_ptr == NULL ) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory");
 					RETURN_FALSE;
@@ -3165,7 +3159,7 @@ PHP_FUNCTION(db2_result)
 				if (out_length == SQL_NULL_DATA) {
 					RETURN_NULL();
 				}
-				out_char_ptr = (char*)emalloc(in_length+1);
+				out_char_ptr = (char*)ecalloc(1, in_length+1);
 				if ( out_char_ptr == NULL ) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for LOB Data");
 					RETURN_FALSE;
@@ -3203,7 +3197,7 @@ PHP_FUNCTION(db2_result)
 
 					case DB2_BINARY:
 
-						out_ptr = (SQLPOINTER)emalloc(in_length);
+						out_ptr = (SQLPOINTER)ecalloc(1, in_length);
 						if ( out_ptr == NULL ) {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for LOB Data");
 							RETURN_FALSE;
@@ -3292,10 +3286,10 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 
 		switch(stmt_res->s_case_mode) {
 			case DB2_CASE_LOWER:
-				stmt_res->column_info[i].name = php_strtolower(stmt_res->column_info[i].name, strlen(stmt_res->column_info[i].name));
+				stmt_res->column_info[i].name = (SQLCHAR *)php_strtolower((char *)stmt_res->column_info[i].name, strlen((char *)stmt_res->column_info[i].name));
 				break;
 			case DB2_CASE_UPPER:
-				stmt_res->column_info[i].name = php_strtoupper(stmt_res->column_info[i].name, strlen(stmt_res->column_info[i].name));
+				stmt_res->column_info[i].name = (SQLCHAR *)php_strtoupper((char *)stmt_res->column_info[i].name, strlen((char *)stmt_res->column_info[i].name));
 				break;
 			case DB2_CASE_NATURAL:
 			default:
@@ -3304,7 +3298,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 
 		if (out_length == SQL_NULL_DATA) {
 			if ( op & DB2_FETCH_ASSOC ) {
-				add_assoc_null(return_value, stmt_res->column_info[i].name);
+				add_assoc_null(return_value, (char *)stmt_res->column_info[i].name);
 			}
 			if ( op & DB2_FETCH_INDEX ) {
 				add_index_null(return_value, i);
@@ -3322,17 +3316,17 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 				case SQL_NUMERIC:
 
 					if ( op & DB2_FETCH_ASSOC ) {
-						add_assoc_stringl(return_value, stmt_res->column_info[i].name,
-							row_data->str_val, strlen(row_data->str_val), 1);
+						add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name,
+							(char *)row_data->str_val, strlen((char *)row_data->str_val), 1);
 					}
 					if ( op & DB2_FETCH_INDEX ) {
-						add_index_stringl(return_value, i, row_data->str_val,
-							strlen(row_data->str_val), 1);
+						add_index_stringl(return_value, i, (char *)row_data->str_val,
+							strlen((char *)row_data->str_val), 1);
 					}
 					break;
 				case SQL_SMALLINT:
 					if ( op & DB2_FETCH_ASSOC ) {
-						add_assoc_long(return_value, stmt_res->column_info[i].name, row_data->s_val);
+						add_assoc_long(return_value, (char *)stmt_res->column_info[i].name, row_data->s_val);
 					}
 					if ( op & DB2_FETCH_INDEX ) {
 						add_index_long(return_value, i, row_data->s_val);
@@ -3340,7 +3334,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 					break;
 				case SQL_INTEGER:
 					if ( op & DB2_FETCH_ASSOC ) {
-						add_assoc_long(return_value, stmt_res->column_info[i].name,
+						add_assoc_long(return_value, (char *)stmt_res->column_info[i].name,
 							row_data->i_val);
 					}
 					if ( op & DB2_FETCH_INDEX ) {
@@ -3351,7 +3345,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 				case SQL_REAL:
 				case SQL_FLOAT:
 					if ( op & DB2_FETCH_ASSOC ) {
-						add_assoc_double(return_value, stmt_res->column_info[i].name, row_data->f_val);
+						add_assoc_double(return_value, (char *)stmt_res->column_info[i].name, row_data->f_val);
 					}
 					if ( op & DB2_FETCH_INDEX ) {
 						add_index_double(return_value, i, row_data->f_val);
@@ -3360,7 +3354,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 
 				case SQL_DOUBLE:
 					if ( op & DB2_FETCH_ASSOC ) {
-						add_assoc_double(return_value, stmt_res->column_info[i].name, row_data->d_val);
+						add_assoc_double(return_value, (char *)stmt_res->column_info[i].name, row_data->d_val);
 					}
 					if ( op & DB2_FETCH_INDEX ) {
 						add_index_double(return_value, i, row_data->d_val);
@@ -3372,19 +3366,19 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 				case SQL_VARBINARY:
 					if ( stmt_res->s_bin_mode == DB2_PASSTHRU ) {
 						if ( op & DB2_FETCH_ASSOC ) {
-							add_assoc_stringl(return_value, stmt_res->column_info[i].name, "", 0, 1);
+							add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, "", 0, 1);
 						}
 						if ( op & DB2_FETCH_INDEX ) {
 							add_index_stringl(return_value, i, "", 0, 1);
 						}
 					} else {
 						if ( op & DB2_FETCH_ASSOC ) {
-							add_assoc_stringl(return_value, stmt_res->column_info[i].name,
-								row_data->str_val, strlen(row_data->str_val), 1);
+							add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name,
+								(char *)row_data->str_val, strlen((char *)row_data->str_val), 1);
 						}
 						if ( op & DB2_FETCH_INDEX ) {
-							add_index_stringl(return_value, i, row_data->str_val,
-								strlen(row_data->str_val), 1);
+							add_index_stringl(return_value, i, (char *)row_data->str_val,
+								strlen((char *)row_data->str_val), 1);
 						}
 					}
 					break;
@@ -3399,7 +3393,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 
 					if (tmp_length == SQL_NULL_DATA) {
 						if ( op & DB2_FETCH_ASSOC ) {
-							add_assoc_null(return_value, stmt_res->column_info[i].name);
+							add_assoc_null(return_value, (char *)stmt_res->column_info[i].name);
 						}
 						if ( op & DB2_FETCH_INDEX ) {
 							add_index_null(return_value, i);
@@ -3408,7 +3402,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 						switch (stmt_res->s_bin_mode) {
 							case DB2_PASSTHRU:
 								if ( op & DB2_FETCH_ASSOC ) {
-										add_assoc_null(return_value, stmt_res->column_info[i].name);
+										add_assoc_null(return_value, (char *)stmt_res->column_info[i].name);
 								}
 								if ( op & DB2_FETCH_INDEX ) {
 										add_index_null(return_value, i);
@@ -3421,7 +3415,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 								/* fall-through */
 
 							case DB2_BINARY:
-								out_ptr = (SQLPOINTER)ecalloc(tmp_length, 1);
+								out_ptr = (SQLPOINTER)ecalloc(1, tmp_length);
 
 								if ( out_ptr == NULL ) {
 									php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for LOB Data");
@@ -3433,10 +3427,10 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 								}
 
 								if ( op & DB2_FETCH_ASSOC ) {
-									add_assoc_stringl(return_value, stmt_res->column_info[i].name, out_ptr, out_length, 0);
+									add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, out_length, 0);
 								}
 								if ( op & DB2_FETCH_INDEX ) {
-									add_index_stringl(return_value, i, out_ptr, out_length, DB2_FETCH_BOTH & op);
+									add_index_stringl(return_value, i, (char *)out_ptr, out_length, DB2_FETCH_BOTH & op);
 								}
 								break;
 							default:
@@ -3455,13 +3449,13 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 
 					if (tmp_length == SQL_NULL_DATA) {
 						if ( op & DB2_FETCH_ASSOC ) {
-							add_assoc_null(return_value, stmt_res->column_info[i].name);
+							add_assoc_null(return_value, (char *)stmt_res->column_info[i].name);
 						}
 						if ( op & DB2_FETCH_INDEX ) {
 							add_index_null(return_value, i);
 						}
 					} else {
-						out_ptr = (SQLPOINTER)ecalloc(tmp_length+1, 1);
+						out_ptr = (SQLPOINTER)ecalloc(1, tmp_length+1);
 
 						if ( out_ptr == NULL ) {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for LOB Data");
@@ -3475,10 +3469,10 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 						out_ptr[tmp_length] = '\0';
 
 						if ( op & DB2_FETCH_ASSOC ) {
-							add_assoc_stringl(return_value, stmt_res->column_info[i].name, out_ptr, tmp_length+1, 0);
+							add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, tmp_length+1, 0);
 						}
 						if ( op & DB2_FETCH_INDEX ) {
-							add_index_stringl(return_value, i, out_ptr, tmp_length+1, DB2_FETCH_BOTH & op);
+							add_index_stringl(return_value, i, (char *)out_ptr, tmp_length+1, DB2_FETCH_BOTH & op);
 						}
 					}
 					break;
@@ -3642,7 +3636,7 @@ PHP_FUNCTION(db2_server_info)
 			RETURN_FALSE;
 			return;
 		} else {
-			add_property_stringl(return_value, "DBMS_NAME", buffer255, strlen(buffer255), 1);
+			add_property_stringl(return_value, "DBMS_NAME", (char *)buffer255, strlen((char *)buffer255), 1);
 		}
 
 		/* DBMS_VER */
@@ -3653,7 +3647,7 @@ PHP_FUNCTION(db2_server_info)
 			RETURN_FALSE;
 			return;
 		} else {
-			add_property_stringl(return_value, "DBMS_VER", buffer11, strlen(buffer11), 1);
+			add_property_stringl(return_value, "DBMS_VER", (char *)buffer11, strlen((char *)buffer11), 1);
 		}
 
 		/* DB_CODEPAGE */
@@ -3675,7 +3669,7 @@ PHP_FUNCTION(db2_server_info)
 			RETURN_FALSE;
 			return;
 		} else {
-			add_property_stringl(return_value, "DB_NAME", buffer255, strlen(buffer255), 1);
+			add_property_stringl(return_value, "DB_NAME", (char *)buffer255, strlen((char *)buffer255), 1);
 		}
 
 		/* INST_NAME */
@@ -3686,7 +3680,7 @@ PHP_FUNCTION(db2_server_info)
 			RETURN_FALSE;
 			return;
 		} else {
-			add_property_stringl(return_value, "INST_NAME", buffer255, strlen(buffer255), 1);
+			add_property_stringl(return_value, "INST_NAME", (char *)buffer255, strlen((char *)buffer255), 1);
 		}
 
 		/* SPECIAL_CHARS */
@@ -3697,7 +3691,7 @@ PHP_FUNCTION(db2_server_info)
 			RETURN_FALSE;
 			return;
 		} else {
-			add_property_stringl(return_value, "SPECIAL_CHARS", buffer255, strlen(buffer255), 1);
+			add_property_stringl(return_value, "SPECIAL_CHARS", (char *)buffer255, strlen((char *)buffer255), 1);
 		}
 
 		/* KEYWORDS */
@@ -3716,7 +3710,7 @@ PHP_FUNCTION(db2_server_info)
 
 			array_init(karray);
 
-			keyword = php_strtok_r(buffer2k, ",", &last);
+			keyword = php_strtok_r((char *)buffer2k, ",", &last);
 			while (keyword) {
 				add_index_stringl(karray, key++, keyword, strlen(keyword), 1);
 				keyword = php_strtok_r(NULL, ",", &last);
@@ -3726,7 +3720,8 @@ PHP_FUNCTION(db2_server_info)
 		}
 
 		/* DFT_ISOLATION */
-		bitmask = 0; memset(buffer11, 0, sizeof(buffer11));
+		bitmask = 0;
+		memset(buffer11, 0, sizeof(buffer11));
 		rc = SQLGetInfo(conn_res->hdbc, SQL_DEFAULT_TXN_ISOLATION, &bitmask, sizeof(bitmask), NULL);
 
 		if ( rc == SQL_ERROR ) {
@@ -3734,26 +3729,27 @@ PHP_FUNCTION(db2_server_info)
 			return;
 		} else {
 			if( bitmask & SQL_TXN_READ_UNCOMMITTED ) {
-				strcpy(buffer11, "UR");
+				strcpy((char *)buffer11, "UR");
 			}
 			if( bitmask & SQL_TXN_READ_COMMITTED ) {
-				strcpy(buffer11, "CS");
+				strcpy((char *)buffer11, "CS");
 			}
 			if( bitmask & SQL_TXN_REPEATABLE_READ ) {
-				strcpy(buffer11, "RS");
+				strcpy((char *)buffer11, "RS");
 			}
 			if( bitmask & SQL_TXN_SERIALIZABLE ) {
-				strcpy(buffer11, "RR");
+				strcpy((char *)buffer11, "RR");
 			}
 			if( bitmask & SQL_TXN_NOCOMMIT ) {
-				strcpy(buffer11, "NC");
+				strcpy((char *)buffer11, "NC");
 			}
 
-			add_property_stringl(return_value, "DFT_ISOLATION", buffer11, strlen(buffer11), 1);
+			add_property_stringl(return_value, "DFT_ISOLATION", (char *)buffer11, strlen((char *)buffer11), 1);
 		}
 
 		/* ISOLATION_OPTION */
-		bitmask = 0; memset(buffer11, 0, sizeof(buffer11));
+		bitmask = 0;
+		memset(buffer11, 0, sizeof(buffer11));
 		rc = SQLGetInfo(conn_res->hdbc, SQL_TXN_ISOLATION_OPTION, &bitmask, sizeof(bitmask), NULL);
 
 		if ( rc == SQL_ERROR ) {
@@ -3797,21 +3793,21 @@ PHP_FUNCTION(db2_server_info)
 		} else {
 			switch (bufferint32) {
 				case SQL_SC_SQL92_ENTRY:
-					strcpy(buffer255, "ENTRY");
+					strcpy((char *)buffer255, "ENTRY");
 					break;
 				case SQL_SC_FIPS127_2_TRANSITIONAL:
-					strcpy(buffer255, "FIPS127");
+					strcpy((char *)buffer255, "FIPS127");
 					break;
 				case SQL_SC_SQL92_FULL:
-					strcpy(buffer255, "FULL");
+					strcpy((char *)buffer255, "FULL");
 					break;
 				case SQL_SC_SQL92_INTERMEDIATE:
-					strcpy(buffer255, "INTERMEDIATE");
+					strcpy((char *)buffer255, "INTERMEDIATE");
 					break;
 				default:
 					break;
 			}
-			add_property_stringl(return_value, "SQL_CONFORMANCE", buffer255, strlen(buffer255), 1);
+			add_property_stringl(return_value, "SQL_CONFORMANCE", (char *)buffer255, strlen((char *)buffer255), 1);
 		}
 
 		/* PROCEDURES */
@@ -3822,7 +3818,7 @@ PHP_FUNCTION(db2_server_info)
 			RETURN_FALSE;
 			return;
 		} else {
-			if( strcmp(buffer11, "Y") == 0 ) {
+			if( strcmp((char *)buffer11, "Y") == 0 ) {
 				add_property_bool(return_value, "PROCEDURES", 1);
 			} else {
 				add_property_bool(return_value, "PROCEDURES", 0);
@@ -3837,7 +3833,7 @@ PHP_FUNCTION(db2_server_info)
 			RETURN_FALSE;
 			return;
 		} else {
-			add_property_stringl(return_value, "IDENTIFIER_QUOTE_CHAR", buffer11, strlen(buffer11), 1);
+			add_property_stringl(return_value, "IDENTIFIER_QUOTE_CHAR", (char *)buffer11, strlen((char *)buffer11), 1);
 		}
 
 		/* LIKE_ESCAPE_CLAUSE */
@@ -3848,7 +3844,7 @@ PHP_FUNCTION(db2_server_info)
 			RETURN_FALSE;
 			return;
 		} else {
-			if( strcmp(buffer11, "Y") == 0 ) {
+			if( strcmp((char *)buffer11, "Y") == 0 ) {
 				add_property_bool(return_value, "LIKE_ESCAPE_CLAUSE", 1);
 			} else {
 				add_property_bool(return_value, "LIKE_ESCAPE_CLAUSE", 0);
@@ -4001,7 +3997,7 @@ PHP_FUNCTION(db2_client_info)
 			RETURN_FALSE;
 			return;
 		} else {
-			add_property_stringl(return_value, "DRIVER_NAME", buffer255, strlen(buffer255), 1);
+			add_property_stringl(return_value, "DRIVER_NAME", (char *)buffer255, strlen((char *)buffer255), 1);
 		}
 
 		/* DRIVER_VER */
@@ -4012,7 +4008,7 @@ PHP_FUNCTION(db2_client_info)
 			RETURN_FALSE;
 			return;
 		} else {
-			add_property_stringl(return_value, "DRIVER_VER", buffer255, strlen(buffer255), 1);
+			add_property_stringl(return_value, "DRIVER_VER", (char *)buffer255, strlen((char *)buffer255), 1);
 		}
 
 		/* DATA_SOURCE_NAME */
@@ -4023,7 +4019,7 @@ PHP_FUNCTION(db2_client_info)
 			RETURN_FALSE;
 			return;
 		} else {
-			add_property_stringl(return_value, "DATA_SOURCE_NAME", buffer255, strlen(buffer255), 1);
+			add_property_stringl(return_value, "DATA_SOURCE_NAME", (char *)buffer255, strlen((char *)buffer255), 1);
 		}
 
 		/* DRIVER_ODBC_VER */
@@ -4034,7 +4030,7 @@ PHP_FUNCTION(db2_client_info)
 			RETURN_FALSE;
 			return;
 		} else {
-			add_property_stringl(return_value, "DRIVER_ODBC_VER", buffer255, strlen(buffer255), 1);
+			add_property_stringl(return_value, "DRIVER_ODBC_VER", (char *)buffer255, strlen((char *)buffer255), 1);
 		}
 
 		/* ODBC_VER */
@@ -4045,11 +4041,12 @@ PHP_FUNCTION(db2_client_info)
 			RETURN_FALSE;
 			return;
 		} else {
-			add_property_stringl(return_value, "ODBC_VER", buffer255, strlen(buffer255), 1);
+			add_property_stringl(return_value, "ODBC_VER", (char *)buffer255, strlen((char *)buffer255), 1);
 		}
 
 		/* ODBC_SQL_CONFORMANCE */
-		bufferint16 = 0; memset(buffer255, 0, sizeof(buffer255));
+		bufferint16 = 0;
+		memset(buffer255, 0, sizeof(buffer255));
 		rc = SQLGetInfo(conn_res->hdbc, SQL_ODBC_SQL_CONFORMANCE, &bufferint16, sizeof(bufferint16), NULL);
 
 		if ( rc == SQL_ERROR ) {
@@ -4058,18 +4055,18 @@ PHP_FUNCTION(db2_client_info)
 		} else {
 			switch (bufferint16) {
 				case SQL_OSC_MINIMUM:
-					strcpy(buffer255, "MINIMUM");
+					strcpy((char *)buffer255, "MINIMUM");
 					break;
 				case SQL_OSC_CORE:
-					strcpy(buffer255, "CORE");
+					strcpy((char *)buffer255, "CORE");
 					break;
 				case SQL_OSC_EXTENDED:
-					strcpy(buffer255, "EXTENDED");
+					strcpy((char *)buffer255, "EXTENDED");
 					break;
 				default:
 					break;
 			}
-			add_property_stringl(return_value, "ODBC_SQL_CONFORMANCE", buffer255, strlen(buffer255), 1);
+			add_property_stringl(return_value, "ODBC_SQL_CONFORMANCE", (char *)buffer255, strlen((char *)buffer255), 1);
 		}
 
 		/* APPL_CODEPAGE */
