@@ -505,7 +505,7 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 			SQL_MAX_MESSAGE_LENGTH + 1, &length ) == SQL_SUCCESS) {
 
 		while (p = strchr( (char *)msg, '\n' )) {
-			*p = ' ';
+			*p = '\0';
 		}
 
 		sprintf((char *)errMsg, "%s SQLCODE=%d", msg, (int)sqlcode);
@@ -516,12 +516,12 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 				if ( cpy_to_global ) {
 					switch (hType) {
 						case SQL_HANDLE_DBC:
-							strlcpy(IBM_DB2_G(__php_conn_err_state), (char *)sqlstate, SQL_SQLSTATE_SIZE);
+							strlcpy(IBM_DB2_G(__php_conn_err_state), (char *)sqlstate, SQL_SQLSTATE_SIZE + 1);
 							strlcpy(IBM_DB2_G(__php_conn_err_msg), (char *)errMsg, DB2_MAX_ERR_MSG_LEN);
 							break;
 
 						case SQL_HANDLE_STMT:
-							strlcpy(IBM_DB2_G(__php_stmt_err_state), (char *)sqlstate, SQL_SQLSTATE_SIZE);
+							strlcpy(IBM_DB2_G(__php_stmt_err_state), (char *)sqlstate, SQL_SQLSTATE_SIZE + 1);
 							strlcpy(IBM_DB2_G(__php_stmt_err_msg), (char *)errMsg, DB2_MAX_ERR_MSG_LEN);
 							break;
 					}
@@ -532,7 +532,7 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 				switch (API) {
 					case DB2_ERR:
 						if ( ret_str != NULL ) {
-							strlcpy(ret_str, (char *)sqlstate, SQL_SQLSTATE_SIZE);
+							strlcpy(ret_str, (char *)sqlstate, SQL_SQLSTATE_SIZE + 1);
 						}
 						return;
 					case DB2_ERRMSG:
