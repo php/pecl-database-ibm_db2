@@ -516,13 +516,13 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 				if ( cpy_to_global ) {
 					switch (hType) {
 						case SQL_HANDLE_DBC:
-							strncpy(IBM_DB2_G(__php_conn_err_state), (char *)sqlstate, SQL_SQLSTATE_SIZE+1);
-							strncpy(IBM_DB2_G(__php_conn_err_msg), (char *)errMsg, DB2_MAX_ERR_MSG_LEN);
+							strlcpy(IBM_DB2_G(__php_conn_err_state), (char *)sqlstate, SQL_SQLSTATE_SIZE);
+							strlcpy(IBM_DB2_G(__php_conn_err_msg), (char *)errMsg, DB2_MAX_ERR_MSG_LEN);
 							break;
 
 						case SQL_HANDLE_STMT:
-							strncpy(IBM_DB2_G(__php_stmt_err_state), (char *)sqlstate, SQL_SQLSTATE_SIZE+1);
-							strncpy(IBM_DB2_G(__php_stmt_err_msg), (char *)errMsg, DB2_MAX_ERR_MSG_LEN);
+							strlcpy(IBM_DB2_G(__php_stmt_err_state), (char *)sqlstate, SQL_SQLSTATE_SIZE);
+							strlcpy(IBM_DB2_G(__php_stmt_err_msg), (char *)errMsg, DB2_MAX_ERR_MSG_LEN);
 							break;
 					}
 				}
@@ -532,12 +532,12 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 				switch (API) {
 					case DB2_ERR:
 						if ( ret_str != NULL ) {
-							strncpy(ret_str, (char *)sqlstate, SQL_SQLSTATE_SIZE+1);
+							strlcpy(ret_str, (char *)sqlstate, SQL_SQLSTATE_SIZE);
 						}
 						return;
 					case DB2_ERRMSG:
 						if ( ret_str != NULL ) {
-							strncpy(ret_str, (char *)msg, DB2_MAX_ERR_MSG_LEN);
+							strlcpy(ret_str, (char *)msg, DB2_MAX_ERR_MSG_LEN);
 						}
 						return;
 					default:
