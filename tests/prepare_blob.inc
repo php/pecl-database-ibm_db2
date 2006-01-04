@@ -22,7 +22,7 @@ if (!$stmt) {
 }
 foreach ($animals as $animal) {
     $name = $animal[0];
-    $picture = file_get_contents($animal[1]);
+    $picture = file_get_contents(dirname(__FILE__) . "/{$animal[1]}");
     if (!$picture) {
       die("Could not retrieve picture '{$animal[1]}'.");
     }
