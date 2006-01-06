@@ -27,8 +27,8 @@ $row = db2_fetch_assoc($stmt);
 print_r($row);
 
 ?>
---EXPECTF--
-PHP Warning:  db2_execute(): Statement Execute Failed in %stest_133.php on line %d
-bool(false)
+--EXPECTREGEX--
+(PHP )?Warning:\s+db2_execute\(\): Statement Execute Failed in .*?test_133.php on line \d+
+bool\(false\)
 SQLSTATE: 22001
-Message: [IBM][CLI Driver] CLI0109E  String data right truncation. SQLSTATE=22001
+Message: \[IBM\]\[CLI Driver\] CLI0109E  String data right truncation. SQLSTATE=22001

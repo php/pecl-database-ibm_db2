@@ -22,5 +22,5 @@ while ($row = db2_fetch_array($result, $i++)) {
   print_r($row);
 }
 ?>
---EXPECTF--
-PHP Warning:  db2_fetch_array(): Fetch Failure in %s/test_194.php on line 16
+--EXPECTREGEX--
+(PHP )?Warning:\s*db2_fetch_array\(\): Fetch Failure in .*?test_194.php on line 16

@@ -22,5 +22,5 @@ if ($conn) {
 }
 
 ?>
---EXPECTF--
-PHP Warning:  db2_fetch_assoc(): Fetch Failure in %s on line %d 
+--EXPECTREGEX--
+(PHP )?Warning:\s+db2_fetch_assoc\(\): Fetch Failure in .*? on line \d+

@@ -17,8 +17,9 @@ $rc = db2_fetch_row($res,-1);
 
 db2_close($conn);
 ?>
---EXPECTF--
+--EXPECTREGEX--
 7
-PHP Warning:  db2_fetch_row(): Requested row number must be a positive value in %stest_014.php on line 10
+
+(PHP )?Warning:\s+db2_fetch_row\(\): Requested row number must be a positive value in .*?test_014.php on line 10
 
 Fetch row -1: false
