@@ -3273,7 +3273,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 
 	if (rc == SQL_NO_DATA_FOUND) {
 		RETURN_FALSE;
-	} else if ( rc != SQL_SUCCESS ) {
+	} else if ( rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO ) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Fetch Failure");
 		RETURN_FALSE;
 	}
