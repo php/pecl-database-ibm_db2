@@ -1836,9 +1836,9 @@ PHP_FUNCTION(db2_commit)
 }
 /* }}} */
 
-/* {{{ static int _php_db2_do_prepare(SQLHANDLE hdbc, string stmt_string, stmt_handle *stmt_res, zval *options TSRMLS_DC)
+/* {{{ static int _php_db2_do_prepare(SQLHANDLE hdbc, string stmt_string, stmt_handle *stmt_res, int stmt_string_len, zval *options TSRMLS_DC)
 */
-static int _php_db2_do_prepare(SQLHANDLE hdbc, char* stmt_string, stmt_handle *stmt_res, zval *options TSRMLS_DC)
+static int _php_db2_do_prepare(SQLHANDLE hdbc, char* stmt_string, stmt_handle *stmt_res, int stmt_string_len, zval *options TSRMLS_DC)
 {
 	int rc;
 
@@ -1857,7 +1857,7 @@ static int _php_db2_do_prepare(SQLHANDLE hdbc, char* stmt_string, stmt_handle *s
 	}
 
 	/* Prepare the stmt. The cursor type requested has already been set in _php_db2_assign_options */
-	rc = SQLPrepare((SQLHSTMT)stmt_res->hstmt, (SQLCHAR*)stmt_string, SQL_NTS);
+	rc = SQLPrepare((SQLHSTMT)stmt_res->hstmt, (SQLCHAR*)stmt_string, (SQLINTEGER)stmt_string_len);
 	if ( rc == SQL_ERROR ) {
 		_php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
 	}
@@ -1914,7 +1914,7 @@ PHP_FUNCTION(db2_exec)
 		/* Allocates the stmt handle */
 		/* Prepares the statement */
 		/* returns the stat_handle back to the calling function */
-		rc = _php_db2_do_prepare(conn_res->hdbc, stmt_string, stmt_res, options TSRMLS_CC);
+		rc = _php_db2_do_prepare(conn_res->hdbc, stmt_string, stmt_res, stmt_string_len, options TSRMLS_CC);
 		if ( rc < SQL_SUCCESS ) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Prepare Failed");
 			efree(stmt_res);
@@ -1992,7 +1992,7 @@ PHP_FUNCTION(db2_prepare)
 		/* Allocates the stmt handle */
 		/* Prepares the statement */
 		/* returns the stat_handle back to the calling function */
-		rc = _php_db2_do_prepare(conn_res->hdbc, stmt_string, stmt_res, options TSRMLS_CC);
+		rc = _php_db2_do_prepare(conn_res->hdbc, stmt_string, stmt_res, stmt_string_len, options TSRMLS_CC);
 		if ( rc < SQL_SUCCESS ) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Prepare Failed");
 			RETURN_FALSE;
@@ -2113,7 +2113,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 				case SQL_LONGVARBINARY:
 				case SQL_VARBINARY:
 					/* account for bin_mode settings as well */
-					curr->bind_indicator = SQL_NTS;
+					curr->bind_indicator = (curr->value)->value.str.len;
 					valueType = SQL_C_BINARY;
 					paramValuePtr = (SQLPOINTER)((curr->value)->value.str.val);
 					break;
@@ -2121,7 +2121,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 				/* This option should handle most other types such as DATE, VARCHAR etc */
 				default:
 					valueType = SQL_C_CHAR;
-					curr->bind_indicator = SQL_NTS;
+					curr->bind_indicator = (curr->value)->value.str.len;
 					paramValuePtr = (SQLPOINTER)((curr->value)->value.str.val);
 			}
 
