@@ -507,6 +507,11 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 		while (p = strchr( (char *)msg, '\n' )) {
 			*p = '\0';
 		}
+#ifdef PHP_WIN32
+		while (p = strchr( (char *)msg, '\r' )) {
+			*p = '\0';
+		}
+#if
 
 		sprintf((char *)errMsg, "%s SQLCODE=%d", msg, (int)sqlcode);
 
