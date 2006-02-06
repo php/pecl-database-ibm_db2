@@ -499,19 +499,23 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 	SQLINTEGER sqlcode;
 	SQLSMALLINT length;
 	char *p;
+	int msgLen = 0;
 
 	memset(errMsg, '\0', DB2_MAX_ERR_MSG_LEN);
+	memset(msg, '\0', SQL_MAX_MESSAGE_LENGTH + 1);
 	if ( SQLGetDiagRec(hType, handle, recno, sqlstate, &sqlcode, msg,
 			SQL_MAX_MESSAGE_LENGTH + 1, &length ) == SQL_SUCCESS) {
 
-		while (p = strchr( (char *)msg, '\n' )) {
-			*p = '\0';
-		}
 #ifdef PHP_WIN32
-		while (p = strchr( (char *)msg, '\r' )) {
+		if (msg[msgLen-2] == '\r') {
+			p = &msg[msgLen-2];
 			*p = '\0';
 		}
 #endif
+		if (msg[msgLen-1] == '\n') {
+			p = &msg[msgLen-1];
+			*p = '\0';
+		}
 
 		sprintf((char *)errMsg, "%s SQLCODE=%d", msg, (int)sqlcode);
 
