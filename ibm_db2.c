@@ -915,9 +915,9 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	char *uid = NULL;
 	char *password = NULL;
 	int argc = ZEND_NUM_ARGS();
-	long database_len;
-	long uid_len;
-	long password_len;
+	int database_len;
+	int uid_len;
+	int password_len;
 	zval *options = NULL;
 	int rc = 0;
 	SQLINTEGER conn_alive;
