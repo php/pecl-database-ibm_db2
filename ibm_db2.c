@@ -498,8 +498,7 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 	SQLCHAR errMsg[DB2_MAX_ERR_MSG_LEN];
 	SQLINTEGER sqlcode;
 	SQLSMALLINT length;
-	char *p;
-	int msgLen = 0;
+	SQLCHAR *p;
 
 	memset(errMsg, '\0', DB2_MAX_ERR_MSG_LEN);
 	memset(msg, '\0', SQL_MAX_MESSAGE_LENGTH + 1);
@@ -507,13 +506,13 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 			SQL_MAX_MESSAGE_LENGTH + 1, &length ) == SQL_SUCCESS) {
 
 #ifdef PHP_WIN32
-		if (msg[msgLen-2] == '\r') {
-			p = &msg[msgLen-2];
+		if (msg[length-2] == '\r') {
+			p = &msg[length-2];
 			*p = '\0';
 		}
 #endif
-		if (msg[msgLen-1] == '\n') {
-			p = &msg[msgLen-1];
+		if (msg[length-1] == '\n') {
+			p = &msg[length-1];
 			*p = '\0';
 		}
 
