@@ -72,6 +72,7 @@ typedef struct _conn_handle_struct {
 	long auto_commit;
 	long c_bin_mode;
 	long c_case_mode;
+	long c_cursor_type;
 	int handle_active;
 	SQLSMALLINT error_recno_tracker;
 	SQLSMALLINT errormsg_recno_tracker;
@@ -336,7 +337,7 @@ static stmt_handle *_db2_new_stmt_struct(conn_handle* conn_res)
 	/* Initialize stmt resource so parsing assigns updated options if needed */
 	stmt_res->hdbc = conn_res->hdbc;
 	stmt_res->s_bin_mode = conn_res->c_bin_mode;
-	stmt_res->cursor_type = DB2_FORWARD_ONLY;
+	stmt_res->cursor_type = conn_res->c_cursor_type;
 	stmt_res->s_case_mode = conn_res->c_case_mode;
 
 	stmt_res->head_cache_list = NULL;
@@ -496,9 +497,9 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 	SQLCHAR msg[SQL_MAX_MESSAGE_LENGTH + 1];
 	SQLCHAR sqlstate[SQL_SQLSTATE_SIZE + 1];
 	SQLCHAR errMsg[DB2_MAX_ERR_MSG_LEN];
-	SQLINTEGER sqlcode;
-	SQLSMALLINT length;
-	SQLCHAR *p;
+	SQLINTEGER sqlcode = 0;
+	SQLSMALLINT length = 0;
+	SQLCHAR *p = NULL;
 
 	memset(errMsg, '\0', DB2_MAX_ERR_MSG_LEN);
 	memset(msg, '\0', SQL_MAX_MESSAGE_LENGTH + 1);
@@ -569,30 +570,48 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 	SQLINTEGER autocommit;
 
 	if ( !STRCASECMP(opt_key, "cursor")) {
-		if ( type == SQL_HANDLE_STMT ) {
-			if (((stmt_handle *)handle)->cursor_type != data ) {
+		switch (type) {
+			case SQL_HANDLE_DBC:
 				switch (data) {
 					case DB2_SCROLLABLE:
-						((stmt_handle *)handle)->cursor_type = DB2_SCROLLABLE;
-						rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-							SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)SQL_CURSOR_KEYSET_DRIVEN,
-							SQL_IS_INTEGER );
+						((conn_handle*)handle)->c_cursor_type = DB2_SCROLLABLE;
 						break;
 
 					case DB2_FORWARD_ONLY:
-						rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-							SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)SQL_SCROLL_FORWARD_ONLY,
-							SQL_IS_INTEGER );
-						((stmt_handle *)handle)->cursor_type = DB2_FORWARD_ONLY;
+						((conn_handle*)handle)->c_cursor_type = DB2_FORWARD_ONLY;
 						break;
 
 					default:
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURSOR statement attribute value must be one of DB2_SCROLLABLE or DB2_FORWARD_ONLY");
 						break;
 				}
-			}
-		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURSOR statement attribute can only be set on statement resources");
+
+			case SQL_HANDLE_STMT:
+				if (((stmt_handle *)handle)->cursor_type != data ) {
+					switch (data) {
+						case DB2_SCROLLABLE:
+							((stmt_handle *)handle)->cursor_type = DB2_SCROLLABLE;
+							rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
+								SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)SQL_CURSOR_KEYSET_DRIVEN,
+								SQL_IS_INTEGER );
+							break;
+
+						case DB2_FORWARD_ONLY:
+							rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
+								SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)SQL_SCROLL_FORWARD_ONLY,
+								SQL_IS_INTEGER );
+							((stmt_handle *)handle)->cursor_type = DB2_FORWARD_ONLY;
+							break;
+
+						default:
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURSOR statement attribute value must be one of DB2_SCROLLABLE or DB2_FORWARD_ONLY");
+							break;
+					}
+				}
+				break;
+
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURSOR attribute can only be set on connection or statement resources");
 		}
 	} else if (!STRCASECMP(opt_key, "autocommit")) {
 		if (type == SQL_HANDLE_DBC ) {
@@ -986,6 +1005,8 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 		rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(conn_res->auto_commit), SQL_NTS);
 
 		conn_res->c_bin_mode = IBM_DB2_G(bin_mode);
+		conn_res->c_case_mode = DB2_CASE_NATURAL;
+		conn_res->c_cursor_type = DB2_FORWARD_ONLY;
 
 		conn_res->error_recno_tracker = 1;
 		conn_res->errormsg_recno_tracker = 1;
@@ -994,7 +1015,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 		conn_res->handle_active = 0;
 
 		/* Set Options */
-		if ( options != NULL && !isPersistent ) {
+		if ( options != NULL ) {
 			rc = _php_db2_parse_options( options, SQL_HANDLE_DBC, conn_res TSRMLS_CC );
 			if (rc != SQL_SUCCESS) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Options Array must have string indexes");
@@ -1223,7 +1244,7 @@ PHP_FUNCTION(db2_bind_param)
 	int varname_len;
 	long param_type; /* set default here */
 	/* LONG types used for data being passed in */
-	SQLUSMALLINT param_no = 0;
+	long param_no = 0;
 	long data_type = 0;
 	long precision = 0;
 	long scale = 0;
@@ -1257,13 +1278,13 @@ PHP_FUNCTION(db2_bind_param)
 			case 5:
 			case 6:
 				/* No param data specified */
-				rc = SQLDescribeParam((SQLHSTMT)stmt_res->hstmt, param_no, &sql_data_type, &sql_precision, &sql_scale, &sql_nullable);
+				rc = SQLDescribeParam((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)param_no, &sql_data_type, &sql_precision, &sql_scale, &sql_nullable);
 				if ( rc == SQL_ERROR ) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Describe Param Failed");
 					RETURN_FALSE;
 				}
 				/* Add to cache */
-				_php_db2_add_param_cache( stmt_res, param_no, varname, varname_len, param_type, sql_data_type, sql_precision, sql_scale, sql_nullable );
+				_php_db2_add_param_cache( stmt_res, (SQLUSMALLINT)param_no, varname, varname_len, param_type, sql_data_type, sql_precision, sql_scale, sql_nullable );
 				break;
 
 			case 7:
@@ -1274,7 +1295,7 @@ PHP_FUNCTION(db2_bind_param)
 				sql_data_type = (SQLSMALLINT)data_type;
 				sql_precision = (SQLUINTEGER)precision;
 				sql_scale = (SQLSMALLINT)scale;
-				_php_db2_add_param_cache( stmt_res, param_no, varname, varname_len, param_type, sql_data_type, sql_precision, sql_scale, sql_nullable );
+				_php_db2_add_param_cache( stmt_res, (SQLUSMALLINT)param_no, varname, varname_len, param_type, sql_data_type, sql_precision, sql_scale, sql_nullable );
 				break;
 
 			default:
@@ -1864,6 +1885,12 @@ static int _php_db2_do_prepare(SQLHANDLE hdbc, char* stmt_string, stmt_handle *s
 		}
 	}
 
+	if ( stmt_res->cursor_type == DB2_SCROLLABLE ) {
+		rc = SQLSetStmtAttr((SQLHSTMT)stmt_res->hstmt,
+		SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)SQL_CURSOR_KEYSET_DRIVEN,
+		SQL_IS_INTEGER );
+	}
+
 	/* Prepare the stmt. The cursor type requested has already been set in _php_db2_assign_options */
 	rc = SQLPrepare((SQLHSTMT)stmt_res->hstmt, (SQLCHAR*)stmt_string, (SQLINTEGER)stmt_string_len);
 	if ( rc == SQL_ERROR ) {
@@ -2408,11 +2435,11 @@ PHP_FUNCTION(db2_execute)
 				switch(tmp_curr->param_type) {
 					case DB2_PARAM_OUT:
 					case DB2_PARAM_INOUT:
-						if( Z_TYPE_P( tmp_curr->value ) == IS_STRING && 
-							(tmp_curr->bind_indicator != SQL_NULL_DATA 
+						if( Z_TYPE_P( tmp_curr->value ) == IS_STRING &&
+							(tmp_curr->bind_indicator != SQL_NULL_DATA
 							 && tmp_curr->bind_indicator != SQL_NO_TOTAL )){
 						    /*
-								if the length of the string out parameter is returned 
+								if the length of the string out parameter is returned
 						    	then correct the length of the corresponding php variable
 							*/
 							tmp_curr->value->value.str.val[tmp_curr->bind_indicator] = 0;
@@ -2922,6 +2949,8 @@ PHP_FUNCTION(db2_field_type)
 			str_val = "real";
 			break;
 		case SQL_CLOB:
+			str_val = "clob";
+			break;
 		case SQL_BLOB:
 			str_val = "blob";
 			break;
