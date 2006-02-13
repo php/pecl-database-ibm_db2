@@ -3206,8 +3206,7 @@ PHP_FUNCTION(db2_result)
 					RETURN_FALSE;
 				}
 
-				out_char_ptr[in_length] = '\0';
-				RETURN_STRING(out_char_ptr, 0);
+				RETURN_STRINGL(out_char_ptr, in_length, 0);
 				break;
 
 			case SQL_BLOB:
@@ -3503,13 +3502,12 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 						if (rc == SQL_ERROR) {
 							RETURN_FALSE;
 						}
-						out_ptr[tmp_length] = '\0';
 
 						if ( op & DB2_FETCH_ASSOC ) {
-							add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, tmp_length+1, 0);
+							add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, tmp_length, 0);
 						}
 						if ( op & DB2_FETCH_INDEX ) {
-							add_index_stringl(return_value, i, (char *)out_ptr, tmp_length+1, DB2_FETCH_BOTH & op);
+							add_index_stringl(return_value, i, (char *)out_ptr, tmp_length, DB2_FETCH_BOTH & op);
 						}
 					}
 					break;
