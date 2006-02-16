@@ -16,6 +16,10 @@ $result = @db2_exec($prepconn, $drop);
 $drop = 'DROP TABLE table_6755';
 $result = @db2_exec($prepconn, $drop);
 
+// Drop the test table for PECL bug #6792
+$drop = 'DROP TABLE table_6792';
+$result = @db2_exec($prepconn, $drop);
+
 // Create the test table
 $create = 'CREATE TABLE animals (id INTEGER, breed VARCHAR(32), name CHAR(16), weight DECIMAL(7,2))';
 $result = db2_exec($prepconn, $create);
