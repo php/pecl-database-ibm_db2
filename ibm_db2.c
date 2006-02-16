@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | (C) Copyright IBM Corporation 2005.                                  |
+  | (C) Copyright IBM Corporation 2005,2006                              |
   +----------------------------------------------------------------------+
   |                                                                      |
   | Licensed under the Apache License, Version 2.0 (the "License"); you  |
@@ -2953,6 +2953,15 @@ PHP_FUNCTION(db2_field_type)
 			break;
 		case SQL_BLOB:
 			str_val = "blob";
+			break;
+		case SQL_TYPE_DATE:
+			str_val = "date";
+			break;
+		case SQL_TYPE_TIME:
+			str_val = "time";
+			break;
+		case SQL_TYPE_TIMESTAMP:
+			str_val = "timestamp";
 			break;
 		default:
 			str_val = "string";
