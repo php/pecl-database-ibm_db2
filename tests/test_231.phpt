@@ -34,7 +34,7 @@ print "5:" . db2_field_type($result2,5) . "\n";
 
 ?>
 --EXPECT--
-0:string
+0:date
 1:string
 2:string
 3:int

@@ -25,7 +25,7 @@ var_dump( $t1 );
 
 ?>
 --EXPECT--
-SALES_DATE:string
+SALES_DATE:date
 SALES_PERSON:string
 REGION:string
 SALES:int
