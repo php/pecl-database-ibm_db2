@@ -33,6 +33,11 @@ extern zend_module_entry ibm_db2_module_entry;
 #include <stdlib.h>
 #include <sqlcli1.h>
 
+/* needed for backward compatibility (SQL_XML not defined prior to DB2 v9) */
+#ifndef SQL_XML
+#define SQL_XML -500
+#endif
+
 #ifdef PHP_WIN32
 #define PHP_IBM_DB2_API __declspec(dllexport)
 #else
@@ -52,6 +57,15 @@ extern zend_module_entry ibm_db2_module_entry;
 
 /* DB2 instance environment variable */
 #define DB2_VAR_INSTANCE "DB2INSTANCE="
+
+/* Visual name for the connection */
+#define DB2_CONN_NAME "DB2 Connection"
+
+/* Visual name for the persistent connection */
+#define DB2_PCONN_NAME "DB2 Persistent Connection"
+
+/* Visual name for the statement */
+#define DB2_STMT_NAME "DB2 Statement"
 
 /******** Makes code compatible with the options used by the user */
 #define DB2_BINARY 1
@@ -144,7 +158,7 @@ PHP_FUNCTION(db2_client_info);
 	and END macros here:
 */
 ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
-	int		bin_mode;
+	long		bin_mode;
 	char		__php_conn_err_msg[DB2_MAX_ERR_MSG_LEN];
 	char		__php_conn_err_state[SQL_SQLSTATE_SIZE + 1];
 	char		__php_stmt_err_msg[DB2_MAX_ERR_MSG_LEN];

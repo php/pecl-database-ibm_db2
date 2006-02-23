@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | (C) Copyright IBM Corporation 2005,2006                              |
+  | (C) Copyright IBM Corporation 2006.                                  |
   +----------------------------------------------------------------------+
   |                                                                      |
   | Licensed under the Apache License, Version 2.0 (the "License"); you  |
@@ -15,7 +15,7 @@
   | permissions and limitations under the License.                       |
   +----------------------------------------------------------------------+
   | Authors: Sushant Koduru, Lynh Nguyen, Kanchana Padmanabhan,          |
-  |          Dan Scott, Helmut Tessarek                                  |
+  |          Dan Scott, Helmut Tessarek, Kellen Bombardier               |
   +----------------------------------------------------------------------+
 
   $Id$
@@ -59,6 +59,8 @@ typedef struct _param_cache_node {
 	SQLSMALLINT	scale;				/* Decimal scale */
 	SQLUINTEGER file_options;		/* File options if DB2_PARAM_FILE */
 	SQLINTEGER	bind_indicator;		/* indicator variable for SQLBindParameter */
+	SQLINTEGER	long_value;			/* Value if this is an SQL_C_LONG type */
+	SQLSMALLINT	short_strlen;		/* Length of string if this is an SQL_C_STRING type */
 	int			param_num;			/* param number in stmt */
 	int			param_type;			/* Type of param - INP/OUT/INP-OUT/FILE */
 	char		*varname;			/* bound variable name */
@@ -302,6 +304,7 @@ static void _php_db2_free_result_struct(stmt_handle* handle)
 				case SQL_BIGINT:
 				case SQL_DECIMAL:
 				case SQL_NUMERIC:
+				case SQL_XML:
 					if ( handle->row_data[i].data.str_val != NULL ) {
 						efree(handle->row_data[i].data.str_val);
 						handle->row_data[i].data.str_val = NULL;
@@ -405,6 +408,7 @@ PHP_MINIT_FUNCTION(ibm_db2)
 	/* This is how CLI defines SQL_C_LONG */
 	REGISTER_LONG_CONSTANT("DB2_LONG", SQL_INTEGER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DB2_CHAR", SQL_CHAR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_XML", SQL_XML, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("DB2_CASE_NATURAL", 0, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DB2_CASE_LOWER", 1, CONST_CS | CONST_PERSISTENT);
@@ -430,9 +434,9 @@ PHP_MINIT_FUNCTION(ibm_db2)
 	putenv("DB2NOEXITLIST=TRUE");
 #endif
 
-	le_conn_struct = zend_register_list_destructors_ex( _php_db2_free_conn_struct, NULL, "conn struct", module_number);
-	le_pconn_struct = zend_register_list_destructors_ex(NULL, _php_db2_free_pconn_struct, "pconn struct", module_number);
-	le_stmt_struct = zend_register_list_destructors_ex( _php_db2_free_stmt_struct, NULL, "stmt struct", module_number);
+	le_conn_struct = zend_register_list_destructors_ex( _php_db2_free_conn_struct, NULL, DB2_CONN_NAME, module_number);
+	le_pconn_struct = zend_register_list_destructors_ex(NULL, _php_db2_free_pconn_struct, DB2_PCONN_NAME, module_number);
+	le_stmt_struct = zend_register_list_destructors_ex( _php_db2_free_stmt_struct, NULL, DB2_STMT_NAME, module_number);
 	return SUCCESS;
 }
 /* }}} */
@@ -854,6 +858,15 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
 						SQL_C_DEFAULT, row_data->str_val, in_length,
 						(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
 				}
+				break;
+
+			case SQL_XML:
+				in_length = stmt_res->column_info[i].size+1;
+				row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
+
+				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
+					SQL_C_BINARY, row_data->str_val, in_length,
+					(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
 				break;
 
 			case SQL_TYPE_DATE:
@@ -2038,9 +2051,9 @@ PHP_FUNCTION(db2_prepare)
 }
 /* }}} */
 
-/* {{{ static param_node* build_list( stmt_res, param_no, data_type, precision, scale, nullable )
+/* {{{ static param_node* _php_db2_build_list( stmt_res, param_no, data_type, precision, scale, nullable )
 */
-static param_node* build_list( stmt_handle *stmt_res, int param_no, SQLSMALLINT data_type, SQLUINTEGER precision, SQLSMALLINT scale, SQLSMALLINT nullable )
+static param_node* _php_db2_build_list( stmt_handle *stmt_res, int param_no, SQLSMALLINT data_type, SQLUINTEGER precision, SQLSMALLINT scale, SQLSMALLINT nullable )
 {
 	param_node *tmp_curr = NULL, *curr = stmt_res->head_cache_list, *prev = NULL;
 
@@ -2054,6 +2067,7 @@ static param_node* build_list( stmt_handle *stmt_res, int param_no, SQLSMALLINT 
 	tmp_curr->param_num = param_no;
 	tmp_curr->file_options = SQL_FILE_READ;
 	tmp_curr->param_type = DB2_PARAM_IN;
+	tmp_curr->long_value = 0;
 
 	MAKE_STD_ZVAL(tmp_curr->value);
 	while ( curr != NULL ) {
@@ -2101,26 +2115,22 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 
 		curr->bind_indicator = 0;
 		/* Bind file name string */
+		curr->short_strlen = (SQLSMALLINT) ((curr->value)->value.str.len);
 		rc = SQLBindFileToParam((SQLHSTMT)stmt_res->hstmt, curr->param_num,
 			curr->data_type, (SQLCHAR *)((curr->value)->value.str.val),
-			(SQLSMALLINT *)&((curr->value)->value.str.len), &(curr->file_options),
+			(SQLSMALLINT *)&curr->short_strlen, &(curr->file_options),
 			Z_STRLEN_P(curr->value), &(curr->bind_indicator));
 
 		return rc;
 	}
 
 	switch(Z_TYPE_PP(bind_data)) {
+		case IS_BOOL:
 		case IS_LONG:
+			curr->long_value = (SQLINTEGER)(curr->value)->value.lval;
 			rc = SQLBindParameter(stmt_res->hstmt, curr->param_num,
 				curr->param_type, SQL_C_LONG, curr->data_type,
-				curr->param_size, curr->scale, &((curr->value)->value.lval), 0, NULL);
-			break;
-
-		/* Convert BOOLEAN types to LONG for DB2 / Cloudscape */
-		case IS_BOOL:
-			rc = SQLBindParameter(stmt_res->hstmt, curr->param_num,
-				curr->param_type, SQL_C_LONG, curr->data_type, curr->param_size,
-				curr->scale, &((curr->value)->value.lval), 0, NULL);
+				curr->param_size, curr->scale, &curr->long_value, 0, NULL);
 			break;
 
 		case IS_DOUBLE:
@@ -2147,6 +2157,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 				case SQL_BINARY:
 				case SQL_LONGVARBINARY:
 				case SQL_VARBINARY:
+				case SQL_XML:
 					/* account for bin_mode settings as well */
 					curr->bind_indicator = (curr->value)->value.str.len;
 					valueType = SQL_C_BINARY;
@@ -2241,7 +2252,7 @@ static int _php_db2_execute_helper(stmt_handle *stmt_res, zval **data, int bind_
 					return rc;
 				}
 
-				curr = build_list( stmt_res, param_no, data_type, precision, scale, nullable );
+				curr = _php_db2_build_list( stmt_res, param_no, data_type, precision, scale, nullable );
 
 				rc = _php_db2_bind_data( stmt_res, curr, data);
 				if ( rc == SQL_ERROR ) {
@@ -2300,164 +2311,170 @@ PHP_FUNCTION(db2_execute)
 	/* Execute */
 	/* Return values back to symbol table for OUT params */
 
-	if (stmt) {
+	if (!stmt) {
+		return;
+	}
 
-		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+	ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
 
-		/* Free any cursors that might have been allocated in a previous call to SQLExecute */
-		SQLFreeStmt((SQLHSTMT)stmt_res->hstmt, SQL_CLOSE);
+	/* Free any cursors that might have been allocated in a previous call to SQLExecute */
+	SQLFreeStmt((SQLHSTMT)stmt_res->hstmt, SQL_CLOSE);
 
-		/* This ensures that each call to db2_execute start from scratch */
-		stmt_res->current_node = stmt_res->head_cache_list;
+	/* This ensures that each call to db2_execute start from scratch */
+	stmt_res->current_node = stmt_res->head_cache_list;
 
-		rc = SQLNumParams((SQLHSTMT)stmt_res->hstmt, (SQLSMALLINT*)&num);
+	rc = SQLNumParams((SQLHSTMT)stmt_res->hstmt, (SQLSMALLINT*)&num);
 
-		if ( num != 0 ) {
-			/* Parameter Handling */
-			if ( parameters_array != NULL ) {
-				/* Make sure db2_bind_param has been called */
-				/* If the param list is NULL -- ERROR */
-				if ( stmt_res->head_cache_list == NULL ) {
-					bind_params = 1;
-				}
-
-				numOpts = zend_hash_num_elements(Z_ARRVAL_P(parameters_array));
-				if (numOpts > num) {
-					/* More are passed in -- Warning - Use the max number present */
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Param count incorrect");
-					numOpts = stmt_res->num_params;
-				} else if (numOpts < num) {
-					/* If there are less params passed in, than are present -- Error */
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Param count incorrect");
-					RETURN_FALSE;
-				}
-
-				zend_hash_internal_pointer_reset(Z_ARRVAL_P(parameters_array));
-				for ( i = 0; i < numOpts; i++) {
-					/* Bind values from the parameters_array to params */
-					zend_hash_get_current_data(Z_ARRVAL_P(parameters_array), (void**)&data);
-
-					/*
-						The 0 denotes that you work only with the current node.
-						The 4th argument specifies whether the data passed in
-						has been described. So we need to call SQLDescribeParam
-						before binding depending on this.
-					*/
-					rc = _php_db2_execute_helper(stmt_res, data, 0, bind_params TSRMLS_CC);
-					if ( rc == SQL_ERROR) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binding Error");
-						RETURN_FALSE;
-					}
-
-					/* Move array ptr forward */
-					zend_hash_move_forward(Z_ARRVAL_P(parameters_array));
-				}
-			} else {
-				/* No additional params passed in. Use values already bound. */
-				if ( num > stmt_res->num_params ) {
-					/* More parameters than we expected */
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "More parameters bound than present");
-				} else if ( num < stmt_res->num_params ) {
-					/* Fewer parameters than we expected */
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Less parameters bound than present");
-					RETURN_FALSE;
-				}
-
-				/* Param cache node list is empty -- No params bound */
-				if ( stmt_res->head_cache_list == NULL ) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameters not bound");
-					RETURN_FALSE;
-				} else {
-					/* The 1 denotes that you work with the whole list */
-					/* And bind sequentially */
-					rc = _php_db2_execute_helper(stmt_res, NULL, 1, 0 TSRMLS_CC);
-					if ( rc == SQL_ERROR ) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binding Error 3");
-						RETURN_FALSE;
-					}
-				}
+	if ( num != 0 ) {
+		/* Parameter Handling */
+		if ( parameters_array != NULL ) {
+			/* Make sure db2_bind_param has been called */
+			/* If the param list is NULL -- ERROR */
+			if ( stmt_res->head_cache_list == NULL ) {
+				bind_params = 1;
 			}
-		} else {
-			/* No Parameters */
-			/* We just execute the statement. No additional work needed. */
-			rc = SQLExecute((SQLHSTMT)stmt_res->hstmt);
-			if ( rc == SQL_ERROR ) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Execute Failed");
+
+			numOpts = zend_hash_num_elements(Z_ARRVAL_P(parameters_array));
+			if (numOpts > num) {
+				/* More are passed in -- Warning - Use the max number present */
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Param count incorrect");
+				numOpts = stmt_res->num_params;
+			} else if (numOpts < num) {
+				/* If there are less params passed in, than are present -- Error */
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Param count incorrect");
 				RETURN_FALSE;
 			}
-			RETURN_TRUE;
-		}
 
-		/* Execute Stmt -- All parameters bound */
+			zend_hash_internal_pointer_reset(Z_ARRVAL_P(parameters_array));
+			for ( i = 0; i < numOpts; i++) {
+				/* Bind values from the parameters_array to params */
+				zend_hash_get_current_data(Z_ARRVAL_P(parameters_array), (void**)&data);
+
+				/*
+					The 0 denotes that you work only with the current node.
+					The 4th argument specifies whether the data passed in
+					has been described. So we need to call SQLDescribeParam
+					before binding depending on this.
+				*/
+				rc = _php_db2_execute_helper(stmt_res, data, 0, bind_params TSRMLS_CC);
+				if ( rc == SQL_ERROR) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binding Error");
+					RETURN_FALSE;
+				}
+
+				/* Move array ptr forward */
+				zend_hash_move_forward(Z_ARRVAL_P(parameters_array));
+			}
+		} else {
+			/* No additional params passed in. Use values already bound. */
+			if ( num > stmt_res->num_params ) {
+				/* More parameters than we expected */
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "More parameters bound than present");
+			} else if ( num < stmt_res->num_params ) {
+				/* Fewer parameters than we expected */
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Less parameters bound than present");
+				RETURN_FALSE;
+			}
+
+			/* Param cache node list is empty -- No params bound */
+			if ( stmt_res->head_cache_list == NULL ) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameters not bound");
+				RETURN_FALSE;
+			} else {
+				/* The 1 denotes that you work with the whole list */
+				/* And bind sequentially */
+				rc = _php_db2_execute_helper(stmt_res, NULL, 1, 0 TSRMLS_CC);
+				if ( rc == SQL_ERROR ) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binding Error 3");
+					RETURN_FALSE;
+				}
+			}
+		}
+	} else {
+		/* No Parameters */
+		/* We just execute the statement. No additional work needed. */
 		rc = SQLExecute((SQLHSTMT)stmt_res->hstmt);
 		if ( rc == SQL_ERROR ) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Execute Failed");
-			RETVAL_FALSE;
+			RETURN_FALSE;
 		}
+		RETURN_TRUE;
+	}
 
-		if ( rc == SQL_NEED_DATA ) {
-			while ( (SQLParamData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER *)&valuePtr)) == SQL_NEED_DATA ) {
-				/* passing data value for a parameter */
-				rc = SQLPutData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER)(((zvalue_value*)valuePtr)->str.val), ((zvalue_value*)valuePtr)->str.len);
-				if ( rc == SQL_ERROR ) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sending data failed");
-					RETVAL_FALSE;
-				}
+	/* Execute Stmt -- All parameters bound */
+	rc = SQLExecute((SQLHSTMT)stmt_res->hstmt);
+	if ( rc == SQL_ERROR ) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Execute Failed");
+		RETVAL_FALSE;
+	}
+
+	if ( rc == SQL_NEED_DATA ) {
+		while ( (SQLParamData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER *)&valuePtr)) == SQL_NEED_DATA ) {
+			/* passing data value for a parameter */
+			rc = SQLPutData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER)(((zvalue_value*)valuePtr)->str.val), ((zvalue_value*)valuePtr)->str.len);
+			if ( rc == SQL_ERROR ) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sending data failed");
+				RETVAL_FALSE;
 			}
 		}
+	}
 
-		/* cleanup dynamic bindings if present */
-		if ( bind_params == 1 ) {
-			/* Free param cache list */
-			curr_ptr = stmt_res->head_cache_list;
-			prev_ptr = stmt_res->head_cache_list;
+	/* cleanup dynamic bindings if present */
+	if ( bind_params == 1 ) {
+		/* Free param cache list */
+		curr_ptr = stmt_res->head_cache_list;
+		prev_ptr = stmt_res->head_cache_list;
 
-			while (curr_ptr != NULL) {
-				curr_ptr = curr_ptr->next;
+		while (curr_ptr != NULL) {
+			curr_ptr = curr_ptr->next;
 
-				/* Free Values */
-				if ( Z_TYPE_P(prev_ptr->value) == IS_STRING ) {
-					efree((prev_ptr->value)->value.str.val);
-				}
-
-				efree(prev_ptr->value);
-				efree(prev_ptr);
-
-				prev_ptr = curr_ptr;
+			/* Free Values */
+			if ( Z_TYPE_P(prev_ptr->value) == IS_STRING ) {
+				efree((prev_ptr->value)->value.str.val);
 			}
 
-			stmt_res->head_cache_list = NULL;
-			stmt_res->num_params = 0;
-		} else {
-			/* Bind the IN/OUT Params back into the active symbol table */
-			tmp_curr = stmt_res->head_cache_list;
-			while (tmp_curr != NULL) {
-				switch(tmp_curr->param_type) {
-					case DB2_PARAM_OUT:
-					case DB2_PARAM_INOUT:
-						if( Z_TYPE_P( tmp_curr->value ) == IS_STRING &&
-							(tmp_curr->bind_indicator != SQL_NULL_DATA
-							 && tmp_curr->bind_indicator != SQL_NO_TOTAL )){
-						    /*
-								if the length of the string out parameter is returned
-						    	then correct the length of the corresponding php variable
-							*/
-							tmp_curr->value->value.str.val[tmp_curr->bind_indicator] = 0;
-							tmp_curr->value->value.str.len = tmp_curr->bind_indicator;
-						}
-						/* cant use zend_hash_update because the symbol need not exist. It might need to be created */
-						ZEND_SET_SYMBOL(EG(active_symbol_table), tmp_curr->varname, tmp_curr->value);
+			efree(prev_ptr->value);
+			efree(prev_ptr);
 
-					default:
-						break;
-				}
-				tmp_curr = tmp_curr->next;
+			prev_ptr = curr_ptr;
+		}
+
+		stmt_res->head_cache_list = NULL;
+		stmt_res->num_params = 0;
+	} else {
+		/* Bind the IN/OUT Params back into the active symbol table */
+		tmp_curr = stmt_res->head_cache_list;
+		while (tmp_curr != NULL) {
+			switch(tmp_curr->param_type) {
+				case DB2_PARAM_OUT:
+				case DB2_PARAM_INOUT:
+					if( Z_TYPE_P( tmp_curr->value ) == IS_STRING &&
+						(tmp_curr->bind_indicator != SQL_NULL_DATA
+						 && tmp_curr->bind_indicator != SQL_NO_TOTAL )){
+						/*
+							if the length of the string out parameter is returned
+							then correct the length of the corresponding php variable
+						*/
+						tmp_curr->value->value.str.val[tmp_curr->bind_indicator] = 0;
+						tmp_curr->value->value.str.len = tmp_curr->bind_indicator;
+					}
+					else if (Z_TYPE_P(tmp_curr->value) == IS_LONG ||
+						 Z_TYPE_P(tmp_curr->value) == IS_BOOL) {
+						/* bind in the value of long_value instead */
+						tmp_curr->value->value.lval = (long)tmp_curr->long_value;
+					}
+					/* cant use zend_hash_update because the symbol need not exist. It might need to be created */
+					ZEND_SET_SYMBOL(EG(active_symbol_table), tmp_curr->varname, tmp_curr->value);
+
+				default:
+					break;
 			}
+			tmp_curr = tmp_curr->next;
 		}
+	}
 
-		if ( rc != SQL_ERROR ) {
-			RETURN_TRUE;
-		}
+	if ( rc != SQL_ERROR ) {
+		RETURN_TRUE;
 	}
 }
 /* }}} */
@@ -2954,6 +2971,9 @@ PHP_FUNCTION(db2_field_type)
 		case SQL_BLOB:
 			str_val = "blob";
 			break;
+		case SQL_XML:
+			str_val = "xml";
+			break;
 		case SQL_TYPE_DATE:
 			str_val = "date";
 			break;
@@ -3088,7 +3108,7 @@ PHP_FUNCTION(db2_free_stmt)
 /* }}} */
 
 /* {{{ static RETCODE _php_db2_get_data(stmt_handle *stmt_res, int col_num, short ctype, void *buff, int in_length, SQLINTEGER *out_length) */
-static RETCODE _php_db2_get_data(stmt_handle *stmt_res, int col_num, short ctype, void *buff, int in_length, SQLINTEGER *out_length)
+static RETCODE _php_db2_get_data(stmt_handle *stmt_res, SQLUSMALLINT col_num, SQLSMALLINT ctype, SQLPOINTER buff, SQLLEN in_length, SQLLEN *out_length)
 {
 	RETCODE rc=SQL_SUCCESS;
 
@@ -3106,14 +3126,14 @@ PHP_FUNCTION(db2_result)
 	zval *stmt = NULL;
 	zval *column = NULL;
 	stmt_handle *stmt_res;
-	long col_num;
-	RETCODE rc;
-	void	*out_ptr;
-	char	*out_char_ptr;
+	SQLSMALLINT col_num = 0;
+	RETCODE rc = 0;
+	void	*out_ptr = NULL;
+	char	*out_char_ptr = NULL;
 	SQLINTEGER in_length, out_length=-10; /*Initialize out_length to some meaningless value*/
 	SQLSMALLINT column_type, lob_bind_type= SQL_C_BINARY;
-	double double_val;
-	long long_val;
+	SQLDOUBLE double_val = 0;
+	SQLINTEGER long_val = 0;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "rz", &stmt, &column) == FAILURE) {
 		return;
@@ -3125,7 +3145,7 @@ PHP_FUNCTION(db2_result)
 		if(Z_TYPE_P(column) == IS_STRING) {
 			col_num = _php_db2_get_column_by_name(stmt_res, Z_STRVAL_P(column), -1);
 		} else {
-			col_num = Z_LVAL_P(column);
+			col_num = (SQLSMALLINT)Z_LVAL_P(column);
 		}
 
 		/* get column header info*/
@@ -3172,7 +3192,7 @@ PHP_FUNCTION(db2_result)
 
 			case SQL_SMALLINT:
 			case SQL_INTEGER:
-				rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_LONG, &long_val, sizeof(long_val), &out_length);
+				rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_LONG, (SQLPOINTER)&long_val, sizeof(long_val), &out_length);
 				if ( rc == SQL_ERROR ) {
 					RETURN_FALSE;
 				}
@@ -3186,7 +3206,7 @@ PHP_FUNCTION(db2_result)
 			case SQL_REAL:
 			case SQL_FLOAT:
 			case SQL_DOUBLE:
-				rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_DOUBLE, &double_val, sizeof(double_val), &out_length);
+				rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_DOUBLE, (SQLPOINTER)&double_val, sizeof(double_val), &out_length);
 				if ( rc == SQL_ERROR ) {
 					RETURN_FALSE;
 				}
@@ -3256,6 +3276,27 @@ PHP_FUNCTION(db2_result)
 						break;
 				}
 				break;
+
+			case SQL_XML:
+				rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_BINARY, NULL, 0, (SQLINTEGER *)&in_length);
+				if ( rc == SQL_ERROR ) {
+					RETURN_FALSE;
+				}
+				if (in_length == SQL_NULL_DATA) {
+					RETURN_NULL();
+				}
+				out_ptr = (SQLPOINTER)ecalloc(1, in_length);
+				if ( out_ptr == NULL ) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for XML Data");
+					RETURN_FALSE;
+				}
+				rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_BINARY, out_ptr, in_length, &out_length);
+				if (rc == SQL_ERROR) {
+					RETURN_FALSE;
+				}
+				RETVAL_STRINGL((char*)out_ptr,out_length, 0);
+				break;
+
 			default:
 				break;
 		}
@@ -3484,6 +3525,42 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 					}
 					break;
 
+				case SQL_XML:
+					out_ptr = NULL;
+					rc = _php_db2_get_data(stmt_res, i+1, SQL_C_BINARY, NULL, 0, (SQLINTEGER *)&tmp_length);
+					if ( rc == SQL_ERROR ) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Determine XML Size");
+						RETURN_FALSE;
+					}
+
+					if (tmp_length == SQL_NULL_DATA) {
+						if ( op & DB2_FETCH_ASSOC ) {
+							add_assoc_null(return_value, (char *)stmt_res->column_info[i].name);
+						}
+						if ( op & DB2_FETCH_INDEX ) {
+							add_index_null(return_value, i);
+						}
+					} else {
+						out_ptr = (SQLPOINTER)ecalloc(1, tmp_length);
+
+						if ( out_ptr == NULL ) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for XML Data");
+							RETURN_FALSE;
+						}
+						rc = _php_db2_get_data(stmt_res, i+1, SQL_C_BINARY, out_ptr, tmp_length, &out_length);
+						if (rc == SQL_ERROR) {
+							RETURN_FALSE;
+						}
+
+						if ( op & DB2_FETCH_ASSOC ) {
+							add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, out_length, 0);
+						}
+						if ( op & DB2_FETCH_INDEX ) {
+							add_index_stringl(return_value, i, (char *)out_ptr, out_length, DB2_FETCH_BOTH & op);
+						}
+					}
+					break;
+
 				case SQL_CLOB:
 					out_ptr = NULL;
 					rc = _php_db2_get_data(stmt_res, i+1, SQL_C_CHAR, NULL, 0, (SQLINTEGER *)&tmp_length);
@@ -3520,7 +3597,6 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 						}
 					}
 					break;
-
 				default:
 					break;
 			}

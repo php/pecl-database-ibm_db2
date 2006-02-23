@@ -20,7 +20,7 @@ if ($conn) {
 	db2_execute($result);
 
 	while ($row = db2_fetch_array($result)) {
-		printf ("${br}\"%s\" from VARCHAR is %d bytes long, \"%s\" from CLOB is %d bytes long.\n",
+		printf ("\"%s\" from VARCHAR is %d bytes long, \"%s\" from CLOB is %d bytes long.\n",
                 $row[0], strlen($row[0]),
                 $row[1], strlen($row[1]));
 	}

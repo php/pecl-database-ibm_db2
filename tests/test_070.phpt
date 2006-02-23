@@ -22,5 +22,5 @@ else {
 
 ?>
 --EXPECTF--
-resource(%d) of type (conn struct)
+resource(%d) of type (DB2 Connection)
 bool(true)
