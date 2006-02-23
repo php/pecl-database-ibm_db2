@@ -17,14 +17,18 @@
  </maintainers>
 
  <release>
-  <version>1.1.6</version>
-  <date>2005-11-25</date>
+  <version>1.2.0</version>
+  <date>2006-01-26</date>
   <license>Apache License 2.0</license>
-  <state>stable</state>
+  <state>beta</state>
   <notes>
-   Better handling of persistent connection resources.
-   Better memory management for OUT and INOUT parameters.
-   More forgiving of NULL or 0 values for scrollable cursor positioning.
+   Use strlcpy() rather than strncpy() to comply with PECL standards.
+   Stricter type-matching, initialize all allocated memory.
+   Improve unit test implementation.
+   Enable SUCCESS_WITH_INFO to return results successfully (bug 6561).
+   Handle null characters within SQL values (bug 6572).
+   Avoid appending a null character to CLOB values (bug 6755).
+   Enable default cursor type to be set as a connection attribute.
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
@@ -35,13 +39,18 @@
     <file name="ibm_db2.dsp" role="src" />
     <file name="php_ibm_db2.h" role="src" />
     <file name="config.m4" role="src" />
+    <file name="config.w32" role="src" />
     <file name="TODO" role="doc" />
    </dir>
    <dir name="tests" role="test">
     <file name="connection.inc" role="test" />
+    <file name="pic1.jpg" role="test" />
     <file name="prepare.inc" role="test" />
+    <file name="prepare_blob.inc" role="test" />
+    <file name="prepare_sp.inc" role="test" />
     <file name="prepare_t_string.inc" role="test" />
     <file name="skipif.inc" role="test" />
+    <file name="spook.png" role="test" />
     <file name="test_001.phpt" role="test" />
     <file name="test_002.phpt" role="test" />
     <file name="test_003.phpt" role="test" />
@@ -156,6 +165,9 @@
     <file name="test_261.phpt" role="test" />
     <file name="test_300.phpt" role="test" />
     <file name="test_310.phpt" role="test" />
+    <file name="test_6561.phpt" role="test" />
+    <file name="test_6572.phpt" role="test" />
+    <file name="test_6755.phpt" role="test" />
    </dir>
   </filelist>
  </release>
