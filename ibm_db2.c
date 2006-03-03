@@ -2224,6 +2224,14 @@ static int _php_db2_execute_helper(stmt_handle *stmt_res, zval **data, int bind_
 					return rc;
 				}
 				curr = curr->next;
+			} else if ( zend_hash_find(&EG(symbol_table), curr->varname,
+						strlen(curr->varname)+1, (void **) &bind_data ) != FAILURE ) {
+				rc = _php_db2_bind_data( stmt_res, curr, bind_data);
+				if ( rc == SQL_ERROR ) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binding Error 1");
+					return rc;
+				}
+				curr = curr->next;
 			} else {
 				/* value not found in the active symbol table */
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Value Not Bound");
