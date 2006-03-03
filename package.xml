@@ -30,6 +30,7 @@
    Avoid appending a null character to CLOB values (bug 6755).
    Enable default cursor type to be set as a connection attribute.
    Provide initial support for native XML data type.
+   Improve variable scope binding
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
@@ -172,6 +173,7 @@
     <file name="test_261.phpt" role="test" />
     <file name="test_300.phpt" role="test" />
     <file name="test_310.phpt" role="test" />
+    <file name="test_6528.phpt" rolt="test" />
     <file name="test_6561.phpt" role="test" />
     <file name="test_6572.phpt" role="test" />
     <file name="test_6755.phpt" role="test" />
