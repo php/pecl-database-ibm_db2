@@ -628,13 +628,13 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 						*/
 						((conn_handle*)handle)->auto_commit = 1;
 						autocommit = SQL_AUTOCOMMIT_ON;
-						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)autocommit, SQL_NTS);
+						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&autocommit, SQL_NTS);
 						break;
 
 					case DB2_AUTOCOMMIT_OFF:
 						((conn_handle*)handle)->auto_commit = 0;
 						autocommit = SQL_AUTOCOMMIT_OFF;
-						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)autocommit, SQL_NTS);
+						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&autocommit, SQL_NTS);
 						break;
 
 					default:
@@ -1015,7 +1015,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 		/* Set this after the connection handle has been allocated to avoid
 		unnecessary network flows. Initialize the structure to default values */
 		conn_res->auto_commit = SQL_AUTOCOMMIT_ON;
-		rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(conn_res->auto_commit), SQL_NTS);
+		rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&(conn_res->auto_commit), SQL_NTS);
 
 		conn_res->c_bin_mode = IBM_DB2_G(bin_mode);
 		conn_res->c_case_mode = DB2_CASE_NATURAL;
@@ -1166,7 +1166,7 @@ PHP_FUNCTION(db2_autocommit)
 		if (argc == 2) {
 			autocommit = value;
 			if(autocommit != (conn_res->auto_commit)) {
-				rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)autocommit, SQL_IS_INTEGER);
+				rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&autocommit, SQL_IS_INTEGER);
 				conn_res->auto_commit = autocommit;
 			}
 			RETURN_TRUE;
