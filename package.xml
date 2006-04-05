@@ -9,9 +9,9 @@
  <license>Apache License 2.0</license>
  <maintainers>
   <maintainer>
-   <user>dbs</user>
-   <name>Dan Scott</name>
-   <email>dan.scott@ca.ibm.com</email>
+   <user>kfbombar</user>
+   <name>Kellen Bombardier</name>
+   <email>kfbombar@us.ibm.com</email>
    <role>lead</role>
   </maintainer>
  </maintainers>
@@ -20,7 +20,7 @@
   <version>1.2.0</version>
   <date>2006-02-23</date>
   <license>Apache License 2.0</license>
-  <state>beta</state>
+  <state>stable</state>
   <notes>
    Use strlcpy() rather than strncpy() to comply with PECL standards.
    Stricter type-matching, initialize all allocated memory.
@@ -29,7 +29,7 @@
    Handle null characters within SQL values (bug 6572).
    Avoid appending a null character to CLOB values (bug 6755).
    Enable default cursor type to be set as a connection attribute.
-   Provide initial support for native XML data type.
+   Provide initial support and testing for native XML data type.
    Improve variable scope binding
   </notes>
   <configureoptions>
@@ -154,6 +154,7 @@
     <file name="test_192.phpt" role="test" />
     <file name="test_193.phpt" role="test" />
     <file name="test_194.phpt" role="test" />
+    <file name="test_195.phpt" role="test" />
     <file name="test_200.phpt" role="test" />
     <file name="test_201.phpt" role="test" />
     <file name="test_210.phpt" role="test" />
