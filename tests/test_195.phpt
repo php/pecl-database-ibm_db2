@@ -9,9 +9,6 @@ require_once('connection.inc');
 
 $conn = db2_connect($database, $user, $password);
 
-$drop = 'DROP TABLE xmlTest';
-$result = @db2_exec($conn, $drop);
-
 $create = 'CREATE TABLE xmlTest (id INTEGER, data XML)';
 $result = db2_exec($conn, $create);
 
