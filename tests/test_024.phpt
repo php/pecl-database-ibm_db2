@@ -22,10 +22,10 @@ if ($conn != 0)
 
 	$stmt = db2_foreign_keys($conn, NULL, NULL, 'TEST_PRIMARY_KEYS');
 	$row = db2_fetch_array($stmt);
-	for ($i=0; $i<8; $i++)
-	{
-		echo $row[$i] . "\n";
-	}
+	echo $row[2] . "\n";
+	echo $row[3] . "\n";
+	echo $row[6] . "\n";
+	echo $row[7] . "\n";
     db2_close($conn);
 }
 else
@@ -36,10 +36,7 @@ else
 
 ?>
 --EXPECT--
-INFORMIX
 TEST_PRIMARY_KEYS
 ID
-
-INFORMIX
 TEST_FOREIGN_KEYS
 IDF

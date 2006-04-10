@@ -13,7 +13,11 @@ if ($conn != 0)
 {
 	$stmt = db2_column_privileges($conn, NULL, NULL, 'ANIMALS');
 	$row = db2_fetch_array($stmt);
-	var_dump($row);
+	print $row[2] . "\n";
+	print $row[3] . "\n";
+	print $row[4] . "\n";
+	print $row[6] . "\n";
+	print $row[7];
     db2_close($conn);
 }
 else
@@ -24,21 +28,8 @@ else
 
 ?>
 --EXPECT--
-array(8) {
-  [0]=>
-  NULL
-  [1]=>
-  string(8) "INFORMIX"
-  [2]=>
-  string(7) "ANIMALS"
-  [3]=>
-  string(5) "BREED"
-  [4]=>
-  string(6) "SYSIBM"
-  [5]=>
-  string(8) "INFORMIX"
-  [6]=>
-  string(6) "INSERT"
-  [7]=>
-  string(3) "YES"
-}
+ANIMALS
+BREED
+SYSIBM
+INSERT
+YES
