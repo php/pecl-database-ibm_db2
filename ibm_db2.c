@@ -2173,7 +2173,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 
 			rc = SQLBindParameter(stmt_res->hstmt, curr->param_num,
 				curr->param_type, valueType, curr->data_type, curr->param_size,
-				curr->scale, paramValuePtr, Z_STRLEN_P(curr->value), &(curr->bind_indicator));
+				curr->scale, paramValuePtr, Z_STRLEN_P(curr->value)+1, &(curr->bind_indicator));
 			break;
 
 		case IS_NULL:
