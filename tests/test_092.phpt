@@ -18,5 +18,5 @@ else {
 }
 
 ?>
---EXPECT--
-[IBM][CLI Driver] SQL30082N  Attempt to establish connection failed with security reason "24" ("USERNAME AND/OR PASSWORD INVALID").  SQLSTATE=08001 SQLCODE=-30082
+--EXPECTF--
+[IBM][CLI Driver] SQL30082N %s reason "24" ("USERNAME AND/OR PASSWORD INVALID").  SQLSTATE=08001 SQLCODE=-30082
