@@ -34,5 +34,5 @@ else {
 --EXPECT--
 Array
 (
-    [DATA] => <?xml version="1.0" encoding="UTF-8"?><TEST><function><xml/></function></TEST>
+    [DATA] => <?xml version="1.0" encoding="UTF-8" ?><TEST><function><xml/></function></TEST>
 )

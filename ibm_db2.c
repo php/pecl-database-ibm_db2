@@ -860,15 +860,6 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
 				}
 				break;
 
-			case SQL_XML:
-				in_length = stmt_res->column_info[i].size+1;
-				row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
-
-				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
-					SQL_C_BINARY, row_data->str_val, in_length,
-					(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
-				break;
-
 			case SQL_TYPE_DATE:
 			case SQL_TYPE_TIME:
 			case SQL_TYPE_TIMESTAMP:
@@ -917,6 +908,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
 
 			case SQL_CLOB:
 			case SQL_BLOB:
+			case SQL_XML:
 				stmt_res->row_data[i].out_length = 0;
 				/* we do getdata call instead */
 				break;
