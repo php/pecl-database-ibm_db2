@@ -1950,18 +1950,30 @@ PHP_FUNCTION(db2_exec)
 		_php_db2_clear_stmt_err_cache(TSRMLS_C);
 
 		stmt_res = _db2_new_stmt_struct(conn_res);
-
-		/* Allocates the stmt handle */
-		/* Prepares the statement */
-		/* returns the stat_handle back to the calling function */
-		rc = _php_db2_do_prepare(conn_res->hdbc, stmt_string, stmt_res, stmt_string_len, options TSRMLS_CC);
+		
+		/* alloc handle and return only if it errors */
+		rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &(stmt_res->hstmt));
 		if ( rc < SQL_SUCCESS ) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Prepare Failed");
-			efree(stmt_res);
-			RETURN_FALSE;
+			_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
 		}
 
-		rc = _php_db2_execute_stmt(stmt_res TSRMLS_CC);
+		if (options != NULL) {
+			rc = _php_db2_parse_options( options, SQL_HANDLE_STMT, stmt_res TSRMLS_CC );
+			if ( rc == SQL_ERROR ) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Options Array must have string indexes");
+			}
+		}
+
+		if ( stmt_res->cursor_type == DB2_SCROLLABLE ) {
+			rc = SQLSetStmtAttr((SQLHSTMT)stmt_res->hstmt,
+					SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)SQL_CURSOR_KEYSET_DRIVEN,
+					SQL_IS_INTEGER );
+		}
+
+		rc = SQLExecDirect((SQLHSTMT)stmt_res->hstmt, stmt_string , stmt_string_len);
+		if ( rc == SQL_ERROR ) {
+			_php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+		}
 		if ( rc < SQL_SUCCESS ) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Execute Failed");
 			efree(stmt_res);
