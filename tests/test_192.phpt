@@ -14,8 +14,11 @@ if ($conn)
    $result = db2_columns($conn,NULL,strtoupper($username),"EMP_RESUME");	
    while ($row = db2_fetch_both($result)) 
    {
-      printf ("%s,%s,%s,%s\n", $row[1], 
-      $row[2], $row[3], $row[17]);
+      if ($row['COLUMN_NAME'] != 'EMP_ROWID')
+      {
+         printf ("%s,%s,%s,%s\n", $row[1], 
+         $row[2], $row[3], $row[17]);
+      }
    }
 }
 else 

@@ -23,7 +23,7 @@ for ($i=0; $i < db2_num_fields($result2); $i++)
    print $i . ":" . db2_field_width($result2,db2_field_name($result2,$i)) . "\n";
 }
 print "\n-----\n";
-for ($i=0; $i < db2_num_fields($result3); $i++) 
+for ($i=0; $i < 3; $i++) 
 {
    print $i . ":" . db2_field_width($result3,$i) . "," . db2_field_display_size($result3,$i)."\n";
 }

@@ -11,7 +11,7 @@ $conn = db2_connect($db, $username, $password);
 
 if ($conn) 
 {
-   $result = db2_exec($conn, "select * from staff, employee, org order by org.location,employee.lastname,staff.id");
+   $result = db2_exec($conn, "select * from staff, employee, org where employee.lastname in ('HAAS','THOMPSON', 'KWAN', 'GEYER', 'STERN', 'PULASKI', 'HENDERSON', 'SPENSER', 'LUCCHESSI', 'O''CONNELL', 'QUINTANA', 'NICHOLLS', 'ADAMSON', 'PIANKA', 'YOSHIMURA', 'SCOUTTEN', 'WALKER', 'BROWN', 'JONES', 'LUTZ', 'JEFFERSON', 'MARINO', 'SMITH', 'JOHNSON', 'PEREZ', 'SCHNEIDER', 'PARKER', 'SMITH', 'SETRIGHT', 'MEHTA', 'LEE', 'GOUNOT') order by org.location,employee.lastname,staff.id");
    $cols = db2_num_fields($result);
    $j=0;
    while ($row = db2_fetch_both($result) ) 

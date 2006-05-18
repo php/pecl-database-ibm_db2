@@ -19,6 +19,8 @@ if ($conn)
       print $j .") ";
       for ($i=0; $i<$cols; $i++) 
       {
+         if( $row[$i] == '      ' )
+         	$row[$i] = '';
          print $row[$i] . "\t|\t";
       }
       print "\n";	
@@ -33,7 +35,7 @@ else
 --EXPECT--
 
 0) 38	|	South Atlantic	|	30	|	Eastern	|	Atlanta	|	AD3113	|	ACCOUNT PROGRAMMING	|	D21	|	000270	|	2.00	|	1982-01-01	|	1983-02-01	|	AD3110	|	
-1) 38	|	South Atlantic	|	30	|	Eastern	|	Atlanta	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|	      	|	
+1) 38	|	South Atlantic	|	30	|	Eastern	|	Atlanta	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|		|	
 2) 38	|	South Atlantic	|	30	|	Eastern	|	Atlanta	|	OP2012	|	APPLICATIONS SUPPORT	|	E21	|	000330	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 3) 38	|	South Atlantic	|	30	|	Eastern	|	Atlanta	|	OP2013	|	DB/DC SUPPORT	|	E21	|	000340	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 4) 38	|	South Atlantic	|	30	|	Eastern	|	Atlanta	|	OP2000	|	GEN SYSTEMS SERVICES	|	E01	|	000050	|	5.00	|	1982-01-01	|	1983-02-01	|		|	
@@ -53,7 +55,7 @@ else
 18) 38	|	South Atlantic	|	30	|	Eastern	|	Atlanta	|	MA2100	|	WELD LINE AUTOMATION	|	D01	|	000010	|	12.00	|	1982-01-01	|	1983-02-01	|		|	
 19) 38	|	South Atlantic	|	30	|	Eastern	|	Atlanta	|	PL2100	|	WELD LINE PLANNING	|	B01	|	000020	|	1.00	|	1982-01-01	|	1982-09-15	|	MA2100	|	
 20) 15	|	New England	|	50	|	Eastern	|	Boston	|	AD3113	|	ACCOUNT PROGRAMMING	|	D21	|	000270	|	2.00	|	1982-01-01	|	1983-02-01	|	AD3110	|	
-21) 15	|	New England	|	50	|	Eastern	|	Boston	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|	      	|	
+21) 15	|	New England	|	50	|	Eastern	|	Boston	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|		|	
 22) 15	|	New England	|	50	|	Eastern	|	Boston	|	OP2012	|	APPLICATIONS SUPPORT	|	E21	|	000330	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 23) 15	|	New England	|	50	|	Eastern	|	Boston	|	OP2013	|	DB/DC SUPPORT	|	E21	|	000340	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 24) 15	|	New England	|	50	|	Eastern	|	Boston	|	OP2000	|	GEN SYSTEMS SERVICES	|	E01	|	000050	|	5.00	|	1982-01-01	|	1983-02-01	|		|	
@@ -73,7 +75,7 @@ else
 38) 15	|	New England	|	50	|	Eastern	|	Boston	|	MA2100	|	WELD LINE AUTOMATION	|	D01	|	000010	|	12.00	|	1982-01-01	|	1983-02-01	|		|	
 39) 15	|	New England	|	50	|	Eastern	|	Boston	|	PL2100	|	WELD LINE PLANNING	|	B01	|	000020	|	1.00	|	1982-01-01	|	1982-09-15	|	MA2100	|	
 40) 42	|	Great Lakes	|	100	|	Midwest	|	Chicago	|	AD3113	|	ACCOUNT PROGRAMMING	|	D21	|	000270	|	2.00	|	1982-01-01	|	1983-02-01	|	AD3110	|	
-41) 42	|	Great Lakes	|	100	|	Midwest	|	Chicago	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|	      	|	
+41) 42	|	Great Lakes	|	100	|	Midwest	|	Chicago	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|		|	
 42) 42	|	Great Lakes	|	100	|	Midwest	|	Chicago	|	OP2012	|	APPLICATIONS SUPPORT	|	E21	|	000330	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 43) 42	|	Great Lakes	|	100	|	Midwest	|	Chicago	|	OP2013	|	DB/DC SUPPORT	|	E21	|	000340	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 44) 42	|	Great Lakes	|	100	|	Midwest	|	Chicago	|	OP2000	|	GEN SYSTEMS SERVICES	|	E01	|	000050	|	5.00	|	1982-01-01	|	1983-02-01	|		|	
@@ -93,7 +95,7 @@ else
 58) 42	|	Great Lakes	|	100	|	Midwest	|	Chicago	|	MA2100	|	WELD LINE AUTOMATION	|	D01	|	000010	|	12.00	|	1982-01-01	|	1983-02-01	|		|	
 59) 42	|	Great Lakes	|	100	|	Midwest	|	Chicago	|	PL2100	|	WELD LINE PLANNING	|	B01	|	000020	|	1.00	|	1982-01-01	|	1982-09-15	|	MA2100	|	
 60) 51	|	Plains	|	140	|	Midwest	|	Dallas	|	AD3113	|	ACCOUNT PROGRAMMING	|	D21	|	000270	|	2.00	|	1982-01-01	|	1983-02-01	|	AD3110	|	
-61) 51	|	Plains	|	140	|	Midwest	|	Dallas	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|	      	|	
+61) 51	|	Plains	|	140	|	Midwest	|	Dallas	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|		|	
 62) 51	|	Plains	|	140	|	Midwest	|	Dallas	|	OP2012	|	APPLICATIONS SUPPORT	|	E21	|	000330	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 63) 51	|	Plains	|	140	|	Midwest	|	Dallas	|	OP2013	|	DB/DC SUPPORT	|	E21	|	000340	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 64) 51	|	Plains	|	140	|	Midwest	|	Dallas	|	OP2000	|	GEN SYSTEMS SERVICES	|	E01	|	000050	|	5.00	|	1982-01-01	|	1983-02-01	|		|	
@@ -113,7 +115,7 @@ else
 78) 51	|	Plains	|	140	|	Midwest	|	Dallas	|	MA2100	|	WELD LINE AUTOMATION	|	D01	|	000010	|	12.00	|	1982-01-01	|	1983-02-01	|		|	
 79) 51	|	Plains	|	140	|	Midwest	|	Dallas	|	PL2100	|	WELD LINE PLANNING	|	B01	|	000020	|	1.00	|	1982-01-01	|	1982-09-15	|	MA2100	|	
 80) 84	|	Mountain	|	290	|	Western	|	Denver	|	AD3113	|	ACCOUNT PROGRAMMING	|	D21	|	000270	|	2.00	|	1982-01-01	|	1983-02-01	|	AD3110	|	
-81) 84	|	Mountain	|	290	|	Western	|	Denver	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|	      	|	
+81) 84	|	Mountain	|	290	|	Western	|	Denver	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|		|	
 82) 84	|	Mountain	|	290	|	Western	|	Denver	|	OP2012	|	APPLICATIONS SUPPORT	|	E21	|	000330	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 83) 84	|	Mountain	|	290	|	Western	|	Denver	|	OP2013	|	DB/DC SUPPORT	|	E21	|	000340	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 84) 84	|	Mountain	|	290	|	Western	|	Denver	|	OP2000	|	GEN SYSTEMS SERVICES	|	E01	|	000050	|	5.00	|	1982-01-01	|	1983-02-01	|		|	
@@ -133,7 +135,7 @@ else
 98) 84	|	Mountain	|	290	|	Western	|	Denver	|	MA2100	|	WELD LINE AUTOMATION	|	D01	|	000010	|	12.00	|	1982-01-01	|	1983-02-01	|		|	
 99) 84	|	Mountain	|	290	|	Western	|	Denver	|	PL2100	|	WELD LINE PLANNING	|	B01	|	000020	|	1.00	|	1982-01-01	|	1982-09-15	|	MA2100	|	
 100) 10	|	Head Office	|	160	|	Corporate	|	New York	|	AD3113	|	ACCOUNT PROGRAMMING	|	D21	|	000270	|	2.00	|	1982-01-01	|	1983-02-01	|	AD3110	|	
-101) 10	|	Head Office	|	160	|	Corporate	|	New York	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|	      	|	
+101) 10	|	Head Office	|	160	|	Corporate	|	New York	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|		|	
 102) 10	|	Head Office	|	160	|	Corporate	|	New York	|	OP2012	|	APPLICATIONS SUPPORT	|	E21	|	000330	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 103) 10	|	Head Office	|	160	|	Corporate	|	New York	|	OP2013	|	DB/DC SUPPORT	|	E21	|	000340	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 104) 10	|	Head Office	|	160	|	Corporate	|	New York	|	OP2000	|	GEN SYSTEMS SERVICES	|	E01	|	000050	|	5.00	|	1982-01-01	|	1983-02-01	|		|	
@@ -153,7 +155,7 @@ else
 118) 10	|	Head Office	|	160	|	Corporate	|	New York	|	MA2100	|	WELD LINE AUTOMATION	|	D01	|	000010	|	12.00	|	1982-01-01	|	1983-02-01	|		|	
 119) 10	|	Head Office	|	160	|	Corporate	|	New York	|	PL2100	|	WELD LINE PLANNING	|	B01	|	000020	|	1.00	|	1982-01-01	|	1982-09-15	|	MA2100	|	
 120) 66	|	Pacific	|	270	|	Western	|	San Francisco	|	AD3113	|	ACCOUNT PROGRAMMING	|	D21	|	000270	|	2.00	|	1982-01-01	|	1983-02-01	|	AD3110	|	
-121) 66	|	Pacific	|	270	|	Western	|	San Francisco	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|	      	|	
+121) 66	|	Pacific	|	270	|	Western	|	San Francisco	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|		|	
 122) 66	|	Pacific	|	270	|	Western	|	San Francisco	|	OP2012	|	APPLICATIONS SUPPORT	|	E21	|	000330	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 123) 66	|	Pacific	|	270	|	Western	|	San Francisco	|	OP2013	|	DB/DC SUPPORT	|	E21	|	000340	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 124) 66	|	Pacific	|	270	|	Western	|	San Francisco	|	OP2000	|	GEN SYSTEMS SERVICES	|	E01	|	000050	|	5.00	|	1982-01-01	|	1983-02-01	|		|	
@@ -173,7 +175,7 @@ else
 138) 66	|	Pacific	|	270	|	Western	|	San Francisco	|	MA2100	|	WELD LINE AUTOMATION	|	D01	|	000010	|	12.00	|	1982-01-01	|	1983-02-01	|		|	
 139) 66	|	Pacific	|	270	|	Western	|	San Francisco	|	PL2100	|	WELD LINE PLANNING	|	B01	|	000020	|	1.00	|	1982-01-01	|	1982-09-15	|	MA2100	|	
 140) 20	|	Mid Atlantic	|	10	|	Eastern	|	Washington	|	AD3113	|	ACCOUNT PROGRAMMING	|	D21	|	000270	|	2.00	|	1982-01-01	|	1983-02-01	|	AD3110	|	
-141) 20	|	Mid Atlantic	|	10	|	Eastern	|	Washington	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|	      	|	
+141) 20	|	Mid Atlantic	|	10	|	Eastern	|	Washington	|	AD3100	|	ADMIN SERVICES	|	D01	|	000010	|	6.50	|	1982-01-01	|	1983-02-01	|		|	
 142) 20	|	Mid Atlantic	|	10	|	Eastern	|	Washington	|	OP2012	|	APPLICATIONS SUPPORT	|	E21	|	000330	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 143) 20	|	Mid Atlantic	|	10	|	Eastern	|	Washington	|	OP2013	|	DB/DC SUPPORT	|	E21	|	000340	|	1.00	|	1982-01-01	|	1983-02-01	|	OP2010	|	
 144) 20	|	Mid Atlantic	|	10	|	Eastern	|	Washington	|	OP2000	|	GEN SYSTEMS SERVICES	|	E01	|	000050	|	5.00	|	1982-01-01	|	1983-02-01	|		|	

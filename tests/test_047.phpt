@@ -30,9 +30,10 @@ else {
 		if ( $row[1] == 'gif' ) {
 			printf ("<img src='test_047.php?EMPNO=%s&FORMAT=%s'><br>\n",$row[0],$row[1]);
 		}
-		printf ("<a href='test_047.php?EMPNO=%s&FORMAT=%s' target=_blank>%s - %s - %s bytes</a>\n",
-			$row['0'], $row[1], $row['0'], $row[1], $row[2]);			
-		print "<br>";
+		if ( $row[1] != 'xwd' ) {
+			printf ("<a href='test_047.php?EMPNO=%s&FORMAT=%s' target=_blank>%s - %s - %s bytes</a>\n", $row['0'], $row[1], $row['0'], $row[1], $row[2]);	
+			print "<br>";
+		}	
 	}
 }
 
@@ -41,17 +42,13 @@ else {
 <a href='test_047.php?EMPNO=000130&FORMAT=bitmap' target=_blank>000130 - bitmap - 43690 bytes</a>
 <br><img src='test_047.php?EMPNO=000130&FORMAT=gif'><br>
 <a href='test_047.php?EMPNO=000130&FORMAT=gif' target=_blank>000130 - gif - 29540 bytes</a>
-<br><a href='test_047.php?EMPNO=000130&FORMAT=xwd' target=_blank>000130 - xwd - 45800 bytes</a>
 <br><a href='test_047.php?EMPNO=000140&FORMAT=bitmap' target=_blank>000140 - bitmap - 71798 bytes</a>
 <br><img src='test_047.php?EMPNO=000140&FORMAT=gif'><br>
 <a href='test_047.php?EMPNO=000140&FORMAT=gif' target=_blank>000140 - gif - 29143 bytes</a>
-<br><a href='test_047.php?EMPNO=000140&FORMAT=xwd' target=_blank>000140 - xwd - 73908 bytes</a>
 <br><a href='test_047.php?EMPNO=000150&FORMAT=bitmap' target=_blank>000150 - bitmap - 73438 bytes</a>
 <br><img src='test_047.php?EMPNO=000150&FORMAT=gif'><br>
 <a href='test_047.php?EMPNO=000150&FORMAT=gif' target=_blank>000150 - gif - 39795 bytes</a>
-<br><a href='test_047.php?EMPNO=000150&FORMAT=xwd' target=_blank>000150 - xwd - 75547 bytes</a>
 <br><a href='test_047.php?EMPNO=000190&FORMAT=bitmap' target=_blank>000190 - bitmap - 63542 bytes</a>
 <br><img src='test_047.php?EMPNO=000190&FORMAT=gif'><br>
 <a href='test_047.php?EMPNO=000190&FORMAT=gif' target=_blank>000190 - gif - 36088 bytes</a>
-<br><a href='test_047.php?EMPNO=000190&FORMAT=xwd' target=_blank>000190 - xwd - 65650 bytes</a>
 <br>

@@ -14,8 +14,11 @@ if ($conn)
    $result = db2_columns($conn,NULL,NULL,"EMP_PHOTO");	
    while ($row = db2_fetch_both($result)) 
    {
-      printf ("%s,%s,%s,%s\n", $row['TABLE_SCHEM'], 
-      $row['TABLE_NAME'], $row['COLUMN_NAME'], $row['IS_NULLABLE']);
+      if ($row['COLUMN_NAME'] != 'EMP_ROWID')
+      {
+         printf ("%s,%s,%s,%s\n", $row['TABLE_SCHEM'], 
+         $row['TABLE_NAME'], $row['COLUMN_NAME'], $row['IS_NULLABLE']);
+      }
    }
    print "done!";
 }

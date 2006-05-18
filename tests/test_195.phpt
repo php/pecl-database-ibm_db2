@@ -1,7 +1,10 @@
 --TEST--
 IBM-DB2: insert and retrieve XML data
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php 
+require_once('skipif.inc'); 
+require_once('skipif2.inc'); 
+?>
 --FILE--
 <?php
 

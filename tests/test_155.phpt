@@ -9,7 +9,7 @@ require_once('connection.inc');
 
 $conn = db2_connect($db,$username,$password);
 
-$result = db2_exec($conn, "select * from employee");
+$result = db2_exec($conn, "select * from employee where lastname in ('HAAS','THOMPSON', 'KWAN', 'GEYER', 'STERN', 'PULASKI', 'HENDERSON', 'SPENSER', 'LUCCHESSI', 'O''CONNELL', 'QUINTANA', 'NICHOLLS', 'ADAMSON', 'PIANKA', 'YOSHIMURA', 'SCOUTTEN', 'WALKER', 'BROWN', 'JONES', 'LUTZ', 'JEFFERSON', 'MARINO', 'SMITH', 'JOHNSON', 'PEREZ', 'SCHNEIDER', 'PARKER', 'SMITH', 'SETRIGHT', 'MEHTA', 'LEE', 'GOUNOT')");
 $i=0;
 while ($row = db2_fetch_assoc($result)) {
 $i++;
@@ -33,7 +33,7 @@ print "\n";
 print "\n\t$i record(s) selected.\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 
 000010    CHRISTINE I HAAS           A00 3978 1965-01-01 PRES      18 F1933-08-24     52750.00      1000.00      4220.00
 000020      MICHAEL L THOMPSON       B01 3476 1973-10-10 MANAGER   18 M1948-02-02     41250.00       800.00      3300.00
@@ -45,7 +45,7 @@ print "\n\t$i record(s) selected.\n";
 000100     THEODORE Q SPENSER        E21 0972 1980-06-19 MANAGER   14 M1956-12-18     26150.00       500.00      2092.00
 000110     VINCENZO G LUCCHESSI      A00 3490 1958-05-16 SALESREP  19 M1929-11-05     46500.00       900.00      3720.00
 000120         SEAN   O'CONNELL      A00 2167 1963-12-05 CLERK     14 M1942-10-18     29250.00       600.00      2340.00
-000130      DOLORES M QUINTANA       C01 4578 1971-07-28 ANALYST   16 F1925-09-15     23800.00       500.00      1904.00
+000130      D%cLORES M QUINTANA       C01 4578 1971-07-28 ANALYST   16 F1925-09-15     23800.00       500.00      1904.00
 000140      HEATHER A NICHOLLS       C01 1793 1976-12-15 ANALYST   18 F1946-01-19     28420.00       600.00      2274.00
 000150        BRUCE   ADAMSON        D11 4510 1972-02-12 DESIGNER  16 M1947-05-17     25280.00       500.00      2022.00
 000160    ELIZABETH R PIANKA         D11 3782 1977-10-11 DESIGNER  17 F1955-04-12     22250.00       400.00      1780.00

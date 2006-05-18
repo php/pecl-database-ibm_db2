@@ -9,6 +9,41 @@ require_once('connection.inc');
 
 $conn = db2_connect($db, $username, $password);
 
+$arr = array(
+"HAAS",
+"THOMPSON",
+"KWAN",
+"GEYER",
+"STERN",
+"PULASKI",
+"HENDERSON",
+"SPENSER",
+"LUCCHESSI",
+"O'CONNELL",
+"QUINTANA",
+"NICHOLLS",
+"ADAMSON",
+"PIANKA",
+"YOSHIMURA",
+"SCOUTTEN",
+"WALKER",
+"BROWN",
+"JONES",
+"LUTZ",
+"JEFFERSON",
+"MARINO",
+"SMITH",
+"JOHNSON",
+"PEREZ",
+"SCHNEIDER",
+"PARKER",
+"SMITH",
+"SETRIGHT",
+"MEHTA",
+"LEE",
+"GOUNOT"
+);
+
 if ($conn) 
 {
    $result = db2_exec($conn, "select staff.id, employee.lastname from staff, employee order by employee.lastname,staff.id");
@@ -16,13 +51,16 @@ if ($conn)
    $j=0;
    while ($row = db2_fetch_assoc($result) ) 
    {
-      for ($i=0; $i<$cols; $i++) 
+      if (in_array($row['LASTNAME'], $arr))
       {
-         print db2_field_name($result,$i) . ":";
-         print $row[db2_field_name($result,$i)] . "\n";
+         for ($i=0; $i<$cols; $i++) 
+         {
+             print db2_field_name($result,$i) . ":";
+             print $row[db2_field_name($result,$i)] . "\n";
+         }
+         print "---------\n";	
+         $j++;
       }
-      print "---------\n";	
-      $j++;
    }
    db2_close($conn);
 }

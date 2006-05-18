@@ -23,7 +23,7 @@ for ($i=0; $i < db2_num_fields($result2); $i++)
    print $i . ":" . db2_field_type($result2,$i) . "\n";
 }
 print "\n-----\n";
-for ($i=0; $i < db2_num_fields($result3); $i++) 
+for ($i=0; $i < 3; $i++) 
 {
    print $i . ":" . db2_field_type($result3,$i) . "\n";
 }

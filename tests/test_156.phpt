@@ -21,7 +21,7 @@ while ($row = db2_fetch_assoc($result))
    printf ("%15s ", $row['SALARY']);
    printf ("%10s ", $row['COMM']);
    print "\n";
-   $result2 = db2_exec($conn,"select * from department");
+   $result2 = db2_exec($conn,"select * from department where substr(deptno,1,1) in ('A','B','C','D','E')");
    while ($row2 = db2_fetch_assoc($result2)) 
    {
       printf ("\t\t%3s %29s %6s %3s %-16s\n",
