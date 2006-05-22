@@ -3553,7 +3553,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 							add_index_null(return_value, i);
 						}
 					} else {
-						out_ptr = (SQLPOINTER)ecalloc(1, tmp_length);
+						out_ptr = (SQLPOINTER)ecalloc(1, tmp_length+1);
 
 						if ( out_ptr == NULL ) {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for XML Data");
@@ -3598,6 +3598,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 
 						rc = _php_db2_get_data(stmt_res, i+1, SQL_C_CHAR, out_ptr, tmp_length+1, &out_length);
 						if (rc == SQL_ERROR) {
+							efree(out_ptr);
 							RETURN_FALSE;
 						}
 
@@ -3607,6 +3608,8 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 						if ( op & DB2_FETCH_INDEX ) {
 							add_index_stringl(return_value, i, (char *)out_ptr, tmp_length, DB2_FETCH_BOTH & op);
 						}
+
+						efree(out_ptr);
 					}
 					break;
 				default:
@@ -3849,6 +3852,8 @@ PHP_FUNCTION(db2_server_info)
 			}
 
 			add_property_zval(return_value, "KEYWORDS", karray);
+
+			zval_ptr_dtor(&karray);
 		}
 
 		/* DFT_ISOLATION */
@@ -3912,6 +3917,8 @@ PHP_FUNCTION(db2_server_info)
 			}
 
 			add_property_zval(return_value, "ISOLATION_OPTION", array);
+
+			zval_ptr_dtor(&array);
 		}
 
 		/* SQL_CONFORMANCE */
