@@ -1200,7 +1200,7 @@ static void _php_db2_add_param_cache( stmt_handle *stmt_res, int param_no, char 
 		if ( varname != NULL) {
 			tmp_curr->varname = estrndup(varname, varname_len);
 		}
-		MAKE_STD_ZVAL(tmp_curr->value);
+		tmp_curr->value = 0;
 
 		/* link pointers for the list */
 		if ( prev == NULL ) {
@@ -2072,8 +2072,8 @@ static param_node* _php_db2_build_list( stmt_handle *stmt_res, int param_no, SQL
 	tmp_curr->file_options = SQL_FILE_READ;
 	tmp_curr->param_type = DB2_PARAM_IN;
 	tmp_curr->long_value = 0;
+	tmp_curr->value = 0;
 
-	MAKE_STD_ZVAL(tmp_curr->value);
 	while ( curr != NULL ) {
 		prev = curr;
 		curr = curr->next;
@@ -2098,6 +2098,11 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 	int rc;
 	SQLSMALLINT valueType;
 	SQLPOINTER	paramValuePtr;
+
+	/* Clean old zval value and create a new one */
+	if( curr->value != 0 )
+		zval_ptr_dtor(&curr->value);
+	MAKE_STD_ZVAL(curr->value);
 
 	/* copy data over from bind_data */
 	*(curr->value) = **bind_data;
@@ -2247,7 +2252,6 @@ static int _php_db2_execute_helper(stmt_handle *stmt_res, zval **data, int bind_
 		/* Bind only the data value passed in to the Current Node */
 		if ( data != NULL ) {
 			if ( bind_params ) {
-
 				/*
 					This condition applies if the parameter has not been
 					bound using db2_bind_param. Need to describe the
@@ -3612,6 +3616,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 						efree(out_ptr);
 					}
 					break;
+
 				default:
 					break;
 			}
