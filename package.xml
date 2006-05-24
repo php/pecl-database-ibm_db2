@@ -14,23 +14,29 @@
    <email>kfbombar@us.ibm.com</email>
    <role>lead</role>
   </maintainer>
+  <maintainer>
+   <user>kraman</user>
+   <name>Krishna Raman</name>
+   <email>kraman@gmail.com</email>
+   <role>lead</role>
+  </maintainer>
+  <maintainer>
+   <user>tessus</user>
+   <name>Helmut Tessarek</name>
+   <email>helmut_tessarek@at.ibm.com</email>
+   <role>developer</role>
+  </maintainer>
  </maintainers>
-
  <release>
-  <version>1.2.1</version>
-  <date>2006-04-05</date>
+  <version>1.2.2</version>
+  <date>2006-05-24</date>
   <license>Apache License 2.0</license>
-  <state>stable</state>
+  <state>alpha</state>
   <notes>
-   Use strlcpy() rather than strncpy() to comply with PECL standards.
-   Stricter type-matching, initialize all allocated memory.
-   Improve unit test implementation.
-   Enable SUCCESS_WITH_INFO to return results successfully (bug 6561).
-   Handle null characters within SQL values (bug 6572).
-   Avoid appending a null character to CLOB values (bug 6755).
-   Enable default cursor type to be set as a connection attribute.
-   Provide initial support and testing for native XML data type.
-   Improve variable scope binding
+   XML functionality for Viper modified
+   Multiple memory leak fixes
+   Fix for stored procedures
+   Modified db2_exec functionality to improve performance
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
@@ -52,6 +58,7 @@
     <file name="prepare_sp.inc" role="test" />
     <file name="prepare_t_string.inc" role="test" />
     <file name="skipif.inc" role="test" />
+    <file name="skipif2.inc" role="test" />
     <file name="spook.png" role="test" />
     <file name="test_001.phpt" role="test" />
     <file name="test_002.phpt" role="test" />
@@ -70,6 +77,9 @@
     <file name="test_020.phpt" role="test" />
     <file name="test_021.phpt" role="test" />
     <file name="test_022.phpt" role="test" />
+    <file name="test_023.phpt" role="test" />
+    <file name="test_024.phpt" role="test" />
+    <file name="test_025.phpt" role="test" />
     <file name="test_030.phpt" role="test" />
     <file name="test_031.phpt" role="test" />
     <file name="test_032.phpt" role="test" />
