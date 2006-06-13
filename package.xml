@@ -28,10 +28,10 @@
   </maintainer>
  </maintainers>
  <release>
-  <version>1.2.2</version>
-  <date>2006-05-24</date>
+  <version>1.2.3</version>
+  <date>2006-06-13</date>
   <license>Apache License 2.0</license>
-  <state>alpha</state>
+  <state>stable</state>
   <notes>
    XML functionality for Viper modified
    Multiple memory leak fixes
