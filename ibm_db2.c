@@ -21,7 +21,7 @@
   $Id$
 */
 
-#define	MODULE_RELEASE	"1.2.2a-b"
+#define	MODULE_RELEASE	"1.2.3"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
