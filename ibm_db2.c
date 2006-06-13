@@ -21,7 +21,7 @@
   $Id$
 */
 
-#define	MODULE_RELEASE	"1.2.0"
+#define	MODULE_RELEASE	"1.2.2a-b"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -186,6 +186,7 @@ function_entry ibm_db2_functions[] = {
 	PHP_FE(db2_fetch_object,    NULL)
 	PHP_FE(db2_server_info,	NULL)
 	PHP_FE(db2_client_info,	NULL)
+	PHP_FE(db2_escape_string,	NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in ibm_db2_functions[] */
 };
 /* }}} */
@@ -4237,6 +4238,64 @@ PHP_FUNCTION(db2_client_info)
 
 	return;
 	}
+}
+/* }}} */
+
+/* {{{ proto string db2_escape_string(string unescaped_string)
+Escapes a string for use in a SQL statement */
+PHP_FUNCTION(db2_escape_string)
+{
+	int argc = ZEND_NUM_ARGS();
+	char *str, *new_str;
+	char *source, *target;
+	char *end;
+	int new_length;
+	int length;
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "s", &str, &length) == FAILURE) {
+		return;
+	}
+
+	if (!str) {
+		RETURN_EMPTY_STRING();
+	}
+
+	/* allocate twice the source length first (worst case) */
+	new_str = (char*)malloc(((length*2)+1)*sizeof(char));
+
+	source = str;
+	end = source + length;
+	target = new_str;
+
+	while (source < end) {
+		switch( *source ) {
+			case '\0':
+				*target++ = '\\';
+				*target++ = '0';
+				break;
+			case '\'':
+				*target++ = '\'';
+				*target++ = '\'';
+				break;
+			case '\"':
+			case '\\':
+				*target++ = '\\';
+			default:
+				*target++ = *source;
+				break;
+		}
+		source++;
+	}
+
+	/* terminate the string and calculate the real length */
+	*target = 0;
+	new_length = target - new_str;
+
+
+	/* reallocate to the real length */
+	new_str = (char *)realloc(new_str, new_length + 1);
+
+	RETURN_STRINGL(new_str, new_length, 1)
 }
 /* }}} */
 

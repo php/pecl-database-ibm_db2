@@ -152,6 +152,7 @@ PHP_FUNCTION(db2_setoption);
 PHP_FUNCTION(db2_fetch_object);
 PHP_FUNCTION(db2_server_info);
 PHP_FUNCTION(db2_client_info);
+PHP_FUNCTION(db2_escape_string);
 
 /*
 	Declare any global variables you may need between the BEGIN
