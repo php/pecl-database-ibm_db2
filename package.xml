@@ -28,11 +28,13 @@
   </maintainer>
  </maintainers>
  <release>
-  <version>1.2.3</version>
-  <date>2006-06-13</date>
+  <version>1.4.9</version>
+  <date>2006-06-21</date>
   <license>Apache License 2.0</license>
-  <state>stable</state>
+  <state>alpha</state>
   <notes>
+   iSeries support added
+   LOB functionality modified to use LOB locaters
    XML functionality for Viper modified
    Multiple memory leak fixes
    Fix for stored procedures
