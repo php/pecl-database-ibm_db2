@@ -35,7 +35,7 @@ extern zend_module_entry ibm_db2_module_entry;
 
 /* needed for backward compatibility (SQL_XML not defined prior to DB2 v9) */
 #ifndef SQL_XML
-#define SQL_XML -500
+#define SQL_XML -370
 #endif
 
 #ifdef PHP_WIN32
@@ -72,8 +72,20 @@ extern zend_module_entry ibm_db2_module_entry;
 #define DB2_CONVERT 2
 #define DB2_PASSTHRU 3
 
+#ifdef PASE
+#define SQL_IS_INTEGER 0
+#define SQL_BEST_ROWID 0
+#define SQLLEN long
+#define SQLFLOAT double
+#endif
+
+#ifndef PASE
 #define DB2_SCROLLABLE SQL_CURSOR_KEYSET_DRIVEN
 #define DB2_FORWARD_ONLY SQL_SCROLL_FORWARD_ONLY
+#else
+#define DB2_SCROLLABLE SQL_CURSOR_DYNAMIC
+#define DB2_FORWARD_ONLY SQL_CURSOR_FORWARD_ONLY
+#endif
 
 #define DB2_AUTOCOMMIT_ON SQL_AUTOCOMMIT_ON
 #define DB2_AUTOCOMMIT_OFF SQL_AUTOCOMMIT_OFF
@@ -163,6 +175,9 @@ ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 	char		__php_conn_err_state[SQL_SQLSTATE_SIZE + 1];
 	char		__php_stmt_err_msg[DB2_MAX_ERR_MSG_LEN];
 	char		__php_stmt_err_state[SQL_SQLSTATE_SIZE + 1];
+#ifdef PASE /* i5/OS ease of use turn off commit */
+	long		i5_allow_commit;
+#endif /* PASE */
 ZEND_END_MODULE_GLOBALS(ibm_db2)
 
 /* In every utility function you add that needs to use variables
