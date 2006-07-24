@@ -28,17 +28,12 @@
   </maintainer>
  </maintainers>
  <release>
-  <version>1.4.9</version>
-  <date>2006-06-21</date>
+  <version>1.4.10</version>
+  <date>2006-07-24</date>
   <license>Apache License 2.0</license>
   <state>alpha</state>
   <notes>
-   iSeries support added
-   LOB functionality modified to use LOB locaters
-   XML functionality for Viper modified
-   Multiple memory leak fixes
-   Fix for stored procedures
-   Modified db2_exec functionality to improve performance
+    Fix for memory leak on failed connection attempt and failed statement execution
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />

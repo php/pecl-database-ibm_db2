@@ -16,11 +16,11 @@
   +----------------------------------------------------------------------+
   | Authors: Sushant Koduru, Lynh Nguyen, Kanchana Padmanabhan,          |
   |          Dan Scott, Helmut Tessarek, Kellen Bombardier,              |
-  |          Tony Cairns                                                 |
+  |          Tony Cairns, Krishna Raman                                  |
   +----------------------------------------------------------------------+
 */
 
-#define	MODULE_RELEASE	"1.4.9"
+#define	MODULE_RELEASE	"1.4.10"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1113,6 +1113,8 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 
 			if ( rc != SQL_SUCCESS ) {
 				_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+                SQLFreeHandle( SQL_HANDLE_DBC, conn_res->hdbc );
+                SQLFreeHandle(SQL_HANDLE_ENV, conn_res->henv);
 				break;
 			}
 		}
@@ -2065,6 +2067,7 @@ PHP_FUNCTION(db2_exec)
 		}
 		if ( rc < SQL_SUCCESS ) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Execute Failed");
+			SQLFreeHandle( SQL_HANDLE_STMT, stmt_res->hstmt );
 			efree(stmt_res);
 			RETURN_FALSE;
 		}
@@ -2091,8 +2094,8 @@ PHP_FUNCTION(db2_free_result)
 	if (stmt) {
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
 		if ( stmt_res->hstmt ) {
-			rc = SQLFreeHandle( SQL_HANDLE_STMT, stmt_res->hstmt);
-			stmt_res->hstmt = 0;
+            /* Free any cursors that might have been allocated in a previous call to SQLExecute */
+            SQLFreeStmt((SQLHSTMT)stmt_res->hstmt, SQL_CLOSE);
 		}
 		_php_db2_free_result_struct(stmt_res);
 	}
@@ -2252,6 +2255,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 	/* copy data over from bind_data */
 	*(curr->value) = **bind_data;
     zval_copy_ctor(curr->value);
+	INIT_PZVAL(curr->value);
 
 	/* Have to use SQLBindFileToParam if PARAM is type DB2_PARAM_FILE */
 	if ( curr->param_type == DB2_PARAM_FILE) {

@@ -1,40 +1,49 @@
 <?php
 
 // Drop the test view, in case it exists
-$drop = 'DROP TABLE anime_cat';
+$drop = 'DROP VIEW anime_cat';
 $result = @db2_exec($prepconn, $drop);
+$result = null;
 
 // Drop the test table, in case it exists
 $drop = 'DROP TABLE animals';
 $result = @db2_exec($prepconn, $drop);
+$result = null;
 
 // Drop the test table for LOBs, in case it exists
 $drop = 'DROP TABLE animal_pics';
 $result = @db2_exec($prepconn, $drop);
+$result = null;
 
 // Drop the test table for PECL bug #6755
 $drop = 'DROP TABLE table_6755';
 $result = @db2_exec($prepconn, $drop);
+$result = null;
 
 // Drop the test table for PECL bug #6792
 $drop = 'DROP TABLE table_6792';
 $result = @db2_exec($prepconn, $drop);
+$result = null;
 
 // Drop the test table for XML testing
 $drop = 'DROP TABLE xmlTest';
 $result = @db2_exec($prepconn, $drop);
+$result = null;
 
 // Drop the test table for primary keys
 $drop = 'DROP TABLE test_primary_keys';
 $result = @db2_exec($prepconn, $drop);
+$result = null;
 
 // Drop the test table for foreign keys
 $drop = 'DROP TABLE test_foreign_keys';
 $result = @db2_exec($prepconn, $drop);
+$result = null;
 
 // Create the test table
 $create = 'CREATE TABLE animals (id INTEGER, breed VARCHAR(32), name CHAR(16), weight DECIMAL(7,2))';
 $result = db2_exec($prepconn, $create);
+$result = null;
 
 // Populate the test table
 $animals = array(
@@ -49,15 +58,17 @@ $animals = array(
 
 $insert = 'INSERT INTO animals (id, breed, name, weight) VALUES (?, ?, ?, ?)';
 $stmt = db2_prepare($prepconn, $insert);
-if ($stmt) {
+if ($stmt != false) {
     foreach ($animals as $animal) {
         $result = db2_execute($stmt, $animal);
     }
 }
+$stmt = null;
 
 // Create test view
-db2_exec($prepconn, 'CREATE VIEW anime_cat AS
+$result = db2_exec($prepconn, 'CREATE VIEW anime_cat AS
     SELECT name, breed FROM animals
     WHERE id = 0');
+$result = null;
 
 ?>
