@@ -8,51 +8,71 @@ dnl without editing.
 dnl If your extension references something external, use with:
 
 PHP_ARG_WITH(IBM_DB2, for IBM_DB2 support,
-[  --with-IBM_DB2[=DIR]             Include IBM DB2 Univeral Database and Cloudscape support.
-                                 DIR is the location of the DB2 application development
-                                 headers and libraries, defaults to /opt/IBM/db2/V8.1])
+[  --with-IBM_DB2=[DIR]	Include IBM DB2 Univeral Database and Cloudscape support.
+			DIR is the location of the DB2 application development
+			headers and libraries])
 dnl PHP_ARG_ENABLE(IBM_DB2, whether to enable IBM_DB2 support,
 dnl Make sure that the comment is aligned:
 dnl [  --enable-IBM_DB2           Enable IBM_DB2 support])
 
 if test "$PHP_IBM_DB2" != "no"; then
 
-  dnl # --with-IBM_DB2 -> check with-path
-  SEARCH_PATH="$DB2PATH $DB2DIR /opt/IBM/db2/V8.1/ /home/db2inst1/sqllib /usr/local /usr"
+  dnl # --with-IBM_DB2 -> check with-path  	 
+  SEARCH_PATH="$DB2PATH $DB2DIR"
 
   if test -r $PHP_IBM_DB2/ && test -n "$PHP_IBM_DB2" ; then
-     AC_MSG_CHECKING([for DB2 CLI files in $PHP_IBM_DB2])
-     if test -r $PHP_IBM_DB2/lib/libdb2.so || test -r $PHP_IBM_DB2/lib/libdb2.a ; then
-       if test -r "$PHP_IBM_DB2/include/sqlcli1.h" ; then
-	 IBM_DB2_DIR=$PHP_IBM_DB2
-	 AC_MSG_RESULT(yes)
-       fi
-     fi
-   else
-     AC_MSG_CHECKING([for DB2 CLI files in default path])
-     for i in $SEARCH_PATH ; do
-     AC_MSG_CHECKING([in $i])
-       if test -r $i/lib/libdb2.so || test -r $i/lib/libdb2.a ; then
-	 if test -r "$i/include/sqlcli1.h" ; then
-	   IBM_DB2_DIR=$i
-	   AC_MSG_RESULT(found in $i)
-	   break
-	 fi
-       fi
-     done
-   fi
+    AC_MSG_CHECKING([for DB2 CLI files in $PHP_IBM_DB2])
+    if test -r $PHP_IBM_DB2/lib/libdb2.so || test -r $PHP_IBM_DB2/lib/libdb2.a ; then
+      if test -r "$PHP_IBM_DB2/include/sqlcli1.h" ; then
+	    IBM_DB2_DIR=$PHP_IBM_DB2
+        AC_MSG_RESULT(yes)
+      fi
+    else
+      dnl this is for i5
+      if test -r $PHP_IBM_DB2/lib/libdb400.a ; then
+        if test -r "$PHP_IBM_DB2/include/sqlcli1.h" ; then
+	      IBM_DB2_DIR=$PHP_IBM_DB2
+          AC_MSG_RESULT(yes)
+        fi
+      fi
+    fi
+  else
+    AC_MSG_CHECKING([for DB2 CLI files in default path])
+    for i in $SEARCH_PATH ; do
+      AC_MSG_CHECKING([in $i])
+      if test -r $i/lib/libdb2.so || test -r $i/lib/libdb2.a ; then
+        if test -r "$i/include/sqlcli1.h" ; then
+          IBM_DB2_DIR=$i
+          AC_MSG_RESULT(found in $i)
+          break
+        fi
+      else
+        dnl this is for i5
+        if test -r $i/lib/libdb400.a ; then
+          if test -r "$i/include/sqlcli1.h" ; then
+            IBM_DB2_DIR=$i
+            AC_MSG_RESULT(found in $i)
+            break
+          fi
+        fi
+      fi
+    done
+  fi
 
-   if test -z "$IBM_DB2_DIR"; then
-     AC_MSG_RESULT([not found])
-     AC_MSG_ERROR([Please reinstall the DB2 CLI distribution])
-   fi
+  if test -z "$IBM_DB2_DIR"; then
+    AC_MSG_RESULT([not found])
+    AC_MSG_ERROR([Please reinstall the DB2 CLI distribution])
+  fi
 
   dnl # --with-IBM_DB2 -> add include path
   PHP_ADD_INCLUDE($IBM_DB2_DIR/include)
 
-
   dnl # --with-IBM_DB2 -> check for lib and symbol presence
-  LIBNAME=db2
+  if test -r $PHP_IBM_DB2/lib/libdb400.a ; then
+    LIBNAME=db400
+  else
+    LIBNAME=db2
+  fi
   LIBSYMBOL=SQLConnect
 
 dnl #  PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
