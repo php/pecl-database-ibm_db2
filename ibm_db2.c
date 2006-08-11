@@ -658,13 +658,21 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 						*/
 						((conn_handle*)handle)->auto_commit = 1;
 						autocommit = SQL_AUTOCOMMIT_ON;
+#ifdef PASE
 						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&autocommit, SQL_NTS);
+#else
+						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)autocommit, SQL_NTS);
+#endif
 						break;
 
 					case DB2_AUTOCOMMIT_OFF:
 						((conn_handle*)handle)->auto_commit = 0;
 						autocommit = SQL_AUTOCOMMIT_OFF;
+#ifdef PASE
 						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&autocommit, SQL_NTS);
+#else
+						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)autocommit, SQL_NTS);
+#endif
 						break;
 
 					default:
