@@ -292,7 +292,9 @@ static void _php_db2_free_result_struct(stmt_handle* handle)
 				efree(prev_ptr->varname);
 			}
 
-			zval_ptr_dtor(&prev_ptr->value);
+            if( prev_ptr->param_type != DB2_PARAM_OUT && prev_ptr->param_type != DB2_PARAM_INOUT ){
+				zval_ptr_dtor(&prev_ptr->value);
+            }
 			efree(prev_ptr);
 
 			prev_ptr = curr_ptr;
@@ -2200,7 +2202,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 	int nullterm = 0;
 
 	/* Clean old zval value and create a new one */
-	if( curr->value != 0 )
+	if( curr->value != 0  && curr->param_type != DB2_PARAM_OUT && curr->param_type != DB2_PARAM_INOUT )
 		zval_ptr_dtor(&curr->value);
 	MAKE_STD_ZVAL(curr->value);
 
@@ -2613,7 +2615,9 @@ PHP_FUNCTION(db2_execute)
 				efree((prev_ptr->value)->value.str.val);
 			}
 
-			efree(prev_ptr->value);
+            if( prev_ptr->param_type != DB2_PARAM_OUT && prev_ptr->param_type != DB2_PARAM_INOUT ){
+                efree(prev_ptr->value);
+            }
 			efree(prev_ptr);
 
 			prev_ptr = curr_ptr;
