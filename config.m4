@@ -20,7 +20,7 @@ if test "$PHP_IBM_DB2" != "no"; then
   dnl # --with-IBM_DB2 -> check with-path  	 
   SEARCH_PATH="$PHP_IBM_DB2 $DB2PATH $DB2DIR"
 
-  AC_MSG_NOTICE(Looking for DB2 CLI libraries)
+  AC_MSG_CHECKING(Looking for DB2 CLI libraries)
   for i in $SEARCH_PATH ; do
     AC_MSG_CHECKING([     in $i/lib64])
     if test -r $i/lib64/libdb2.so || test -r $i/lib64/libdb2.a || test -r $i/lib64/libdb400.a ; then
