@@ -20,7 +20,7 @@
   +----------------------------------------------------------------------+
 */
 
-#define	MODULE_RELEASE	"1.4.10"
+#define	MODULE_RELEASE	"1.5.0"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -74,6 +74,10 @@ typedef struct _conn_handle_struct {
 	long c_bin_mode;
 	long c_case_mode;
 	long c_cursor_type;
+#ifdef PASE /* i5 override php.ini */
+	long c_i5_allow_commit;
+	long c_i5_dbcs_alloc;
+#endif /* PASE */
 	int handle_active;
 	SQLSMALLINT error_recno_tracker;
 	SQLSMALLINT errormsg_recno_tracker;
@@ -110,6 +114,10 @@ typedef struct _stmt_handle_struct {
 	long s_bin_mode;
 	long cursor_type;
 	long s_case_mode;
+#ifdef PASE /* i5 override php.ini */
+	long s_i5_allow_commit;
+	long s_i5_dbcs_alloc;
+#endif /* PASE */
 	SQLSMALLINT error_recno_tracker;
 	SQLSMALLINT errormsg_recno_tracker;
 
@@ -224,10 +232,28 @@ PHP_INI_BEGIN()
 #ifdef PASE /* i5/OS ease of use turn off commit */
 	STD_PHP_INI_BOOLEAN("ibm_db2.i5_allow_commit", "0", PHP_INI_SYSTEM, OnUpdateLong,
 		i5_allow_commit, zend_ibm_db2_globals, ibm_db2_globals)
+	STD_PHP_INI_BOOLEAN("ibm_db2.i5_dbcs_alloc", "0", PHP_INI_SYSTEM, OnUpdateLong,
+		i5_dbcs_alloc, zend_ibm_db2_globals, ibm_db2_globals)
 #endif /* PASE */
 	PHP_INI_ENTRY("ibm_db2.instance_name", NULL, PHP_INI_SYSTEM, NULL)
 PHP_INI_END()
 /* }}} */
+
+#ifdef PASEOUT /* i5 - debug to error log ... _php_db2_errorlog("inlen=%d",tmp_length) */
+/* {{{ static void _php_db2_errorlog */
+static void _php_db2_errorlog(const char * format, ...)
+{
+    char bigbuff[4096];
+    char * p = (char *) &bigbuff;
+    va_list args;
+    va_start(args, format);
+    vsprintf(p, format, args);
+    va_end(args);
+    php_error_docref(NULL TSRMLS_CC, E_WARNING, p);
+}
+/* }}} */
+#endif /* PASE */
+
 
 /* {{{ static void php_ibm_db2_init_globals
 */
@@ -292,9 +318,9 @@ static void _php_db2_free_result_struct(stmt_handle* handle)
 				efree(prev_ptr->varname);
 			}
 
-            if( prev_ptr->param_type != DB2_PARAM_OUT && prev_ptr->param_type != DB2_PARAM_INOUT ){
+			if( prev_ptr->param_type != DB2_PARAM_OUT && prev_ptr->param_type != DB2_PARAM_INOUT ) {
 				zval_ptr_dtor(&prev_ptr->value);
-            }
+			}
 			efree(prev_ptr);
 
 			prev_ptr = curr_ptr;
@@ -305,12 +331,22 @@ static void _php_db2_free_result_struct(stmt_handle* handle)
 				switch (handle->column_info[i].type) {
 				case SQL_CHAR:
 				case SQL_VARCHAR:
+#ifdef PASE
+				case SQL_UTF8_CHAR:
+#endif
+				case SQL_WCHAR:
+				case SQL_WVARCHAR:
+				case SQL_GRAPHIC:
+				case SQL_VARGRAPHIC:
 #ifndef PASE /* i5/OS SQL_LONGVARCHAR is SQL_VARCHAR */
 				case SQL_LONGVARCHAR:
+				case SQL_WLONGVARCHAR:
+				case SQL_LONGVARGRAPHIC:
 #endif /* PASE */
 				case SQL_TYPE_DATE:
 				case SQL_TYPE_TIME:
 				case SQL_TYPE_TIMESTAMP:
+				case SQL_DATETIME:
 				case SQL_BIGINT:
 				case SQL_DECIMAL:
 				case SQL_NUMERIC:
@@ -352,6 +388,10 @@ static stmt_handle *_db2_new_stmt_struct(conn_handle* conn_res)
 	stmt_res->s_bin_mode = conn_res->c_bin_mode;
 	stmt_res->cursor_type = conn_res->c_cursor_type;
 	stmt_res->s_case_mode = conn_res->c_case_mode;
+#ifdef PASE /* i5 override php.ini */
+	stmt_res->s_i5_allow_commit = conn_res->c_i5_allow_commit;
+	stmt_res->s_i5_dbcs_alloc   = conn_res->c_i5_dbcs_alloc;
+#endif /* PASE */
 
 	stmt_res->head_cache_list = NULL;
 	stmt_res->current_node = NULL;
@@ -398,6 +438,39 @@ PHP_MINIT_FUNCTION(ibm_db2)
 #endif
 
 	ZEND_INIT_MODULE_GLOBALS(ibm_db2, php_ibm_db2_init_globals, NULL);
+
+#ifdef PASE /* i5OS db2_setoptions */
+	REGISTER_LONG_CONSTANT("DB2_I5_FETCH_ON", SQL_TRUE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_FETCH_OFF", SQL_FALSE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_NAMING_ON",  SQL_TRUE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_NAMING_OFF", SQL_FALSE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_DBCS_ALLOC_ON",  SQL_TRUE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_DBCS_ALLOC_OFF", SQL_FALSE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_TXN_NO_COMMIT", SQL_TXN_NO_COMMIT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_TXN_READ_UNCOMMITTED", SQL_TXN_READ_UNCOMMITTED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_TXN_READ_COMMITTED", SQL_TXN_READ_COMMITTED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_TXN_REPEATABLE_READ", SQL_TXN_REPEATABLE_READ, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_TXN_SERIALIZABLE", SQL_TXN_SERIALIZABLE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_FMT_ISO", SQL_FMT_ISO, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_FMT_USA", SQL_FMT_USA, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_FMT_EUR", SQL_FMT_EUR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_FMT_JIS", SQL_FMT_JIS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_FMT_DMY", SQL_FMT_DMY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_FMT_MDY", SQL_FMT_MDY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_FMT_YMD", SQL_FMT_YMD, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_FMT_JUL", SQL_FMT_JUL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_FMT_JOB", SQL_FMT_JOB, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_FMT_HMS", SQL_FMT_HMS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_SEP_SLASH", SQL_SEP_SLASH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_SEP_DASH", SQL_SEP_DASH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_SEP_PERIOD", SQL_SEP_PERIOD, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_SEP_COMMA", SQL_SEP_COMMA, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_SEP_BLANK", SQL_SEP_BLANK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_SEP_JOB", SQL_SEP_JOB, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_SEP_COLON", SQL_SEP_COLON, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_FIRST_IO", SQL_FIRST_IO, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_ALL_IO",   SQL_ALL_IO, CONST_CS | CONST_PERSISTENT);
+#endif /* PASE */
 
 	REGISTER_LONG_CONSTANT("DB2_BINARY", 1, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DB2_CONVERT", 2, CONST_CS | CONST_PERSISTENT);
@@ -585,7 +658,7 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
 static void _php_db2_assign_options( void *handle, int type, char *opt_key, long data TSRMLS_DC )
 {
 	int rc = 0;
-	SQLINTEGER autocommit;
+	SQLINTEGER pvParam;
 
 	if ( !STRCASECMP(opt_key, "cursor")) {
 		switch (type) {
@@ -654,26 +727,26 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 			if (((conn_handle *)handle)->auto_commit != data) {
 				switch (data) {
 					case DB2_AUTOCOMMIT_ON:
-						/*	Setting AUTOCOMMIT again here. The user could modify
-							this option, close the connection, and reopen it again
-							with this option.
+						/* Setting AUTOCOMMIT again here. The user could modify
+						   this option, close the connection, and reopen it again
+						   with this option.
 						*/
 						((conn_handle*)handle)->auto_commit = 1;
-						autocommit = SQL_AUTOCOMMIT_ON;
+						pvParam = SQL_AUTOCOMMIT_ON;
 #ifdef PASE
-						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&autocommit, SQL_NTS);
+						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&pvParam, SQL_NTS);
 #else
-						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)autocommit, SQL_NTS);
+						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)pvParam, SQL_NTS);
 #endif
 						break;
 
 					case DB2_AUTOCOMMIT_OFF:
 						((conn_handle*)handle)->auto_commit = 0;
-						autocommit = SQL_AUTOCOMMIT_OFF;
+						pvParam = SQL_AUTOCOMMIT_OFF;
 #ifdef PASE
-						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&autocommit, SQL_NTS);
+						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&pvParam, SQL_NTS);
 #else
-						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)autocommit, SQL_NTS);
+						rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)pvParam, SQL_NTS);
 #endif
 						break;
 
@@ -765,6 +838,210 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 			default:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "DB2_ATTR_CASE attribute can only be set on connection or statement resources");
 		}
+#ifdef PASE  /* i5/OS new set options */
+	} else if (!STRCASECMP(opt_key, "i5_lib")) {
+          /* i5_lib - SQL_ATTR_DBC_DEFAULT_LIB
+             A character value that indicates the default library that will be used for resolving unqualified file references. This is not valid if the connection is using system naming mode.
+             */
+	    char * lib = (char *)data;
+	    rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_DBC_DEFAULT_LIB, (SQLPOINTER)lib, SQL_NTS);
+	} else if (!STRCASECMP(opt_key, "i5_naming")) {
+          /* i5_naming - SQL_ATTR_DBC_SYS_NAMING
+             DB2_I5_NAMING_ON value turns on DB2 UDB CLI iSeries system naming mode. Files are qualified using the slash (/) delimiter. Unqualified files are resolved using the library list for the job..
+             DB2_I5_NAMING_OFF value turns off DB2 UDB CLI default naming mode, which is SQL naming. Files are qualified using the period (.) delimiter. Unqualified files are resolved using either the default library or the current user ID.
+             */
+	    pvParam = data;
+	    switch (data) {
+		case DB2_I5_NAMING_ON:
+		case DB2_I5_NAMING_OFF:
+		    rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_DBC_SYS_NAMING, (SQLPOINTER)&pvParam, SQL_NTS);
+		    break;
+		default:
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_naming (DB2_I5_NAMING_ON, DB2_I5_NAMING_OFF)");
+	    }
+	} else if (!STRCASECMP(opt_key, "i5_dbcs_alloc")) {
+           /* i5_dbcs_alloc SQL_ATTR_DBC_SYS_NAMING
+              DB2_I5_DBCS_ALLOC_ON value turns on DB2 6X allocation scheme for DBCS translation column size growth.
+              DB2_I5_DBCS_ALLOC_OFF value turns off DB2 6X allocation scheme for DBCS translation column size growth.
+              */
+	    pvParam = data;
+	    switch (data) {
+		case DB2_I5_DBCS_ALLOC_ON:
+		    /* override i5_dbcs_alloc in php.ini */
+		    ((conn_handle*)handle)->c_i5_dbcs_alloc = 1;
+		    break;
+		case DB2_I5_DBCS_ALLOC_OFF:
+		    /* override i5_dbcs_alloc in php.ini */
+		    ((conn_handle*)handle)->c_i5_dbcs_alloc = 0;
+		    break;
+		default:
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_dbcs_alloc (DB2_I5_DBCS_ALLOC_ON, DB2_I5_DBCS_ALLOC_OFF)");
+	    }
+	} else if (!STRCASECMP(opt_key, "i5_commit")) {
+          /* i5_commit - SQL_ATTR_COMMIT
+             The SQL_ATTR_COMMIT attribute should be set before the SQLConnect(). If the value is changed after the connection has been established, and the connection is to a remote data source, the change does not take effect until the next successful SQLConnect() for the connection handle
+             DB2_I5_TXN_NO_COMMIT - Commitment control is not used.
+             DB2_I5_TXN_READ_UNCOMMITTED - Dirty reads, nonrepeatable reads, and phantoms are possible. 
+             DB2_I5_TXN_READ_COMMITTED - Dirty reads are not possible. Nonrepeatable reads, and phantoms are possible. 
+             DB2_I5_TXN_REPEATABLE_READ - Dirty reads and nonrepeatable reads are not possible. Phantoms are possible. 
+             DB2_I5_TXN_SERIALIZABLE - Transactions are serializable. Dirty reads, non-repeatable reads, and phantoms are not possible
+             */
+	    pvParam = data;
+	    switch (data) {
+		case DB2_I5_TXN_READ_UNCOMMITTED:
+		case DB2_I5_TXN_READ_COMMITTED:
+		case DB2_I5_TXN_REPEATABLE_READ:
+		case DB2_I5_TXN_SERIALIZABLE:
+		    /* override commit in php.ini */
+		    ((conn_handle*)handle)->c_i5_allow_commit = 1;
+		    rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_COMMIT, (SQLPOINTER)&pvParam, SQL_NTS);
+		    break;
+		case DB2_I5_TXN_NO_COMMIT:
+		    /* override commit in php.ini */
+		    ((conn_handle*)handle)->c_i5_allow_commit = 0;
+		    rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_COMMIT, (SQLPOINTER)&pvParam, SQL_NTS);
+		    break;
+		default:
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_commit (DB2_I5_TXN_NO_COMMIT, DB2_I5_TXN_READ_UNCOMMITTED, DB2_I5_TXN_READ_COMMITTED, DB2_I5_TXN_REPEATABLE_READ, DB2_I5_TXN_SERIALIZABLE)");
+	    }
+
+	} else if (!STRCASECMP(opt_key, "i5_date_fmt")) {
+          /* i5_date_fmt - SQL_ATTR_DATE_FMT
+             DB2_I5_FMT_ISO - The International Organization for Standardization (ISO) date format yyyy-mm-dd is used. This is the default. 
+             DB2_I5_FMT_USA - The United States date format mm/dd/yyyy is used. 
+             DB2_I5_FMT_EUR - The European date format dd.mm.yyyy is used. 
+             DB2_I5_FMT_JIS - The Japanese Industrial Standard date format yyyy-mm-dd is used. 
+             DB2_I5_FMT_MDY - The date format mm/dd/yyyy is used. 
+             DB2_I5_FMT_DMY - The date format dd/mm/yyyy is used. 
+             DB2_I5_FMT_YMD - The date format yy/mm/dd is used. 
+             DB2_I5_FMT_JUL - The Julian date format yy/ddd is used. 
+             DB2_I5_FMT_JOB - The job default is used.
+             */
+	    pvParam = data;
+	    switch (data) {
+		case DB2_I5_FMT_ISO:
+		case DB2_I5_FMT_USA:
+		case DB2_I5_FMT_EUR:
+		case DB2_I5_FMT_JIS:
+		case DB2_I5_FMT_MDY:
+		case DB2_I5_FMT_DMY:
+		case DB2_I5_FMT_YMD:
+		case DB2_I5_FMT_JUL:
+		case DB2_I5_FMT_JOB:
+		    rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_DATE_FMT, (SQLPOINTER)&pvParam, SQL_NTS);
+		    break;
+		default:
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_date_fmt DB2_I5_FMT_ISO, DB2_I5_FMT_USA, DB2_I5_FMT_EUR, DB2_I5_FMT_JIS, DB2_I5_FMT_MDY, DB2_I5_FMT_DMY, DB2_I5_FMT_YMD, DB2_I5_FMT_JUL, DB2_I5_FMT_JOB");
+	    }
+	} else if (!STRCASECMP(opt_key, "i5_date_sep")) {
+          /* i5_date_sep - SQL_ATTR_DATE_SEP
+             DB2_I5_SEP_SLASH - A slash ( / ) is used as the date separator. This is the default. 
+             DB2_I5_SEP_DASH - A dash ( - ) is used as the date separator. 
+             DB2_I5_SEP_PERIOD - A period ( . ) is used as the date separator. 
+             DB2_I5_SEP_COMMA - A comma ( , ) is used as the date separator. 
+             DB2_I5_SEP_BLANK - A blank is used as the date separator. 
+             DB2_I5_SEP_JOB - The job default is used
+             */
+	    pvParam = data;
+	    switch (data) {
+		case DB2_I5_SEP_SLASH:
+		case DB2_I5_SEP_DASH:
+		case DB2_I5_SEP_PERIOD:
+		case DB2_I5_SEP_COMMA:
+		case DB2_I5_SEP_BLANK:
+		case DB2_I5_SEP_JOB:
+		    rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_DATE_SEP, (SQLPOINTER)&pvParam, SQL_NTS);
+		    break;
+		default:
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_date_sep (DB2_I5_SEP_SLASH, DB2_I5_SEP_DASH, DB2_I5_SEP_PERIOD, DB2_I5_SEP_COMMA, DB2_I5_SEP_BLANK, DB2_I5_SEP_JOB)");
+	    }
+	} else if (!STRCASECMP(opt_key, "i5_time_fmt")) {
+          /* i5_time_fmt - SQL_ATTR_TIME_FMT
+             DB2_I5_FMT_ISO - The International Organization for Standardization (ISO) time format hh.mm.ss is used. This is the default. 
+             DB2_I5_FMT_USA - The United States time format hh:mmxx is used, where xx is AM or PM. 
+             DB2_I5_FMT_EUR - The European time format hh.mm.ss is used. 
+             DB2_I5_FMT_JIS - The Japanese Industrial Standard time format hh:mm:ss is used. 
+             DB2_I5_FMT_HMS - The hh:mm:ss format is used.
+             */ 
+	    pvParam = data;
+	    switch (data) {
+		case DB2_I5_FMT_ISO:
+		case DB2_I5_FMT_USA:
+		case DB2_I5_FMT_EUR:
+		case DB2_I5_FMT_JIS:
+		case DB2_I5_FMT_HMS:
+		    rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_TIME_FMT, (SQLPOINTER)&pvParam, SQL_NTS);
+		    break;
+		default:
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_time_fmt (DB2_I5_FMT_ISO, DB2_I5_FMT_USA, DB2_I5_FMT_EUR, DB2_I5_FMT_JIS, DB2_I5_FMT_HMS)");
+	    }
+	} else if (!STRCASECMP(opt_key, "i5_time_sep")) {
+          /* i5_time_sep - SQL_ATTR_TIME_SEP
+             DB2_I5_SEP_COLON - A colon ( : ) is used as the time separator. This is the default. 
+             DB2_I5_SEP_PERIOD - A period ( . ) is used as the time separator. 
+             DB2_I5_SEP_COMMA - A comma ( , ) is used as the time separator. 
+             DB2_I5_SEP_BLANK - A blank is used as the time separator. 
+             DB2_I5_SEP_JOB - The job default is used.
+             */
+	    pvParam = data;
+	    switch (data) {
+		case DB2_I5_SEP_COLON:
+		case DB2_I5_SEP_PERIOD:
+		case DB2_I5_SEP_COMMA:
+		case DB2_I5_SEP_BLANK:
+		case DB2_I5_SEP_JOB:
+		    rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_TIME_SEP, (SQLPOINTER)&pvParam, SQL_NTS);
+		    break;
+		default:
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_time_sep (DB2_I5_SEP_COLON, DB2_I5_SEP_PERIOD, DB2_I5_SEP_COMMA, DB2_I5_SEP_BLANK, DB2_I5_SEP_JOB)");
+	    }
+	} else if (!STRCASECMP(opt_key, "i5_decimal_sep")) {
+          /* i5_decimal_sep - SQL_ATTR_DECIMAL_SEP
+             DB2_I5_SEP_PERIOD - A period ( . ) is used as the decimal separator. This is the default. 
+             DB2_I5_SEP_COMMA - A comma ( , ) is used as the date separator. 
+             DB2_I5_SEP_JOB - The job default is used.
+             */
+	    pvParam = data;
+	    switch (data) {
+		case DB2_I5_SEP_PERIOD:
+		case DB2_I5_SEP_COMMA:
+		case DB2_I5_SEP_JOB:
+		    rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_DECIMAL_SEP, (SQLPOINTER)&pvParam, SQL_NTS);
+		    break;
+		default:
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_decimal_sep (DB2_I5_SEP_PERIOD, DB2_I5_SEP_COMMA, DB2_I5_SEP_JOB)");
+	    }
+	} else if (!STRCASECMP(opt_key, "i5_query_optimize")) {
+          /* i5_query_optimize - SQL_ATTR_QUERY_OPTIMIZE_GOAL
+             DB2_FIRST_IO All queries are optimized with the goal of returning the first page of output as fast as possible. This goal works well when the output is controlled by a user who is most likely to cancel the query after viewing the first page of output data. Queries coded with an OPTIMIZE FOR nnn ROWS clause honor the goal specified by the clause.
+             DB2_ALL_IO All queries are optimized with the goal of running the entire query to completion in the shortest amount of elapsed time. This is a good option when the output of a query is being written to a file or report, or the interface is queuing the output data. Queries coded with an OPTIMIZE FOR nnn ROWS clause honor the goal specified by the clause. This is the default.
+             */
+	    pvParam = data;
+	    switch (data) {
+		case DB2_FIRST_IO:
+		case DB2_ALL_IO:
+		    rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_QUERY_OPTIMIZE_GOAL, (SQLPOINTER)&pvParam, SQL_NTS);
+		    break;
+		default:
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_fetch_only (DB2_FIRST_IO, DB2_ALL_IO)");
+	    }
+	} else if (!STRCASECMP(opt_key, "i5_fetch_only")) {
+          /* i5_fetch_only - SQL_ATTR_FOR_FETCH_ONLY
+             DB2_I5_FETCH_ON - Cursors are read-only and cannot be used for positioned updates or deletes. This is the default unless SQL_ATTR_FOR_FETCH_ONLY environment has been set to SQL_FALSE. 
+             DB2_I5_FETCH_OFF - Cursors can be used for positioned updates and deletes.
+             */
+	    pvParam = data;
+	    switch (data) {
+		case DB2_I5_FETCH_ON:
+		case DB2_I5_FETCH_OFF:
+		    rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
+					SQL_ATTR_FOR_FETCH_ONLY, (SQLPOINTER)&pvParam,
+					SQL_IS_INTEGER );
+		    break;
+		default:
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_fetch_only (DB2_I5_FETCH_ON, DB2_I5_FETCH_OFF)");
+	    }
+#endif /* PASE */
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Incorrect option setting passed in");
 	}
@@ -851,6 +1128,24 @@ static int _php_db2_get_result_set_info(stmt_handle *stmt_res)
 		} else {
 			stmt_res->column_info[i].name = (SQLCHAR *)estrdup(tmp_name);
 		}
+#ifdef PASE /* i5/OS DBCS may have up to 6 times growth in column alloc size on convert */
+		if (stmt_res->s_i5_dbcs_alloc) {
+		    switch (stmt_res->column_info[i].type) {
+			case SQL_CHAR:
+			case SQL_VARCHAR:
+			case SQL_CLOB:
+			case SQL_DBCLOB:
+			case SQL_UTF8_CHAR:
+			case SQL_WCHAR:
+			case SQL_WVARCHAR:
+			case SQL_GRAPHIC:
+			case SQL_VARGRAPHIC:
+			    stmt_res->column_info[i].size = stmt_res->column_info[i].size * 6;
+		    }
+
+		}
+#endif /* PASE */
+
 	}
 	return 0;
 }
@@ -865,6 +1160,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
 	SQLSMALLINT column_type;
 	db2_row_data_type *row_data;
 	int i, rc = SQL_SUCCESS;
+	SQLSMALLINT target_type = SQL_C_DEFAULT;
 
 	stmt_res->row_data = (db2_row_type*) ecalloc(stmt_res->num_columns, sizeof(db2_row_type));
 
@@ -874,17 +1170,27 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
 		switch(column_type) {
 			case SQL_CHAR:
 			case SQL_VARCHAR:
-#ifndef PASE /* i5/OS EBCIDIC<->ASCII related - we do getdata call instead */
+#ifdef PASE
+			case SQL_UTF8_CHAR:
+#endif
+			case SQL_WCHAR:
+			case SQL_WVARCHAR:
+			case SQL_GRAPHIC:
+			case SQL_VARGRAPHIC:
+			case SQL_DBCLOB:
+#ifndef PASE /* i5/OS SQL_LONGVARCHAR is SQL_VARCHAR */
 			case SQL_LONGVARCHAR:
+			case SQL_WLONGVARCHAR:
+			case SQL_LONGVARGRAPHIC:
+#else  /* i5/OS Until i5 DB2 PTF wide spread - SQL_C_CHAR works (replace orig i5 SqlGetData scheme) */
+			        target_type = SQL_C_CHAR; 
+#endif /* PASE */
 				in_length = stmt_res->column_info[i].size+1;
 				row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
 
 				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
-					SQL_C_DEFAULT, row_data->str_val, in_length,
+					target_type, row_data->str_val, in_length,
 					(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
-#else
-				stmt_res->row_data[i].out_length = 0;
-#endif
 				break;
 
 			case SQL_BINARY:
@@ -912,6 +1218,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
 			case SQL_TYPE_DATE:
 			case SQL_TYPE_TIME:
 			case SQL_TYPE_TIMESTAMP:
+			case SQL_DATETIME:
 			case SQL_BIGINT:
 				in_length = stmt_res->column_info[i].size+1;
 				row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
@@ -969,7 +1276,6 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
 						stmt_res->column_info[i].loc_type, &stmt_res->column_info[i].lob_loc, 4,
 						&stmt_res->column_info[i].loc_ind);
  			   break;
-
 			case SQL_XML:
 				stmt_res->row_data[i].out_length = 0;
 				break;
@@ -1052,6 +1358,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 #ifndef PASE /* i5/OS difference */
 			rc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &(conn_res->henv));
 #else /* PASE */
+			long attr;
 			rc = SQLAllocEnv(&(conn_res->henv));
 #endif /* PASE */
 			if (rc != SQL_SUCCESS) {
@@ -1061,7 +1368,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 #ifndef PASE /* i5/OS server mode */
 			rc = SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_ODBC_VERSION, (void *)SQL_OV_ODBC3, 0);
 #else /* PASE */
-			long attr = SQL_TRUE;
+			attr = SQL_TRUE;
 			SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_SERVER_MODE, &attr, 0);
 #endif /* PASE */
 		}
@@ -1080,16 +1387,12 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 #ifndef PASE
 		conn_res->auto_commit = SQL_AUTOCOMMIT_ON;
 		rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(conn_res->auto_commit), SQL_NTS);
-#else
+#else /* PASE */
 		conn_res->auto_commit = SQL_AUTOCOMMIT_ON;
 		rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(&conn_res->auto_commit), SQL_NTS);
-		if (!IBM_DB2_G(i5_allow_commit)) {
-			if (!rc) {
-				SQLINTEGER nocommitpase = SQL_TXN_NO_COMMIT;
-				SQLSetConnectOption((SQLHDBC)conn_res->hdbc, SQL_ATTR_COMMIT, (SQLPOINTER)&nocommitpase);
-			}
-		}
-#endif
+		conn_res->c_i5_allow_commit = IBM_DB2_G(i5_allow_commit);
+		conn_res->c_i5_dbcs_alloc = IBM_DB2_G(i5_dbcs_alloc);
+#endif /* PASE */
 
 		conn_res->c_bin_mode = IBM_DB2_G(bin_mode);
 		conn_res->c_case_mode = DB2_CASE_NATURAL;
@@ -1108,6 +1411,14 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Options Array must have string indexes");
 			}
 		}
+#ifdef PASE
+		if (!conn_res->c_i5_allow_commit) {
+			if (!rc) {
+				SQLINTEGER nocommitpase = SQL_TXN_NO_COMMIT;
+				SQLSetConnectOption((SQLHDBC)conn_res->hdbc, SQL_ATTR_COMMIT, (SQLPOINTER)&nocommitpase);
+			}
+		}
+#endif /* PASE */
 
 		if (! reused) {
 			/* Connect */
@@ -2202,7 +2513,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 	int nullterm = 0;
 
 	/* Clean old zval value and create a new one */
-	if( curr->value != 0  && curr->param_type != DB2_PARAM_OUT && curr->param_type != DB2_PARAM_INOUT )
+	if( curr->value != 0 && curr->param_type != DB2_PARAM_OUT && curr->param_type != DB2_PARAM_INOUT )
 		zval_ptr_dtor(&curr->value);
 	MAKE_STD_ZVAL(curr->value);
 
@@ -2223,15 +2534,26 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 
 		case SQL_CHAR:
 		case SQL_VARCHAR:
+		case SQL_WCHAR:
+		case SQL_WVARCHAR:
+		case SQL_GRAPHIC:
+		case SQL_VARGRAPHIC:
 #ifndef PASE /* i5/OS SQL_LONGVARCHAR is SQL_VARCHAR */
 		case SQL_LONGVARCHAR:
+		case SQL_WLONGVARCHAR:
+		case SQL_LONGVARGRAPHIC:
 #endif /* PASE */
 		case SQL_DECIMAL:
 		case SQL_NUMERIC:
 		case SQL_TYPE_DATE:
+		case SQL_DATETIME:
 		case SQL_TYPE_TIME:
 		case SQL_TYPE_TIMESTAMP:
 		case SQL_CLOB:
+#ifdef PASE
+		case SQL_UTF8_CHAR:
+#endif
+		case SQL_DBCLOB:
 			nullterm = 1;
 		case SQL_BINARY:
 #ifndef PASE /* i5/OS SQL_LONGVARBINARY is SQL_VARBINARY */
@@ -2303,6 +2625,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 		case IS_STRING:
 			switch ( curr->data_type ) {
 				case SQL_CLOB:
+				case SQL_DBCLOB:
 					if (curr->param_type == DB2_PARAM_OUT || curr->param_type == DB2_PARAM_INOUT) {
 						curr->bind_indicator = (curr->value)->value.str.len;
 						valueType = SQL_C_CHAR;
@@ -2615,9 +2938,9 @@ PHP_FUNCTION(db2_execute)
 				efree((prev_ptr->value)->value.str.val);
 			}
 
-            if( prev_ptr->param_type != DB2_PARAM_OUT && prev_ptr->param_type != DB2_PARAM_INOUT ){
-                efree(prev_ptr->value);
-            }
+			if( prev_ptr->param_type != DB2_PARAM_OUT && prev_ptr->param_type != DB2_PARAM_INOUT ){
+				efree(prev_ptr->value);
+			}
 			efree(prev_ptr);
 
 			prev_ptr = curr_ptr;
@@ -2839,6 +3162,10 @@ PHP_FUNCTION(db2_next_result)
 		new_stmt_res->s_bin_mode = stmt_res->s_bin_mode;
 		new_stmt_res->cursor_type = stmt_res->cursor_type;
 		new_stmt_res->s_case_mode = stmt_res->s_case_mode;
+#ifdef PASE /* i5 override php.ini */
+		new_stmt_res->s_i5_allow_commit = stmt_res->s_i5_allow_commit;
+		new_stmt_res->s_i5_dbcs_alloc   = stmt_res->s_i5_dbcs_alloc;
+#endif /* PASE */
 		new_stmt_res->head_cache_list = NULL;
 		new_stmt_res->current_node = NULL;
 		new_stmt_res->num_params = 0;
@@ -3158,6 +3485,9 @@ PHP_FUNCTION(db2_field_type)
 		case SQL_CLOB:
 			str_val = "clob";
 			break;
+		case SQL_DBCLOB:
+			str_val = "dbclob";
+			break;
 		case SQL_BLOB:
 			str_val = "blob";
 			break;
@@ -3169,6 +3499,9 @@ PHP_FUNCTION(db2_field_type)
 			break;
 		case SQL_TYPE_TIME:
 			str_val = "time";
+			break;
+	    case SQL_DATETIME:
+			str_val = "datetime";
 			break;
 		case SQL_TYPE_TIMESTAMP:
 			str_val = "timestamp";
@@ -3322,6 +3655,24 @@ static RETCODE _php_db2_get_length(stmt_handle* stmt_res, SQLUSMALLINT col_num, 
 	rc = SQLGetLength((SQLHSTMT)new_hstmt, stmt_res->column_info[col_num-1].loc_type,
 				stmt_res->column_info[col_num-1].lob_loc, sLength,
 				&stmt_res->column_info[col_num-1].loc_ind);
+#ifdef PASE /* i5/OS special DBCS */
+	if (*sLength != SQL_NULL_DATA){
+		if (stmt_res->s_i5_dbcs_alloc) {
+		    switch (stmt_res->column_info[col_num-1].type) {
+			case SQL_CHAR:
+			case SQL_VARCHAR:
+			case SQL_CLOB:
+			case SQL_DBCLOB:
+			case SQL_UTF8_CHAR:
+			case SQL_WCHAR:
+			case SQL_WVARCHAR:
+			case SQL_GRAPHIC:
+			case SQL_VARGRAPHIC:
+			    *sLength = *sLength * 6;
+		    }
+		}
+	}
+#endif /*  PASE */
 
 	SQLFreeHandle(SQL_HANDLE_STMT, new_hstmt);
 
@@ -3341,7 +3692,6 @@ static RETCODE _php_db2_get_data2(stmt_handle *stmt_res, SQLUSMALLINT col_num, S
 	if ( rc < SQL_SUCCESS ) {
 		return SQL_ERROR;
 	}
-
 	rc = SQLGetSubString((SQLHSTMT)new_hstmt, stmt_res->column_info[col_num-1].loc_type,
 				stmt_res->column_info[col_num-1].lob_loc, 1, in_length, targetCType,
 				buff, in_length, out_length, &stmt_res->column_info[col_num-1].loc_ind);
@@ -3400,12 +3750,23 @@ PHP_FUNCTION(db2_result)
 		switch(column_type) {
 			case SQL_CHAR:
 			case SQL_VARCHAR:
+#ifdef PASE
+			case SQL_UTF8_CHAR:
+#endif
+			case SQL_WCHAR:
+			case SQL_WVARCHAR:
+			case SQL_GRAPHIC:
+			case SQL_VARGRAPHIC:
+			case SQL_DBCLOB:
 #ifndef PASE /* i5/OS SQL_LONGVARCHAR is SQL_VARCHAR */
 			case SQL_LONGVARCHAR:
+			case SQL_WLONGVARCHAR:
+			case SQL_LONGVARGRAPHIC:
 #endif /* PASE */
 			case SQL_TYPE_DATE:
 			case SQL_TYPE_TIME:
 			case SQL_TYPE_TIMESTAMP:
+			case SQL_DATETIME:
 			case SQL_BIGINT:
 			case SQL_DECIMAL:
 			case SQL_NUMERIC:
@@ -3479,7 +3840,7 @@ PHP_FUNCTION(db2_result)
 
 			case SQL_BLOB:
 			case SQL_BINARY:
-#ifndef PASE /* i5/OS SQL_LONGVARCHAR is SQL_VARCHAR */
+#ifndef PASE /* i5/OS SQL_LONGVARBINARY is SQL_VARBINARY */
 			case SQL_LONGVARBINARY:
 #endif /* PASE */
 			case SQL_VARBINARY:
@@ -3638,42 +3999,23 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 			switch(column_type) {
 				case SQL_CHAR:
 				case SQL_VARCHAR:
+#ifdef PASE
+				case SQL_UTF8_CHAR:
+#endif
+				case SQL_WCHAR:
+				case SQL_WVARCHAR:
+				case SQL_GRAPHIC:
+				case SQL_VARGRAPHIC:
+				case SQL_DBCLOB:
 #ifndef PASE /* i5/OS SQL_LONGVARCHAR is SQL_VARCHAR */
 				case SQL_LONGVARCHAR:
-#else /* PASE */
-					/* i5/OS will xlate from EBCIDIC to ASCII (via SQLGetData) */
-					tmp_length = stmt_res->column_info[i].size;
-					out_ptr = (SQLPOINTER)emalloc(tmp_length+1);
-					memset(out_ptr,0,tmp_length+1);
-					if ( out_ptr == NULL ) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory");
-						RETURN_FALSE;
-					}
-					rc = _php_db2_get_data(stmt_res, i+1, SQL_C_CHAR, out_ptr, tmp_length+1, &out_length);
-					if ( rc == SQL_ERROR ) {
-						RETURN_FALSE;
-					}
-					if (out_length == SQL_NULL_DATA) {
-						if ( op & DB2_FETCH_ASSOC ) {
-							add_assoc_null(return_value, stmt_res->column_info[i].name);
-						}
-						if ( op & DB2_FETCH_INDEX ) {
-    						add_index_null(return_value, i);
-						}
-					} else {
-						out_ptr[tmp_length] = '\0';
-						if ( op & DB2_FETCH_ASSOC ) {
-							add_assoc_stringl(return_value, stmt_res->column_info[i].name, (char *)out_ptr, strlen(out_ptr), 0);
-						}
-						if ( op & DB2_FETCH_INDEX ) {
-							add_index_stringl(return_value, i, (char *)out_ptr, strlen(out_ptr), DB2_FETCH_BOTH & op);
-						}
-					}
-					break;
+				case SQL_WLONGVARCHAR:
+				case SQL_LONGVARGRAPHIC:
 #endif /* PASE */
 				case SQL_TYPE_DATE:
 				case SQL_TYPE_TIME:
 				case SQL_TYPE_TIMESTAMP:
+				case SQL_DATETIME:
 				case SQL_BIGINT:
 				case SQL_DECIMAL:
 				case SQL_NUMERIC:
@@ -3857,7 +4199,6 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 						}
 					} else {
 						out_ptr = (SQLPOINTER)ecalloc(1, tmp_length+1);
-
 						if ( out_ptr == NULL ) {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for LOB Data");
 							RETURN_FALSE;
@@ -3869,11 +4210,12 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 						}
 
 						if ( op & DB2_FETCH_ASSOC ) {
-							add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, tmp_length, 0);
+							add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, tmp_length, 1);
 						}
 						if ( op & DB2_FETCH_INDEX ) {
 							add_index_stringl(return_value, i, (char *)out_ptr, tmp_length, DB2_FETCH_BOTH & op);
 						}
+
 						efree(out_ptr);
 					}
 					break;
@@ -3974,7 +4316,7 @@ PHP_FUNCTION(db2_fetch_both)
 }
 /* }}} */
 
-/* {{{ proto bool db2_set_option(resource stmt, array options, int type)
+/* {{{ proto bool db2_set_option(resource resc, array options, int type)
 Sets the specified option in the resource. TYPE field specifies the resource type (1 = Connection) */
 PHP_FUNCTION(db2_set_option)
 {

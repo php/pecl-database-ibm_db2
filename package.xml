@@ -28,12 +28,15 @@
   </maintainer>
  </maintainers>
  <release>
-  <version>1.4.10</version>
-  <date>2006-07-24</date>
+  <version>1.5.0</version>
+  <date>2006-08-30</date>
   <license>Apache License 2.0</license>
   <state>alpha</state>
   <notes>
-    Fix for memory leak on failed connection attempt and failed statement execution
+    Greater iSeries support
+    Fix for setting AUTOCOMMIT in Linux/Windows
+    Stored procedure with INOUT/IN paramters segfault fix
+    Addition of more tests to the test suite
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
@@ -140,10 +143,12 @@
     <file name="test_144.phpt" role="test" />
     <file name="test_145.phpt" role="test" />
     <file name="test_146.phpt" role="test" />
+    <file name="test_147.phpt" role="test" />
     <file name="test_150.phpt" role="test" />
     <file name="test_151.phpt" role="test" />
     <file name="test_152.phpt" role="test" />
     <file name="test_153.phpt" role="test" />
+    <file name="test_154.phpt" role="test" />
     <file name="test_155.phpt" role="test" />
     <file name="test_156.phpt" role="test" />
     <file name="test_157.phpt" role="test" />
