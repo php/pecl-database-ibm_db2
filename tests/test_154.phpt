@@ -11,7 +11,7 @@ $conn = db2_connect($db,$user,$password);
 
 if ($conn) {
 	$statement = 'DROP TABLE fetch_test';
-	$result = db2_exec($conn, $statement);
+	$result = @db2_exec($conn, $statement);
 	$statement = 'CREATE TABLE fetch_test (col1 VARCHAR(20), col2 CLOB(20), col3 INTEGER)';
 	$result = db2_exec($conn, $statement);
 	$statement = "INSERT INTO fetch_test VALUES ('column 0', 'Data in the clob 0', 0)";
