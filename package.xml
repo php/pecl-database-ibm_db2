@@ -28,15 +28,15 @@
   </maintainer>
  </maintainers>
  <release>
-  <version>1.5.0</version>
+  <version>1.5.1</version>
   <date>2006-08-30</date>
   <license>Apache License 2.0</license>
-  <state>alpha</state>
+  <state>beta</state>
   <notes>
-    Greater iSeries support
-    Fix for setting AUTOCOMMIT in Linux/Windows
-    Stored procedure with INOUT/IN paramters segfault fix
-    Addition of more tests to the test suite
+    Major peformance increase for iSeries
+    Bug fix for binding two parameters out of order
+    Options fix for setting cursor to scrollable
+    Fix for db2_free_result segfault
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
@@ -144,6 +144,7 @@
     <file name="test_145.phpt" role="test" />
     <file name="test_146.phpt" role="test" />
     <file name="test_147.phpt" role="test" />
+    <file name="test_148.phpt" role="test" />
     <file name="test_150.phpt" role="test" />
     <file name="test_151.phpt" role="test" />
     <file name="test_152.phpt" role="test" />
@@ -182,6 +183,7 @@
     <file name="test_241.phpt" role="test" />
     <file name="test_250.phpt" role="test" />
     <file name="test_251.phpt" role="test" />
+    <file name="test_252.phpt" role="test" />
     <file name="test_260.phpt" role="test" />
     <file name="test_261.phpt" role="test" />
     <file name="test_300.phpt" role="test" />

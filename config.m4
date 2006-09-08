@@ -75,8 +75,10 @@ if test "$PHP_IBM_DB2" != "no"; then
   dnl # --with-IBM_DB2 -> check for lib and symbol presence
   if test -r $LIB_DIR/libdb400.a ; then
     LIBNAME=db400
+    PHP_NEW_EXTENSION(ibm_db2, ibm_db2.c, $ext_shared,,-DPASE)
   else
     LIBNAME=db2
+    PHP_NEW_EXTENSION(ibm_db2, ibm_db2.c, $ext_shared)
   fi
   LIBSYMBOL=SQLConnect
 
@@ -89,8 +91,6 @@ dnl #    AC_MSG_ERROR([wrong DB2 CLI lib version or lib not found])
 dnl #  ],[
 dnl #    -L$IBM_DB2_DIR/lib -lm -ldl
 dnl #  ])
-
-  PHP_NEW_EXTENSION(ibm_db2, ibm_db2.c, $ext_shared)
 
   PHP_SUBST(IBM_DB2_SHARED_LIBADD)
 fi

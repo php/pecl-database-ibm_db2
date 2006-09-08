@@ -20,7 +20,7 @@
   +----------------------------------------------------------------------+
 */
 
-#define	MODULE_RELEASE	"1.5.0"
+#define	MODULE_RELEASE	"1.5.1"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -325,6 +325,9 @@ static void _php_db2_free_result_struct(stmt_handle* handle)
 
 			prev_ptr = curr_ptr;
 		}
+
+		handle->head_cache_list = NULL;
+
 		/* free row data cache */
 		if (handle->row_data) {
 			for (i=0; i<handle->num_columns;i++) {
@@ -1368,8 +1371,14 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 #ifndef PASE /* i5/OS server mode */
 			rc = SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_ODBC_VERSION, (void *)SQL_OV_ODBC3, 0);
 #else /* PASE */
-			attr = SQL_TRUE;
-			SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_SERVER_MODE, &attr, 0);
+			/*
+			 * server mode is relatively slow (100X)
+			 * so only use if user id is passed
+			 */
+			if (uid_len) {
+				attr = SQL_TRUE;
+				SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_SERVER_MODE, &attr, 0);
+			}
 #endif /* PASE */
 		}
 
@@ -1574,7 +1583,7 @@ static void _php_db2_add_param_cache( stmt_handle *stmt_res, int param_no, char 
 {
 	param_node *tmp_curr = NULL, *prev = stmt_res->head_cache_list, *curr = stmt_res->head_cache_list;
 
-	while ( (curr != NULL) && (curr->param_num < param_no) ) {
+	while ( curr != NULL && curr->param_num != param_no ) {
 		prev = curr;
 		curr = curr->next;
 	}
@@ -2293,11 +2302,13 @@ static int _php_db2_do_prepare(SQLHANDLE hdbc, char* stmt_string, stmt_handle *s
 	if ( stmt_res->cursor_type == DB2_SCROLLABLE ) {
 #ifndef PASE
 		vParam = SQL_CURSOR_KEYSET_DRIVEN;
+		rc = SQLSetStmtAttr((SQLHSTMT)stmt_res->hstmt, SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)vParam,
+				SQL_IS_INTEGER );
 #else
 		vParam = DB2_SCROLLABLE;
-#endif
 		rc = SQLSetStmtAttr((SQLHSTMT)stmt_res->hstmt, SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)&vParam,
 				SQL_IS_INTEGER );
+#endif
 	}
 
 	/* Prepare the stmt. The cursor type requested has already been set in _php_db2_assign_options */
