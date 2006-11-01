@@ -49,6 +49,7 @@ static int _php_db2_parse_options( zval* options, int type, void* handle TSRMLS_
 static void _php_db2_clear_conn_err_cache(TSRMLS_D);
 static void _php_db2_clear_stmt_err_cache(TSRMLS_D);
 static char * _php_db2_instance_name;
+static int is_systemi;		/* 1 == TRUE; 0 == FALSE; */
 
 /* Defines a linked list structure for caching param data */
 typedef struct _param_cache_node {
@@ -550,9 +551,29 @@ PHP_MSHUTDOWN_FUNCTION(ibm_db2)
 */
 PHP_MINFO_FUNCTION(ibm_db2)
 {
+	char *src, *tgt, *rev;
+	char revision[30];
+
+	src = "$Revision$";
+	rev = (char*)malloc(8*sizeof(char));
+	tgt = rev;
+
+	while( *src != ':' )
+		src++;
+	src++; src++;
+
+	while( *src != '$' )
+		*tgt++ = *src++;
+	tgt--;
+	*tgt = 0;
+
+	sprintf( revision, "%s", rev );
+	free(rev);
+
 	php_info_print_table_start();
 	php_info_print_table_header(2, "IBM DB2, Cloudscape and Apache Derby support", "enabled");
 	php_info_print_table_row(2, "Module release", MODULE_RELEASE);
+	php_info_print_table_row(2, "Module revision", revision);
 
 	switch (IBM_DB2_G(bin_mode)) {
 		case DB2_BINARY:
@@ -692,11 +713,19 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 								SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)&vParam,
 								SQL_IS_INTEGER );
 #else
-							vParam = SQL_CURSOR_KEYSET_DRIVEN;
-							((stmt_handle *)handle)->cursor_type = DB2_SCROLLABLE;
-							rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-								SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)vParam,
-								SQL_IS_INTEGER );
+							if (is_systemi != 1) {		/* Not i5 */
+								vParam = SQL_CURSOR_KEYSET_DRIVEN;
+								((stmt_handle *)handle)->cursor_type = DB2_SCROLLABLE;
+								rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
+									SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)vParam,
+									SQL_IS_INTEGER );
+							} else {				/* Is i5 */
+								vParam = DB2_SCROLLABLE;
+								((stmt_handle *)handle)->cursor_type = DB2_SCROLLABLE;
+								rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
+									SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)&vParam,
+									SQL_IS_INTEGER );
+							}
 #endif
 							break;
 
@@ -707,10 +736,17 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, long
 								SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)&vParam,
 								SQL_IS_INTEGER );
 #else
-							vParam = SQL_SCROLL_FORWARD_ONLY;
-							rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-								SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)vParam,
-								SQL_IS_INTEGER );
+							if (is_systemi != 1) {		/* Not i5 */
+								vParam = SQL_SCROLL_FORWARD_ONLY;
+								rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
+									SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)vParam,
+									SQL_IS_INTEGER );
+							} else {				/* Is i5 */
+								vParam = DB2_FORWARD_ONLY;
+								rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
+									SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)&vParam,
+									SQL_IS_INTEGER );
+							}
 #endif
 							((stmt_handle *)handle)->cursor_type = DB2_FORWARD_ONLY;
 							break;
@@ -1319,6 +1355,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	int hKeyLen = 0;
 	char *hKey = NULL;
 	list_entry newEntry;
+	char server[2048];
 
 	conn_alive = 1;
 
@@ -1440,6 +1477,11 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 						(SQLSMALLINT)database_len, (SQLCHAR *)uid, (SQLSMALLINT)uid_len,
 						(SQLCHAR *)password, (SQLSMALLINT)password_len );
 			}
+
+			/* Get the server name */
+			memset(server, 0, sizeof(server));
+			rc = SQLGetInfo(conn_res->hdbc, SQL_DBMS_NAME, (SQLPOINTER)server, 2048, NULL);
+			if (!strcmp(server, "AS")) is_systemi = 1;
 
 			if ( rc != SQL_SUCCESS ) {
 				_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -1996,7 +2038,7 @@ PHP_FUNCTION(db2_procedure_columns)
 	}
 
 	if (connection) {
-		ZEND_FETCH_RESOURCE(conn_res, conn_handle*, &connection, connection_id, "Connection Resource", le_conn_struct);
+		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id, "Connection Resource", le_conn_struct, le_pconn_struct);
 
 		stmt_res = _db2_new_stmt_struct(conn_res);
 
@@ -2039,7 +2081,7 @@ PHP_FUNCTION(db2_procedures)
 	}
 
 	if (connection) {
-		ZEND_FETCH_RESOURCE(conn_res, conn_handle*, &connection, connection_id, "Connection Resource", le_conn_struct);
+		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id, "Connection Resource", le_conn_struct, le_pconn_struct);
 
 		stmt_res = _db2_new_stmt_struct(conn_res);
 
@@ -2299,18 +2341,6 @@ static int _php_db2_do_prepare(SQLHANDLE hdbc, char* stmt_string, stmt_handle *s
 		}
 	}
 
-	if ( stmt_res->cursor_type == DB2_SCROLLABLE ) {
-#ifndef PASE
-		vParam = SQL_CURSOR_KEYSET_DRIVEN;
-		rc = SQLSetStmtAttr((SQLHSTMT)stmt_res->hstmt, SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)vParam,
-				SQL_IS_INTEGER );
-#else
-		vParam = DB2_SCROLLABLE;
-		rc = SQLSetStmtAttr((SQLHSTMT)stmt_res->hstmt, SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)&vParam,
-				SQL_IS_INTEGER );
-#endif
-	}
-
 	/* Prepare the stmt. The cursor type requested has already been set in _php_db2_assign_options */
 	rc = SQLPrepare((SQLHSTMT)stmt_res->hstmt, (SQLCHAR*)stmt_string, (SQLINTEGER)stmt_string_len);
 	if ( rc == SQL_ERROR ) {
@@ -2377,20 +2407,6 @@ PHP_FUNCTION(db2_exec)
 			if ( rc == SQL_ERROR ) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Options Array must have string indexes");
 			}
-		}
-
-		if ( stmt_res->cursor_type == DB2_SCROLLABLE ) {
-#ifdef PASE
-			vParam = DB2_SCROLLABLE;
-			rc = SQLSetStmtAttr((SQLHSTMT)stmt_res->hstmt,
-					SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)&vParam,
-					SQL_IS_INTEGER );
-#else
-			vParam = SQL_CURSOR_KEYSET_DRIVEN;
-			rc = SQLSetStmtAttr((SQLHSTMT)stmt_res->hstmt,
-					SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)vParam,
-					SQL_IS_INTEGER );
-#endif
 		}
 
 		rc = SQLExecDirect((SQLHSTMT)stmt_res->hstmt, stmt_string , stmt_string_len);
@@ -3929,7 +3945,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 	stmt_handle *stmt_res = NULL;
 	SQLSMALLINT column_type, lob_bind_type = SQL_C_BINARY;
 	db2_row_data_type *row_data;
-	SQLINTEGER out_length, tmp_length;
+	SQLINTEGER out_length, loc_length, tmp_length;
 	unsigned char *out_ptr;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &stmt, &row_number) == FAILURE) {
@@ -3986,6 +4002,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 		column_type = stmt_res->column_info[i].type;
 		row_data = &stmt_res->row_data[i].data;
 		out_length = stmt_res->row_data[i].out_length;
+		loc_length = stmt_res->column_info[i].loc_ind;
 
 		switch(stmt_res->s_case_mode) {
 			case DB2_CASE_LOWER:
@@ -3999,7 +4016,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 				break;
 		}
 
-		if (out_length == SQL_NULL_DATA) {
+		if (out_length == SQL_NULL_DATA || loc_length == SQL_NULL_DATA) {
 			if ( op & DB2_FETCH_ASSOC ) {
 				add_assoc_null(return_value, (char *)stmt_res->column_info[i].name);
 			}

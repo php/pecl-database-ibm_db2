@@ -33,10 +33,11 @@
   <license>Apache License 2.0</license>
   <state>beta</state>
   <notes>
-    Major peformance increase for iSeries
-    Bug fix for binding two parameters out of order
-    Options fix for setting cursor to scrollable
-    Fix for db2_free_result segfault
+    Greater support for remote i5 connections
+    Added support for tolerated errors
+    Bug fixes for db2_procedures and db2_procedure_columns
+    Bug fix for db2_fetch_* when CLOB columns are null
+    Test suite has been re-designed
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
@@ -53,13 +54,15 @@
    <dir name="tests" role="test">
     <file name="connection.inc" role="test" />
     <file name="pic1.jpg" role="test" />
-    <file name="prepare.inc" role="test" />
-    <file name="prepare_blob.inc" role="test" />
-    <file name="prepare_sp.inc" role="test" />
-    <file name="prepare_t_string.inc" role="test" />
+    <file name="resume_000130.txt" role="test" />
+    <file name="resume_000140.txt" role="test" />
+    <file name="resume_000150.txt" role="test" />
+    <file name="resume_000190.txt" role="test" />
     <file name="skipif.inc" role="test" />
     <file name="skipif2.inc" role="test" />
+    <file name="skipif3.inc" role="test" />
     <file name="spook.png" role="test" />
+    <file name="test_000.phpt" role="test" />
     <file name="test_001.phpt" role="test" />
     <file name="test_002.phpt" role="test" />
     <file name="test_003.phpt" role="test" />
@@ -193,6 +196,7 @@
     <file name="test_6572.phpt" role="test" />
     <file name="test_6755.phpt" role="test" />
     <file name="test_6792.phpt" role="test" />
+    <file name="test_9173.phpt" role="test" />
    </dir>
   </filelist>
  </release>
