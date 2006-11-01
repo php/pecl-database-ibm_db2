@@ -37,6 +37,8 @@ if ($conn) {
     var_dump( $num5 );
     var_dump( $num6 );
    
+    $drop = "drop table ftest";
+    @db2_exec( $conn, $drop );
 }
 else {
     echo "Connection failed.";

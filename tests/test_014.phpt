@@ -9,17 +9,14 @@ require_once('connection.inc');
 
 $conn = db2_connect($db, $username, $password);
 $query = 'select * from animals order by name';
-$res = db2_exec( $conn, $query, array('CURSOR' => DB2_SCROLLABLE) );
-$rows = db2_num_rows($res);
-echo "$rows\n";
-$rc = db2_fetch_row($res,-1);
-     printf( "\nFetch row -1: %s\n", $rc ? "true" : "false" );
+$stmt = db2_prepare( $conn, $query, array('CURSOR' => DB2_SCROLLABLE) );
+db2_execute($stmt);
+$rc = db2_fetch_row($stmt,-1);
+printf( "\nFetch row -1: %s\n", $rc ? "true" : "false" );
 
 db2_close($conn);
 ?>
 --EXPECTREGEX--
-7
-
-(PHP )?Warning:\s+db2_fetch_row\(\): Requested row number must be a positive value in .*?test_014.php on line 10
+(PHP )?Warning:\s+db2_fetch_row\(\): Requested row number must be a positive value in .*?test_014.php on line 9
 
 Fetch row -1: false

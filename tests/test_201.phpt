@@ -34,6 +34,7 @@ $procedure = <<<HERE
 HERE;
 
 $conn = db2_connect($database, $user, $password);
+db2_autocommit( $conn, DB2_AUTOCOMMIT_OFF );
 
 if ($conn) {
   @db2_exec($conn, 'DROP PROCEDURE multiResults()');
@@ -61,6 +62,7 @@ if ($conn) {
     }
   }
 
+  db2_rollback($conn);
   db2_close($conn);
 }
 else {

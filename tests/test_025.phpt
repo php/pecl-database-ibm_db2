@@ -11,6 +11,11 @@ $conn = db2_connect($database, $user, $password);
 
 if ($conn != 0)
 {
+	$statement = 'DROP TABLE test_primary_keys';
+	$statement = 'DROP TABLE test_foreign_keys';
+	$result = @db2_exec($conn, $statement);
+	$result = @db2_exec($conn, $statement);
+
 	$statement = 'CREATE TABLE test_primary_keys (id INTEGER NOT NULL, PRIMARY KEY(id))';
 	$result = db2_exec($conn, $statement);
 	$statement = "INSERT INTO test_primary_keys VALUES (1)";
@@ -25,6 +30,12 @@ if ($conn != 0)
 	echo $row[2] . "\n";
 	echo $row[3] . "\n";
 	echo $row[4] . "\n";
+
+	$statement = 'DROP TABLE test_primary_keys';
+	$result = db2_exec($conn, $statement);
+	$statement = 'DROP TABLE test_foreign_keys';
+	$result = db2_exec($conn, $statement);
+
 	db2_close($conn);
 }
 else

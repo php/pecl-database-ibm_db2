@@ -28,6 +28,9 @@ if ($conn) {
     var_dump( $num1 );
     var_dump( $num2 );
     var_dump( $num3 );
+
+    $drop = "drop table ftest";
+    @db2_exec( $conn, $drop );
     
 }
 else {

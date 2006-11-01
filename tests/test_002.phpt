@@ -7,7 +7,7 @@ IBM-DB2: connect to a database (uncataloged connection)
 
 require_once('connection.inc');
 
-$conn = db2_connect("DRIVER={IBM DB2 ODBC DRIVER};DATABASE=$database;HOSTNAME=$hostname;PORT=$port;PROTOCOL=TCPIP;UID=$user;PWD=$password;", '', '');
+$conn = db2_connect("DATABASE=$database;HOSTNAME=$hostname;PORT=$port;PROTOCOL=TCPIP;UID=$user;PWD=$password;", '', '');
 
 if ($conn) {
     echo "Connection succeeded.";

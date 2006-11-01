@@ -51,6 +51,8 @@ if ($conn) {
                 $row[1], strlen($row[1]));
 	}
 
+	$statement = 'DROP TABLE fetch_test';
+	$result = @db2_exec($conn, $statement);
 	db2_close($conn);
 }
 else {

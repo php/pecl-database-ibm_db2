@@ -25,6 +25,8 @@ db2_execute( $stmt );
 $row = db2_fetch_both( $stmt );
 echo $row[0] . " , " . $row[1];
 
+@db2_exec($conn, "drop table test_58210");
+
 ?>
 --EXPECT--
 1 , Java

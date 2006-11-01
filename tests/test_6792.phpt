@@ -10,6 +10,8 @@ require_once('connection.inc');
 $conn = db2_connect($database, $user, $password);
 
 if ($conn) {
+	$statement = "DROP TABLE table_6792";
+	$result = @db2_exec($conn, $statement);
 	$statement = "CREATE TABLE table_6792 (col1 time, col2 date, col3 timestamp)";
 	$result = db2_exec($conn, $statement);
 	$statement = "SELECT * FROM table_6792";
@@ -20,6 +22,9 @@ if ($conn) {
 	   echo $i . ":" . db2_field_type($result,$i) . "\n";
 	}
 	
+	$statement = "DROP TABLE table_6792";
+	$result = @db2_exec($conn, $statement);
+
 	db2_close($conn);
 }
 else {

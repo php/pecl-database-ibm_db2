@@ -1,7 +1,10 @@
 --TEST--
 IBM-DB2: db2_conn_errormsg() - wrong username
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+  require_once('skipif.inc');
+  require_once('skipif3.inc');
+?>
 --FILE--
 <?php
 
@@ -19,4 +22,4 @@ else {
 
 ?>
 --EXPECTF--
-[IBM][CLI Driver] SQL30082N %s reason "24" ("USERNAME AND/OR PASSWORD INVALID").  SQLSTATE=08001 SQLCODE=-30082
+[IBM][CLI Driver] %s SQLSTATE=%d SQLCODE=-%d

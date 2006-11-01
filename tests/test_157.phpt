@@ -1,7 +1,10 @@
 --TEST--
 IBM-DB2: db2_fetch_assoc() - positioned with scrollable cursor
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+  require_once('skipif.inc');
+  require_once('skipif3.inc');
+?>
 --FILE--
 <?php
 

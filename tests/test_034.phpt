@@ -9,7 +9,7 @@ require_once('connection.inc');
 
 $conn = db2_connect($db,$user,$password);
 
-$result = db2_exec($conn, "select * from staff");
+$result = db2_exec($conn, "SELECT * FROM staff");
 
 if ($row = db2_fetch_assoc($result)) 
 {

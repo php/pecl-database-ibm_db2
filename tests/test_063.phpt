@@ -13,15 +13,6 @@ $result = db2_tables($conn, NULL, "SYSIBM", "", "VIEW");
 
 print_r ($result);
 
-while ($row=db2_fetch_array($result))
-{
-   for ($i=0; $i<db2_num_fields($result); $i++) 
-   {
-      print $row[$i] . ", ";	
-   }
-   print "\n";
-}
-
 db2_free_result($result);
 
 ?>

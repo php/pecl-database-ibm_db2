@@ -10,8 +10,10 @@ require_once('connection.inc');
 $conn = db2_connect($database, $user, $password);
 
 if ($conn) {
-    $stmt = db2_exec( $conn, "SELECT name FROM animals WHERE weight < 10.0", array('cursor' => DB2_SCROLLABLE) );
-    echo "Number of affected rows: " . db2_num_rows( $stmt );
+    $stmt = db2_prepare( $conn, "SELECT name FROM animals WHERE weight < 10.0", array('cursor' => DB2_SCROLLABLE) );
+    db2_execute($stmt);
+    $row = db2_fetch_both($stmt);
+    var_dump($row);
     db2_close($conn);
 }
 else {
@@ -20,4 +22,9 @@ else {
 
 ?>
 --EXPECT--
-Number of affected rows: 4
+array(2) {
+  ["NAME"]=>
+  string(16) "Pook            "
+  [0]=>
+  string(16) "Pook            "
+}

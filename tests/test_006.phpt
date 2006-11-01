@@ -10,16 +10,20 @@ require_once('connection.inc');
 $options1 = array('cursor' => DB2_SCROLLABLE);
 $options2 = array('cursor' => DB2_FORWARD_ONLY);
 
-$conn = db2_connect($database, $user, $password, $options1);
+$conn = db2_connect($database, $user, $password);
 
 if ($conn) {
-    $stmt = db2_exec( $conn, "SELECT name FROM animals WHERE weight < 10.0", $options2 );
-    echo "Number of affected rows: " . db2_num_rows( $stmt );
+    $stmt = db2_prepare( $conn, "SELECT name FROM animals WHERE weight < 10.0", $options2 );
+    db2_execute($stmt);
+    $data = db2_fetch_both($stmt);
+    var_dump($data);
     
     echo "\n";
 
-    $stmt = db2_exec( $conn, "SELECT name FROM animals WHERE weight < 10.0" );
-    echo "Number of affected rows: " . db2_num_rows( $stmt );
+    $stmt = db2_prepare( $conn, "SELECT name FROM animals WHERE weight < 10.0", $options1 );
+    db2_execute($stmt);
+    $data = db2_fetch_both($stmt);
+    var_dump($data);
 
     db2_close($conn);
 }
@@ -29,5 +33,16 @@ else {
 
 ?>
 --EXPECT--
-Number of affected rows: -1
-Number of affected rows: 4
+array(2) {
+  ["NAME"]=>
+  string(16) "Pook            "
+  [0]=>
+  string(16) "Pook            "
+}
+
+array(2) {
+  ["NAME"]=>
+  string(16) "Pook            "
+  [0]=>
+  string(16) "Pook            "
+}

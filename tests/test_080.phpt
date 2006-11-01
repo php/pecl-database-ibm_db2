@@ -18,5 +18,5 @@ else {
 }
 
 ?>
---EXPECT--
-08001
+--EXPECTF--
+0800%d

@@ -20,6 +20,7 @@ IBM-DB2: Call a stored procedure in a different binding pattern
 	$row = db2_fetch_both($stmt);
 	echo $row[0] . " , " . $row[1] .  " , " . $row[2] . "\n";
 
+	@db2_exec($conn, "drop table test_58215");
 	db2_close($conn);
 ?>
 --EXPECT--

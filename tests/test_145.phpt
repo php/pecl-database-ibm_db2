@@ -8,9 +8,9 @@ IBM-DB2: Bind and retrieve NULL and empty string values
 require_once('connection.inc');
 
 $conn = db2_connect($database, $user, $password);
+db2_autocommit( $conn, DB2_AUTOCOMMIT_OFF );
 
 if ($conn) {
-    require_once('prepare.inc');
     $stmt = db2_prepare( $conn, "INSERT INTO animals (id, breed, name) VALUES (?, ?, ?)" );
 
     $id = 999;
@@ -39,6 +39,8 @@ if ($conn) {
     while ($row = db2_fetch_array($result)) {
       var_dump($row);
     }
+
+    db2_rollback($conn);
 }
 else 
 {

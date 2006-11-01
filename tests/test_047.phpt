@@ -27,7 +27,7 @@ if (isset($_GET['EMPNO']) && isset($_GET['FORMAT'])) {
 else {
 	$result = db2_exec($conn, "select EMPNO, PHOTO_FORMAT, length(PICTURE) from emp_photo");	
 	while ($row = db2_fetch_array($result)) {
-		if ( $row[1] == 'gif' ) {
+		if ( $row[1] == 'png' ) {
 			printf ("<img src='test_047.php?EMPNO=%s&FORMAT=%s'><br>\n",$row[0],$row[1]);
 		}
 		if ( $row[1] != 'xwd' ) {
@@ -39,16 +39,16 @@ else {
 
 ?>
 --EXPECT--
-<a href='test_047.php?EMPNO=000130&FORMAT=bitmap' target=_blank>000130 - bitmap - 43690 bytes</a>
-<br><img src='test_047.php?EMPNO=000130&FORMAT=gif'><br>
-<a href='test_047.php?EMPNO=000130&FORMAT=gif' target=_blank>000130 - gif - 29540 bytes</a>
-<br><a href='test_047.php?EMPNO=000140&FORMAT=bitmap' target=_blank>000140 - bitmap - 71798 bytes</a>
-<br><img src='test_047.php?EMPNO=000140&FORMAT=gif'><br>
-<a href='test_047.php?EMPNO=000140&FORMAT=gif' target=_blank>000140 - gif - 29143 bytes</a>
-<br><a href='test_047.php?EMPNO=000150&FORMAT=bitmap' target=_blank>000150 - bitmap - 73438 bytes</a>
-<br><img src='test_047.php?EMPNO=000150&FORMAT=gif'><br>
-<a href='test_047.php?EMPNO=000150&FORMAT=gif' target=_blank>000150 - gif - 39795 bytes</a>
-<br><a href='test_047.php?EMPNO=000190&FORMAT=bitmap' target=_blank>000190 - bitmap - 63542 bytes</a>
-<br><img src='test_047.php?EMPNO=000190&FORMAT=gif'><br>
-<a href='test_047.php?EMPNO=000190&FORMAT=gif' target=_blank>000190 - gif - 36088 bytes</a>
+<a href='test_047.php?EMPNO=000130&FORMAT=jpg' target=_blank>000130 - jpg - 15398 bytes</a>
+<br><img src='test_047.php?EMPNO=000130&FORMAT=png'><br>
+<a href='test_047.php?EMPNO=000130&FORMAT=png' target=_blank>000130 - png - 10291 bytes</a>
+<br><a href='test_047.php?EMPNO=000140&FORMAT=jpg' target=_blank>000140 - jpg - 15398 bytes</a>
+<br><img src='test_047.php?EMPNO=000140&FORMAT=png'><br>
+<a href='test_047.php?EMPNO=000140&FORMAT=png' target=_blank>000140 - png - 10291 bytes</a>
+<br><a href='test_047.php?EMPNO=000150&FORMAT=jpg' target=_blank>000150 - jpg - 15398 bytes</a>
+<br><img src='test_047.php?EMPNO=000150&FORMAT=png'><br>
+<a href='test_047.php?EMPNO=000150&FORMAT=png' target=_blank>000150 - png - 10291 bytes</a>
+<br><a href='test_047.php?EMPNO=000190&FORMAT=jpg' target=_blank>000190 - jpg - 15398 bytes</a>
+<br><img src='test_047.php?EMPNO=000190&FORMAT=png'><br>
+<a href='test_047.php?EMPNO=000190&FORMAT=png' target=_blank>000190 - png - 10291 bytes</a>
 <br>

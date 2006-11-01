@@ -8,8 +8,9 @@ IBM-DB2: db2_stmt_errormsg()
 require_once('connection.inc');
 
 $conn = db2_connect($db,$username,$password);
+db2_autocommit( $conn, DB2_AUTOCOMMIT_OFF );
+
 if ($conn) {
-    require_once('prepare_t_string.inc');
     $result = @db2_exec($conn,"insert int0 t_string values(123,1.222333,'one to one')");
     if ($result) {
         $cols = db2_num_fields($result);
@@ -31,6 +32,8 @@ if ($conn) {
         echo db2_stmt_errormsg();    
     }
 
+    db2_rollback($conn);
+
 }
 else {
     echo 'no connection';    
@@ -38,4 +41,4 @@ else {
 
 ?>
 --EXPECTF--
-[IBM][CLI Driver][DB2/%s] SQL0104N  An unexpected token "insert int0 t_string" was found following "BEGIN-OF-STATEMENT".  Expected tokens may include:  "<space>".  SQLSTATE=42601 SQLCODE=-104col: 0,affected row: 0 
+[IBM][CLI Driver]%s SQL0104N  An unexpected token %s was found following %s.  Expected tokens may include:  %s.  SQLSTATE=42601 SQLCODE=-104col: 0,affected row: 0 

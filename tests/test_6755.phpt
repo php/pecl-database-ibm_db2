@@ -10,6 +10,8 @@ require_once('connection.inc');
 $conn = db2_connect($database, $user, $password);
 
 if ($conn) {
+	$statement = 'DROP TABLE table_6755';
+	$result = @db2_exec($conn, $statement);
 	$statement = 'CREATE TABLE table_6755 (col1 VARCHAR(20), col2 CLOB(20))';
 	$result = db2_exec($conn, $statement);
 	$statement = "INSERT INTO table_6755 VALUES ('database', 'database')";
@@ -25,6 +27,9 @@ if ($conn) {
                 $row[1], strlen($row[1]));
 	}
 	
+	$statement = 'DROP TABLE table_6755';
+	$result = @db2_exec($conn, $statement);
+
 	db2_close($conn);
 }
 else {

@@ -1,7 +1,10 @@
 --TEST--
 IBM-DB2: db2_conn_error() - wrong password
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+  require_once('skipif.inc');
+  require_once('skipif3.inc');
+?>
 --FILE--
 <?php
 
@@ -18,5 +21,5 @@ else {
 }
 
 ?>
---EXPECT--
-08001
+--EXPECTF--
+0800%d

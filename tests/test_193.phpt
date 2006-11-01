@@ -26,8 +26,8 @@ Array
 (
     [0] => 000130
     [1] => ascii
-    [2] =>  
- 
+    [2] => 
+
   Resume:  Delores M. Quintana
  
  
@@ -88,8 +88,8 @@ Array
 (
     [0] => 000140
     [1] => ascii
-    [2] =>  
- 
+    [2] => 
+
   Resume:  Heather A. Nicholls
  
  
@@ -149,8 +149,8 @@ Array
 (
     [0] => 000150
     [1] => ascii
-    [2] =>  
- 
+    [2] => 
+
   Resume:  Bruce Adamson
  
  
@@ -210,13 +210,13 @@ Array
 (
     [0] => 000190
     [1] => ascii
-    [2] =>  
- 
+    [2] => 
+
   Resume:  James H. Walker
- 
- 
+
+
   Personal Information
- 
+
   Address:            3500 Steeles Ave
                       Mellonville, Idaho 83757
   Phone:              (208) 725-7325
@@ -225,42 +225,42 @@ Array
   Marital Status:     Single
   Height:             5'11"
   Weight:             166 lbs.
- 
- 
+
+
   Department Information
- 
+
   Employee Number:    000190
   Dept Number:        D11
   Manager:            Irving Stern
   Position:           Designer
   Phone:              (208) 385-2986
   Hire Date:          1974-07-26
- 
- 
+
+
   Education
- 
+
   1974                Computer Studies, B.Sc.
                       University of Massachusetts
- 
+
   1972                Linguistic Anthropology, B.A.
                       University of Toronto
- 
- 
+
+
   Work History
- 
+
   6/87 - present      Microcode Design
                       Optimizing algorithms for mathematical functions.
- 
+
   4/77 - 5/87         Printer Technical Support
                       Installing and supporting laser printers.
- 
+
   9/74 - 3/77         Maintenance Programming
                       Patching assembly language compiler for
                       mainframes.
- 
- 
+
+
   Interests
- 
+
   o   Wine tasting
   o   Skiing
   o   Swimming

@@ -15,7 +15,6 @@ if ($conn != 0)
 	$row = db2_fetch_array($stmt);
 	print $row[2] . "\n";
 	print $row[3] . "\n";
-	print $row[4] . "\n";
 	print $row[6] . "\n";
 	print $row[7];
     db2_close($conn);
@@ -30,6 +29,5 @@ else
 --EXPECT--
 ANIMALS
 BREED
-SYSIBM
 INSERT
 YES

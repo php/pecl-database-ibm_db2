@@ -9,6 +9,9 @@ require_once('connection.inc');
 
 $conn = db2_connect($db,$username,$password);
 
+$schema = 'CREATE SCHEMA t';
+$result = @db2_exec($conn, $schema);
+
 $create = 'CREATE TABLE t.t1( c1 integer, c2 varchar(40))';
 $result = @db2_exec($conn, $create);
 
@@ -25,12 +28,20 @@ if ($conn)
 {
    $schema = strtoupper('t');
    $result = db2_tables($conn,NULL,$schema);	
+   $i = 0;
    while ($row = db2_fetch_both($result)) 
    {
       $str = $row[1] ."/". $row[2] ."/". $row[3];
-      print $str . "\n";
+      if ($i < 4) print $str . "\n";
+      $i++;
    }
-print "done!";
+
+   @db2_exec($conn, 'DROP TABLE t.t1');
+   @db2_exec($conn, 'DROP TABLE t.t2');
+   @db2_exec($conn, 'DROP TABLE t.t3');
+   @db2_exec($conn, 'DROP TABLE t.t4');
+
+   print "done!";
 }
 else 
 {

@@ -8,8 +8,9 @@ IBM-DB2: db2_num_rows - insert, delete
 require_once('connection.inc');
 
 $conn = db2_connect($db,$username,$password);
+db2_autocommit( $conn, DB2_AUTOCOMMIT_OFF );
+
 if ($conn) {
-    require_once('prepare_t_string.inc');
     $result = db2_exec($conn,"insert into t_string values(123,1.222333,'one to one')");
     if ($result) {
         $cols = db2_num_fields($result);
@@ -30,6 +31,8 @@ if ($conn) {
     else {
         echo db2_stmt_errormsg();    
     }
+
+    db2_rollback($conn);
     db2_close($conn);
 }
 else {

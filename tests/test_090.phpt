@@ -18,5 +18,5 @@ else {
 }
 
 ?>
---EXPECT--
-[IBM][CLI Driver] SQL1013N  The database alias name or database name "X" could not be found.  SQLSTATE=42705 SQLCODE=-1013
+--EXPECTF--
+[IBM][CLI Driver] %s SQLSTATE=%d SQLCODE=-%d

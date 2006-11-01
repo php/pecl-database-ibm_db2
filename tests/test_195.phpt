@@ -4,6 +4,7 @@ IBM-DB2: insert and retrieve XML data
 <?php 
 require_once('skipif.inc'); 
 require_once('skipif2.inc'); 
+require_once('skipif3.inc'); 
 ?>
 --FILE--
 <?php
@@ -11,6 +12,9 @@ require_once('skipif2.inc');
 require_once('connection.inc');
 
 $conn = db2_connect($database, $user, $password);
+
+$drop = 'DROP TABLE xmlTest';
+$result = @db2_exec($conn, $drop);
 
 $create = 'CREATE TABLE xmlTest (id INTEGER, data XML)';
 $result = db2_exec($conn, $create);
@@ -27,6 +31,8 @@ if ($conn) {
 		print_r($result);
 		echo "\n";
 	}
+	$drop = 'DROP TABLE xmlTest';
+	$result = @db2_exec($conn, $drop);
 	db2_close($conn);
 }
 else {

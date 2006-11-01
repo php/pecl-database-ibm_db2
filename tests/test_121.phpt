@@ -8,6 +8,7 @@ IBM-DB2: db2_field_name() - add. col.
 require_once('connection.inc');
 
 $conn = db2_connect($database, $user, $password);
+db2_autocommit( $conn, DB2_AUTOCOMMIT_OFF );
 
 if ($conn) {
     $insert = "INSERT INTO animals values (7, 'cat', 'Benji', 5.1)";
@@ -34,6 +35,8 @@ if ($conn) {
     var_dump( $name6 );
     var_dump( $name7 );
     var_dump( $name8 );
+
+    db2_rollback($conn);
 }
 else {
     echo "Connection failed.";

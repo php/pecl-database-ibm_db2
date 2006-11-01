@@ -1,26 +1,16 @@
 --TEST--
 IBM-DB2: Call a stored procedure with IN and OUT parameters
 --SKIPIF--
-<?php require_once('skipif.inc');
-require_once('connection.inc');
-// This will not run on Cloudscape / Derby servers
-// ... unless someone builds a JDBC stored procedure
-$conn = db2_connect($database, $user, $password);
-$info = db2_server_info($conn);
-if (!strstr($info->DBMS_NAME, 'DB2')) {
-  die('skip');
-}
-db2_close($conn);
-?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
 require_once('connection.inc');
 
 $conn = db2_connect($database, $user, $password);
+db2_autocommit( $conn, DB2_AUTOCOMMIT_OFF );
 
 if ($conn) {
-    require_once('prepare_sp.inc');
     $sql = 'CALL match_animal(?, ?, ?)';
     $stmt = db2_prepare($conn, $sql);
 
@@ -43,6 +33,7 @@ if ($conn) {
                     print "  " . trim($row[0]) . ", " . trim($row[1]) . ", {$row[2]}\n";	
             }
     }
+    db2_rollback($conn);
 }
 ?>
 --EXPECT--

@@ -7,6 +7,7 @@ IBM-DB2: db2_bind_param: INSERT statement - NULL parameter
 
 require_once('connection.inc');
 $conn = db2_connect($database, $user, $password);
+db2_autocommit( $conn, DB2_AUTOCOMMIT_OFF );
 
 $insert1 = "INSERT INTO animals (id, breed, name, weight)
     VALUES (NULL, 'ghost', NULL, ?)";
@@ -24,6 +25,7 @@ if ($conn) {
             var_dump($row);
         }
     }
+    db2_rollback($conn);
 }
 else 
 {

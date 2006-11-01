@@ -10,6 +10,7 @@ $sql =  "INSERT INTO animals (id, breed, name, weight)
     VALUES (?, ?, ?, ?)";
 
 $conn = db2_connect($database, $user, $password);
+db2_autocommit( $conn, DB2_AUTOCOMMIT_OFF );
 
 if (!$conn) {
     die("Connection failed.\n");
@@ -25,6 +26,8 @@ $stmt = db2_prepare($conn, "SELECT breed, name FROM animals WHERE id = ?");
 $res = db2_execute ($stmt, array(128));
 $row = db2_fetch_assoc($stmt);
 print_r($row);
+
+db2_rollback($conn);
 
 ?>
 --EXPECTREGEX--

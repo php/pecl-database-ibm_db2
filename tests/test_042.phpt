@@ -25,7 +25,7 @@ if (isset($_GET['EMPNO'])) {
 	exit();
 }
 else {
-	$result = db2_exec($conn, "select EMPNO, PHOTO_FORMAT from emp_photo where photo_format='gif'");	
+	$result = db2_exec($conn, "select EMPNO, PHOTO_FORMAT from emp_photo where photo_format='jpg'");	
 	while ($row = db2_fetch_array($result)) {
 		printf ("<a href='test_042.php?EMPNO=%s' target=_blank>%s (%s)</a><br>",$row['0'], $row['0'], $row[1]);
 		print "\n";
@@ -35,8 +35,8 @@ else {
 
 ?>
 --EXPECT--
-<a href='test_042.php?EMPNO=000130' target=_blank>000130 (gif)</a><br>
-<a href='test_042.php?EMPNO=000140' target=_blank>000140 (gif)</a><br>
-<a href='test_042.php?EMPNO=000150' target=_blank>000150 (gif)</a><br>
-<a href='test_042.php?EMPNO=000190' target=_blank>000190 (gif)</a><br>
+<a href='test_042.php?EMPNO=000130' target=_blank>000130 (jpg)</a><br>
+<a href='test_042.php?EMPNO=000140' target=_blank>000140 (jpg)</a><br>
+<a href='test_042.php?EMPNO=000150' target=_blank>000150 (jpg)</a><br>
+<a href='test_042.php?EMPNO=000190' target=_blank>000190 (jpg)</a><br>
 

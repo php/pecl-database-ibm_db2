@@ -9,6 +9,8 @@ require_once('connection.inc');
 
 $conn = db2_connect($database, $user, $password);
 
+db2_autocommit( $conn, DB2_AUTOCOMMIT_OFF );
+
 // Drop the test table, in case it exists
 $drop = 'DROP TABLE animals';
 $result = @db2_exec($conn, $drop);
@@ -26,6 +28,8 @@ $stmt = db2_exec( $conn, "select * from animals" );
 $onerow = db2_fetch_array( $stmt );
 
 var_dump( $onerow );
+
+db2_rollback($conn);
 
 ?>
 --EXPECT--

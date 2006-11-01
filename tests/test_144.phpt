@@ -31,6 +31,9 @@ if ($conn)
     $num = db2_num_rows( $stmt );
     
     echo $num;
+
+    $drop = 'DROP TABLE pictures';
+    $result = @db2_exec($conn, $drop);
 }
 else {
     echo "Connection failed.\n";

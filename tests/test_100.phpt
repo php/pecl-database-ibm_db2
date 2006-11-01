@@ -8,6 +8,7 @@ IBM-DB2: db2_num_fields() - select - delete - insert
 require_once('connection.inc');
 
 $conn = db2_connect($database, $user, $password);
+db2_autocommit( $conn, DB2_AUTOCOMMIT_OFF );
 
 if ($conn) {
     $stmt = db2_exec( $conn, "SELECT * FROM animals ORDER BY breed" );
@@ -35,6 +36,8 @@ if ($conn) {
     $fields5 = db2_num_fields( $stmt );
         
     var_dump( $fields5 );
+
+    db2_rollback($conn);
 }    
 else {
     echo "Connection failed.";

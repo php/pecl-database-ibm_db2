@@ -26,7 +26,11 @@ if ($conn != 0)
 	echo $row[3] . "\n";
 	echo $row[6] . "\n";
 	echo $row[7] . "\n";
-    db2_close($conn);
+
+	$statement = 'DROP TABLE test_primary_keys';
+	$result = db2_exec($conn, $statement);
+
+	db2_close($conn);
 }
 else
 {
