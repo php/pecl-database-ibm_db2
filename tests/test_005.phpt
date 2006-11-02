@@ -9,7 +9,7 @@ require_once('connection.inc');
 
 $baduser = "non_user";
 $badpass = "invalid_password";
-$dsn = "DSN=$db;User Id=$baduser;Password=$badpass;";
+$dsn = "DATABASE=$db;UID=$baduser;PWD=$badpass;";
 $conn = db2_connect($dsn, "", "");
 if ( $conn )
 {
