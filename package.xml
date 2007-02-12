@@ -9,35 +9,28 @@
  <license>Apache License 2.0</license>
  <maintainers>
   <maintainer>
-   <user>kfbombar</user>
-   <name>Kellen Bombardier</name>
-   <email>kfbombar@us.ibm.com</email>
-   <role>lead</role>
-  </maintainer>
-  <maintainer>
-   <user>kraman</user>
-   <name>Krishna Raman</name>
-   <email>kraman@gmail.com</email>
-   <role>lead</role>
-  </maintainer>
-  <maintainer>
    <user>tessus</user>
    <name>Helmut Tessarek</name>
    <email>helmut_tessarek@at.ibm.com</email>
    <role>developer</role>
   </maintainer>
+  <maintainer>
+   <user>kfbombar</user>
+   <name>Kellen Bombardier</name>
+   <email>kfbombar@us.ibm.com</email>
+   <role>lead</role>
+  </maintainer>
  </maintainers>
  <release>
-  <version>1.5.1</version>
-  <date>2006-09-08</date>
+  <version>1.6.0</version>
+  <date>2007-02-12</date>
   <license>Apache License 2.0</license>
-  <state>beta</state>
+  <state>stable</state>
   <notes>
-    Greater support for remote i5 connections
-    Added support for tolerated errors
-    Bug fixes for db2_procedures and db2_procedure_columns
-    Bug fix for db2_fetch_* when CLOB columns are null
-    Test suite has been re-designed
+    Fixed bug #9217 (ability to stream LOB elements)
+    Fixed bug #7882 (escape string functionality added)
+    Fixed bug #9870 (fix for db2_result LOB defect)
+    Fix for LOB binding defects
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
@@ -53,6 +46,7 @@
    </dir>
    <dir name="tests" role="test">
     <file name="connection.inc" role="test" />
+    <file name="escape.dat" role="test" />
     <file name="pic1.jpg" role="test" />
     <file name="resume_000130.txt" role="test" />
     <file name="resume_000140.txt" role="test" />
@@ -107,6 +101,7 @@
     <file name="test_050.phpt" role="test" />
     <file name="test_051.phpt" role="test" />
     <file name="test_052.phpt" role="test" />
+    <file name="test_053.phpt" role="test" />
     <file name="test_060.phpt" role="test" />
     <file name="test_061.phpt" role="test" />
     <file name="test_062.phpt" role="test" />
@@ -148,6 +143,7 @@
     <file name="test_146.phpt" role="test" />
     <file name="test_147.phpt" role="test" />
     <file name="test_148.phpt" role="test" />
+    <file name="test_149.phpt" role="test" />
     <file name="test_150.phpt" role="test" />
     <file name="test_151.phpt" role="test" />
     <file name="test_152.phpt" role="test" />
@@ -171,6 +167,9 @@
     <file name="test_193.phpt" role="test" />
     <file name="test_194.phpt" role="test" />
     <file name="test_195.phpt" role="test" />
+    <file name="test_196.phpt" role="test" />
+    <file name="test_197.phpt" role="test" />
+    <file name="test_198.phpt" role="test" />
     <file name="test_200.phpt" role="test" />
     <file name="test_201.phpt" role="test" />
     <file name="test_210.phpt" role="test" />
@@ -191,12 +190,15 @@
     <file name="test_261.phpt" role="test" />
     <file name="test_300.phpt" role="test" />
     <file name="test_310.phpt" role="test" />
-    <file name="test_6528.phpt" rolt="test" />
+    <file name="test_320.phpt" role="test" />
+    <file name="test_321.phpt" role="test" />
+    <file name="test_6528.phpt" role="test" />
     <file name="test_6561.phpt" role="test" />
     <file name="test_6572.phpt" role="test" />
     <file name="test_6755.phpt" role="test" />
     <file name="test_6792.phpt" role="test" />
     <file name="test_9173.phpt" role="test" />
+    <file name="test_9194.phpt" role="test" />
    </dir>
   </filelist>
  </release>

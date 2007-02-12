@@ -11,7 +11,7 @@ $conn = db2_connect($db,$user,$password);
 
 $result = db2_exec($conn, "SELECT * FROM staff WHERE id < 101", array('cursor' => DB2_SCROLLABLE) );
 
-while ($row = db2_fetch_row($result,$i)) 
+while ($row = db2_fetch_row($result)) 
 {
    $result2 = db2_prepare($conn, "SELECT * FROM staff WHERE id < 101", array ('cursor' => DB2_SCROLLABLE));
    db2_execute($result2);

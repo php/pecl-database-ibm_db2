@@ -37,7 +37,7 @@ array(8) {
   ["NUM_RESULT_SETS"]=>
   int(%d)
   ["REMARKS"]=>
-  NULL
+  %s
   ["PROCEDURE_TYPE"]=>
   int(%d)
 }

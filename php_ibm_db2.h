@@ -72,6 +72,12 @@ extern zend_module_entry ibm_db2_module_entry;
 #define DB2_CONVERT 2
 #define DB2_PASSTHRU 3
 
+/* maximum sizes */
+#define USERID_LEN 16
+#define ACCTSTR_LEN 200
+#define APPLNAME_LEN 32
+#define WRKSTNNAME_LEN 18
+
 #ifdef PASE
 #define SQL_IS_INTEGER 0
 #define SQL_BEST_ROWID 0
@@ -198,6 +204,10 @@ PHP_FUNCTION(db2_setoption);
 PHP_FUNCTION(db2_fetch_object);
 PHP_FUNCTION(db2_server_info);
 PHP_FUNCTION(db2_client_info);
+PHP_FUNCTION(db2_escape_string);
+PHP_FUNCTION(db2_lob_read);
+PHP_FUNCTION(db2_get_option);
+PHP_FUNCTION(db2_getoption);
 
 /*
 	Declare any global variables you may need between the BEGIN

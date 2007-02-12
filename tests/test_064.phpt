@@ -36,7 +36,7 @@ $i = 0;
 while ($row=db2_fetch_array($result))
 {
     db2_num_fields($result);
-    if ($i < 4) print ", " . $row[1] . ", " . $row[2] . ", " . $row[3] . ", " . $row[4] . ", " . $row[5] . "\n";
+    if ($i < 4) print ", " . $row[1] . ", " . $row[2] . ", " . $row[3] . ", , \n";
     $i++;
 }
 

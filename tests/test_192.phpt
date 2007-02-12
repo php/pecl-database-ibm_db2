@@ -9,21 +9,18 @@ require_once('connection.inc');
 
 $conn = db2_connect($db,$username,$password);
 
-if ($conn) 
-{
-   $result = db2_columns($conn,NULL,strtoupper($username),"EMP_RESUME");	
-   while ($row = db2_fetch_both($result)) 
-   {
-      if ($row['COLUMN_NAME'] != 'EMP_ROWID')
-      {
-         printf ("%s,%s,%s,%s\n", $row[1], 
-         $row[2], $row[3], $row[17]);
-      }
-   }
-}
-else 
-{
-   echo 'no connection: ' . db2_conn_errormsg();	
+if ($conn) {
+	$result = db2_columns($conn,NULL,strtoupper($username),"EMP_RESUME");	
+	$i = 0;
+	while ($row = db2_fetch_both($result)) {
+		if ($row['COLUMN_NAME'] != 'EMP_ROWID' && $i < 3) {
+			printf ("%s,%s,%s,%s\n", $row[1], 
+				$row[2], $row[3], $row[17]);
+		}
+		$i++;
+	}
+} else {
+	echo 'no connection: ' . db2_conn_errormsg();	
 }
 
 ?>
