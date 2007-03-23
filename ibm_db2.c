@@ -493,6 +493,8 @@ PHP_MINIT_FUNCTION(ibm_db2)
 
 	REGISTER_LONG_CONSTANT("DB2_AUTOCOMMIT_ON", SQL_AUTOCOMMIT_ON, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DB2_AUTOCOMMIT_OFF", SQL_AUTOCOMMIT_OFF, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_DEFERRED_PREPARE_ON", SQL_DEFERRED_PREPARE_ON, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_DEFERRED_PREPARE_OFF", SQL_DEFERRED_PREPARE_OFF, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("DB2_DOUBLE", SQL_DOUBLE, CONST_CS | CONST_PERSISTENT);
 	/* This is how CLI defines SQL_C_LONG */
@@ -1169,6 +1171,44 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 			_php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
 		}
 #endif /* not PASE */
+	} else if (!STRCASECMP(opt_key, "deferred_prepare")) {
+		switch (option_num) {
+			case DB2_DEFERRED_PREPARE_ON:
+				pvParam = SQL_DEFERRED_PREPARE_ON;
+#ifdef PASE
+				rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
+						SQL_ATTR_DEFERRED_PREPARE, (SQLPOINTER)&pvParam,
+						SQL_IS_INTEGER );
+#else
+				rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
+						SQL_ATTR_DEFERRED_PREPARE, (SQLPOINTER)pvParam,
+						SQL_IS_INTEGER );
+#endif
+				if ( rc == SQL_ERROR ) {
+					_php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				}
+				break;
+
+			case DB2_DEFERRED_PREPARE_OFF:
+				pvParam = SQL_DEFERRED_PREPARE_OFF;
+#ifdef PASE
+				rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
+						SQL_ATTR_DEFERRED_PREPARE, (SQLPOINTER)&pvParam,
+						SQL_IS_INTEGER );
+#else
+				rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
+						SQL_ATTR_DEFERRED_PREPARE, (SQLPOINTER)pvParam,
+						SQL_IS_INTEGER );
+#endif
+				if ( rc == SQL_ERROR ) {
+					_php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				}
+				break;
+
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "DEFERRED PREPARE statement attribute value must be one of DB2_DEFERRED_PREPARE_ON or DB2_DEFERRED_PREPARE_OFF");
+				break;
+		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Incorrect option setting passed in");
 	}
@@ -2009,6 +2049,7 @@ PHP_FUNCTION(db2_column_privileges)
 		rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &(stmt_res->hstmt));
 		if (rc == SQL_ERROR) {
 			_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 #ifdef PASE /* i5OS CatalogName=NULL. Length must be set to 0. */
@@ -2020,6 +2061,7 @@ PHP_FUNCTION(db2_column_privileges)
 #endif /* not PASE */
 		if (rc == SQL_ERROR ) {
 			_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, stmt_res, le_stmt_struct);
@@ -2065,6 +2107,7 @@ PHP_FUNCTION(db2_columns)
 		rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &(stmt_res->hstmt));
 		if (rc == SQL_ERROR) {
 			_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 
@@ -2075,6 +2118,7 @@ PHP_FUNCTION(db2_columns)
 						owner, SQL_NTS, table_name, SQL_NTS, column_name, SQL_NTS);
 		if (rc == SQL_ERROR ) {
 			_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 
@@ -2115,6 +2159,7 @@ PHP_FUNCTION(db2_foreign_keys)
 		rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &(stmt_res->hstmt));
 		if (rc == SQL_ERROR) {
 			_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 		rc = SQLForeignKeys((SQLHSTMT)stmt_res->hstmt, qualifier, SQL_NTS,
@@ -2122,6 +2167,7 @@ PHP_FUNCTION(db2_foreign_keys)
 						NULL, SQL_NTS, NULL, SQL_NTS);
 		if (rc == SQL_ERROR ) {
 			_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, stmt_res, le_stmt_struct);
@@ -2164,12 +2210,14 @@ PHP_FUNCTION(db2_primary_keys)
 		rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &(stmt_res->hstmt));
 		if (rc == SQL_ERROR) {
 			_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 		rc = SQLPrimaryKeys((SQLHSTMT)stmt_res->hstmt, qualifier, SQL_NTS,
 						owner,SQL_NTS, table_name,SQL_NTS);
 		if (rc == SQL_ERROR ) {
 			_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, stmt_res, le_stmt_struct);
@@ -2213,12 +2261,14 @@ PHP_FUNCTION(db2_procedure_columns)
 		rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &(stmt_res->hstmt));
 		if (rc == SQL_ERROR) {
 			_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 		rc = SQLProcedureColumns((SQLHSTMT)stmt_res->hstmt, qualifier, SQL_NTS, owner,
 			SQL_NTS, proc_name, SQL_NTS, column_name, SQL_NTS);
 		if (rc == SQL_ERROR ) {
 			_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, stmt_res, le_stmt_struct);
@@ -2258,12 +2308,14 @@ PHP_FUNCTION(db2_procedures)
 		rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &(stmt_res->hstmt));
 		if (rc == SQL_ERROR) {
 			_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 		rc = SQLProcedures((SQLHSTMT)stmt_res->hstmt, qualifier, SQL_NTS, owner,
 			SQL_NTS, proc_name, SQL_NTS);
 		if (rc == SQL_ERROR ) {
 			_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, stmt_res, le_stmt_struct);
@@ -2305,12 +2357,14 @@ PHP_FUNCTION(db2_special_columns)
 		rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &(stmt_res->hstmt));
 		if (rc == SQL_ERROR) {
 			_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 		rc = SQLSpecialColumns((SQLHSTMT)stmt_res->hstmt,SQL_BEST_ROWID, qualifier, SQL_NTS,
 						owner,SQL_NTS, table_name,SQL_NTS,scope,SQL_NULLABLE);
 		if (rc == SQL_ERROR ) {
 			_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, stmt_res, le_stmt_struct);
@@ -2355,6 +2409,7 @@ SQLCHAR *qualifier = NULL;
 		rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &(stmt_res->hstmt));
 		if (rc == SQL_ERROR) {
 			_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 #ifdef PASE /* i5os CatalogName=NULL. length must be set to 0 */
@@ -2366,6 +2421,7 @@ SQLCHAR *qualifier = NULL;
 #endif /* not PASE */
 		if (rc == SQL_ERROR ) {
 			_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, stmt_res, le_stmt_struct);
@@ -2411,6 +2467,7 @@ PHP_FUNCTION(db2_table_privileges)
 		rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &(stmt_res->hstmt));
 		if (rc == SQL_ERROR) {
 			_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 #ifdef PASE /* i5os CatalogName=NULL. length must be set to 0 */
@@ -2422,6 +2479,7 @@ PHP_FUNCTION(db2_table_privileges)
 #endif /* not PASE */
 		if (rc == SQL_ERROR ) {
 			_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, stmt_res, le_stmt_struct);
@@ -2465,6 +2523,7 @@ PHP_FUNCTION(db2_tables)
 		rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &(stmt_res->hstmt));
 		if (rc == SQL_ERROR) {
 			_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 #ifdef PASE /* i5os CatalogName=NULL. length must be set to 0 */
@@ -2476,6 +2535,7 @@ PHP_FUNCTION(db2_tables)
 #endif /* not PASE */
 		if (rc == SQL_ERROR ) {
 			_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, stmt_res, le_stmt_struct);
@@ -2682,6 +2742,7 @@ PHP_FUNCTION(db2_prepare)
 		rc = _php_db2_do_prepare(conn_res->hdbc, stmt_string, stmt_res, stmt_string_len, options TSRMLS_CC);
 		if ( rc < SQL_SUCCESS ) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Prepare Failed");
+			efree(stmt_res);
 			RETURN_FALSE;
 		}
 
