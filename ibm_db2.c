@@ -493,8 +493,10 @@ PHP_MINIT_FUNCTION(ibm_db2)
 
 	REGISTER_LONG_CONSTANT("DB2_AUTOCOMMIT_ON", SQL_AUTOCOMMIT_ON, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DB2_AUTOCOMMIT_OFF", SQL_AUTOCOMMIT_OFF, CONST_CS | CONST_PERSISTENT);
+#ifndef PASE
 	REGISTER_LONG_CONSTANT("DB2_DEFERRED_PREPARE_ON", SQL_DEFERRED_PREPARE_ON, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DB2_DEFERRED_PREPARE_OFF", SQL_DEFERRED_PREPARE_OFF, CONST_CS | CONST_PERSISTENT);
+#endif
 
 	REGISTER_LONG_CONSTANT("DB2_DOUBLE", SQL_DOUBLE, CONST_CS | CONST_PERSISTENT);
 	/* This is how CLI defines SQL_C_LONG */
@@ -1170,20 +1172,13 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 		if ( rc == SQL_ERROR ) {
 			_php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
 		}
-#endif /* not PASE */
 	} else if (!STRCASECMP(opt_key, "deferred_prepare")) {
 		switch (option_num) {
 			case DB2_DEFERRED_PREPARE_ON:
 				pvParam = SQL_DEFERRED_PREPARE_ON;
-#ifdef PASE
-				rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-						SQL_ATTR_DEFERRED_PREPARE, (SQLPOINTER)&pvParam,
-						SQL_IS_INTEGER );
-#else
 				rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
 						SQL_ATTR_DEFERRED_PREPARE, (SQLPOINTER)pvParam,
 						SQL_IS_INTEGER );
-#endif
 				if ( rc == SQL_ERROR ) {
 					_php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
 				}
@@ -1191,15 +1186,9 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 
 			case DB2_DEFERRED_PREPARE_OFF:
 				pvParam = SQL_DEFERRED_PREPARE_OFF;
-#ifdef PASE
-				rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-						SQL_ATTR_DEFERRED_PREPARE, (SQLPOINTER)&pvParam,
-						SQL_IS_INTEGER );
-#else
 				rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
 						SQL_ATTR_DEFERRED_PREPARE, (SQLPOINTER)pvParam,
 						SQL_IS_INTEGER );
-#endif
 				if ( rc == SQL_ERROR ) {
 					_php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
 				}
@@ -1209,6 +1198,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "DEFERRED PREPARE statement attribute value must be one of DB2_DEFERRED_PREPARE_ON or DB2_DEFERRED_PREPARE_OFF");
 				break;
 		}
+#endif /* not PASE */
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Incorrect option setting passed in");
 	}
