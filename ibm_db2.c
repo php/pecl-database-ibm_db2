@@ -4344,6 +4344,10 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 			RETURN_FALSE;
 		}
 	}
+#ifdef PASE /* i5/OS problem with SQL_FETCH out_length (temporary until fixed) */
+	for (i=0; i<stmt_res->num_columns; i++)
+		tmt_res->row_data[i].out_length = 0;
+#endif /*PASE*/
 	/* check if row_number is present */
 	if (argc == 2 && row_number > 0) {
 #ifndef PASE /* i5/OS problem with SQL_FETCH_ABSOLUTE (temporary until fixed) */
