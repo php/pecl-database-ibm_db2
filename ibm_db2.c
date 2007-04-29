@@ -324,7 +324,9 @@ static void _php_db2_free_result_struct(stmt_handle* handle)
 			}
 
 			if( prev_ptr->param_type != DB2_PARAM_OUT && prev_ptr->param_type != DB2_PARAM_INOUT ) {
-				zval_ptr_dtor(&prev_ptr->value);
+				if (prev_ptr->value) {
+					zval_ptr_dtor(&prev_ptr->value);
+				}
 			}
 			efree(prev_ptr);
 
@@ -4346,7 +4348,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 	}
 #ifdef PASE /* i5/OS problem with SQL_FETCH out_length (temporary until fixed) */
 	for (i=0; i<stmt_res->num_columns; i++)
-		tmt_res->row_data[i].out_length = 0;
+		stmt_res->row_data[i].out_length = 0;
 #endif /*PASE*/
 	/* check if row_number is present */
 	if (argc == 2 && row_number > 0) {
