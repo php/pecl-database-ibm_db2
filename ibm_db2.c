@@ -921,7 +921,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
           /* i5_lib - SQL_ATTR_DBC_DEFAULT_LIB
              A character value that indicates the default library that will be used for resolving unqualified file references. This is not valid if the connection is using system naming mode.
              */
-	    char * lib = (char *)option_num;
+	    char * lib = (char *)option_str;
 	    rc = SQLSetConnectAttr((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_ATTR_DBC_DEFAULT_LIB, (SQLPOINTER)lib, SQL_NTS);
 		if ( rc == SQL_ERROR ) {
 			_php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
