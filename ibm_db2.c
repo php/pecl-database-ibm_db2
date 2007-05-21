@@ -2103,9 +2103,6 @@ PHP_FUNCTION(db2_columns)
 			RETURN_FALSE;
 		}
 
-		for( i=0; table_name[i] != 0; i++ )
-			table_name[i] = toupper( table_name[i] );
-
 		rc = SQLColumns((SQLHSTMT)stmt_res->hstmt, qualifier, SQL_NTS,
 						owner, SQL_NTS, table_name, SQL_NTS, column_name, SQL_NTS);
 		if (rc == SQL_ERROR ) {
