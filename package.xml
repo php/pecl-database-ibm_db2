@@ -9,28 +9,19 @@
  <license>Apache License 2.0</license>
  <maintainers>
   <maintainer>
-   <user>tessus</user>
-   <name>Helmut Tessarek</name>
-   <email>helmut_tessarek@at.ibm.com</email>
-   <role>developer</role>
-  </maintainer>
-  <maintainer>
-   <user>kfbombar</user>
-   <name>Kellen Bombardier</name>
-   <email>kfbombar@us.ibm.com</email>
-   <role>lead</role>
+     <user>kfbombar</user>
+     <name>IBM OpenDev</name>
+     <email>opendev@us.ibm.com</email>
+     <role>lead</role>
   </maintainer>
  </maintainers>
  <release>
-  <version>1.6.0</version>
-  <date>2007-02-12</date>
+  <version>1.6.2</version>
+  <date>2007-06-20</date>
   <license>Apache License 2.0</license>
   <state>stable</state>
   <notes>
-    Fixed bug #9217 (ability to stream LOB elements)
-    Fixed bug #7882 (escape string functionality added)
-    Fixed bug #9870 (fix for db2_result LOB defect)
-    Fix for LOB binding defects
+    Fixed bug -- db2_fetch_assoc() of BLOB columns
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
