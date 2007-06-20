@@ -4547,7 +4547,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 								}
 
 								if ( op & DB2_FETCH_ASSOC ) {
-									add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, out_length, 0);
+									add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, out_length, 1);
 								}
 								if ( op & DB2_FETCH_INDEX ) {
 									add_index_stringl(return_value, i, (char *)out_ptr, out_length, DB2_FETCH_BOTH & op);
