@@ -20,7 +20,7 @@
   +----------------------------------------------------------------------+
 */
 
-#define	MODULE_RELEASE	"1.6.0"
+#define	MODULE_RELEASE	"1.6.3"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -2496,6 +2496,10 @@ PHP_FUNCTION(db2_tables)
 	conn_handle *conn_res;
 	stmt_handle *stmt_res;
 	int rc;
+
+#ifdef PASE /* i5os owner cannot be NULL */
+	owner = "%";
+#endif /* PASE */
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "r|ssss", &connection, &qualifier,
 		&qualifier_len, &owner, &owner_len, &table_name, &table_name_len,
