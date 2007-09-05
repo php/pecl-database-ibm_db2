@@ -35,7 +35,7 @@ if ($conn) {
 	$drop = 'DROP TABLE blob_stream';
 	$result = @db2_exec( $conn, $drop );
 
-	$create = 'CREATE TABLE blob_stream (id INTEGER, my_blob CLOB)';
+	$create = 'CREATE TABLE blob_stream (id INTEGER, my_blob BLOB)';
 	$result = db2_exec( $conn, $create );
 
 	$variable = "";
@@ -66,11 +66,17 @@ Loop 3: T. THI
 Loop 4: S IS A
 Loop 5:  CLOB 
 Loop 6: TEST.
-Loop 0: THIS I
-Loop 1: S A BL
-Loop 2: OB TES
-Loop 3: T. THI
-Loop 4: S IS A
-Loop 5:  BLOB 
-Loop 6: TEST.
-
+Loop 0: 544849
+Loop 1: 532049
+Loop 2: 532041
+Loop 3: 20424C
+Loop 4: 4F4220
+Loop 5: 544553
+Loop 6: 542E20
+Loop 7: 544849
+Loop 8: 532049
+Loop 9: 532041
+Loop 10: 20424C
+Loop 11: 4F4220
+Loop 12: 544553
+Loop 13: 542E

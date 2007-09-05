@@ -1,5 +1,5 @@
 --TEST--
-IBM-DB2: db2_fetch_array() - one row binary data
+IBM-DB2: db2_fetch_array() - binary data
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -27,5 +27,13 @@ if(strcmp($file0, $file1) == 0) {
     echo "The files are not the same...bad.";
 }
 
+$result = db2_exec($conn, "select photo_format, picture, length(picture) from emp_photo");
+$count = 0;
+while ($row = db2_fetch_array($result)) {
+    $count++;
+}
+
+echo "\nIterated over $count rows.";
 --EXPECT--
 The files are the same...good.
+Iterated over 8 rows.
