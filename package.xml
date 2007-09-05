@@ -16,12 +16,12 @@
   </maintainer>
  </maintainers>
  <release>
-  <version>1.6.2</version>
-  <date>2007-06-20</date>
+  <version>1.6.3</version>
+  <date>2007-09-05</date>
   <license>Apache License 2.0</license>
   <state>stable</state>
   <notes>
-    Fixed bug -- db2_fetch_assoc() of BLOB columns
+    Fixed bug -- db2_tables() was failing on i5/OS
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
@@ -152,6 +152,7 @@
     <file name="test_160.phpt" role="test" />
     <file name="test_161.phpt" role="test" />
     <file name="test_162.phpt" role="test" />
+    <file name="test_163.phpt" role="test" />
     <file name="test_180.phpt" role="test" />
     <file name="test_190.phpt" role="test" />
     <file name="test_191.phpt" role="test" />
@@ -184,6 +185,7 @@
     <file name="test_310.phpt" role="test" />
     <file name="test_320.phpt" role="test" />
     <file name="test_321.phpt" role="test" />
+    <file name="test_1551.phpt" role="test" />
     <file name="test_6528.phpt" role="test" />
     <file name="test_6561.phpt" role="test" />
     <file name="test_6572.phpt" role="test" />
