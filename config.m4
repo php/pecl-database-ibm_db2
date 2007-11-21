@@ -10,7 +10,9 @@ dnl If your extension references something external, use with:
 PHP_ARG_WITH(IBM_DB2, for IBM_DB2 support,
 [  --with-IBM_DB2=[DIR]      Include IBM DB2 Univeral Database and Cloudscape support.
                           DIR is the location of the DB2 application development 
-                          headers and libraries])
+                          headers and libraries. Set the PHP_IBM_DB2_LIB
+                          environment variable to set the specific location of
+                          the DB2 libraries])
 
 dnl PHP_ARG_ENABLE(IBM_DB2, whether to enable IBM_DB2 support,
 dnl Make sure that the comment is aligned:
@@ -18,10 +20,18 @@ dnl [  --enable-IBM_DB2           Enable IBM_DB2 support])
 
 if test "$PHP_IBM_DB2" != "no"; then
   dnl # --with-IBM_DB2 -> check with-path  	 
-  SEARCH_PATH="$PHP_IBM_DB2 $DB2PATH $DB2DIR"
+  SEARCH_PATH="$PHP_IBM_DB2_LIB $PHP_IBM_DB2 $DB2PATH $DB2DIR"
 
   AC_MSG_CHECKING(Looking for DB2 CLI libraries)
   for i in $SEARCH_PATH ; do
+    AC_MSG_CHECKING([     in $i])
+    if test -r $i/libdb2.so || test -r $i/libdb2.a || test -r $i/libdb400.a ; then
+      LIB_DIR="$i/"
+      AC_MSG_RESULT(found)
+      break
+    else
+      AC_MSG_RESULT()
+    fi
     AC_MSG_CHECKING([     in $i/lib64])
     if test -r $i/lib64/libdb2.so || test -r $i/lib64/libdb2.a || test -r $i/lib64/libdb400.a ; then
       LIB_DIR="$i/lib64/"
