@@ -239,6 +239,8 @@ PHP_INI_BEGIN()
 		i5_allow_commit, zend_ibm_db2_globals, ibm_db2_globals)
 	STD_PHP_INI_BOOLEAN("ibm_db2.i5_dbcs_alloc", "0", PHP_INI_SYSTEM, OnUpdateLong,
 		i5_dbcs_alloc, zend_ibm_db2_globals, ibm_db2_globals)
+	STD_PHP_INI_BOOLEAN("ibm_db2.i5_all_pconnect", "0", PHP_INI_SYSTEM, OnUpdateLong,
+		i5_all_pconnect, zend_ibm_db2_globals, ibm_db2_globals)
 #endif /* PASE */
 	PHP_INI_ENTRY("ibm_db2.instance_name", NULL, PHP_INI_SYSTEM, NULL)
 PHP_INI_END()
@@ -1695,40 +1697,10 @@ static void _php_db2_clear_conn_err_cache(TSRMLS_D)
 }
 /* }}} */
 
-/* {{{ proto resource db2_connect(string database, string uid, string password [, array options])
-Returns a connection to a database */
-PHP_FUNCTION(db2_connect)
-{
-	int rc;
-
-	conn_handle *conn_res = NULL;
-
-	_php_db2_clear_conn_err_cache(TSRMLS_C);
-
-
-	rc = _php_db2_connect_helper( INTERNAL_FUNCTION_PARAM_PASSTHRU, &conn_res, 0 );
-
-	if ( rc != SQL_SUCCESS ) {
-		if (conn_res != NULL && conn_res->handle_active) {
-			rc = SQLFreeHandle( SQL_HANDLE_DBC, conn_res->hdbc);
-		}
-
-		/* free memory */
-		if (conn_res != NULL) {
-			efree(conn_res);
-		}
-
-		RETVAL_FALSE;
-		return;
-	} else {
-		ZEND_REGISTER_RESOURCE(return_value, conn_res, le_conn_struct);
-	}
-}
-/* }}} */
-
-/* {{{ proto resource db2_pconnect(string database_name, string username, string password [, array options])
-Returns a persistent connection to a database */
-PHP_FUNCTION(db2_pconnect)
+#ifdef PASE /* ini file switch all to pconnect */
+/* {{{ static int _php_db2_connect( INTERNAL_FUNCTION_PARAMETERS)
+*/
+static int _php_db2_pconnect( INTERNAL_FUNCTION_PARAMETERS)
 {
 	int rc;
 	conn_handle *conn_res = NULL;
@@ -1754,6 +1726,78 @@ PHP_FUNCTION(db2_pconnect)
 	}
 }
 /* }}} */
+#endif /* PASE */
+
+/* {{{ proto resource db2_connect(string database, string uid, string password [, array options])
+Returns a connection to a database */
+PHP_FUNCTION(db2_connect)
+{
+	int rc;
+
+	conn_handle *conn_res = NULL;
+
+#ifdef PASE /* ini file switch all to pconnect */
+	if (IBM_DB2_G(i5_all_pconnect)) {
+	    return _php_db2_pconnect(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	}
+#endif /* PASE */
+
+	_php_db2_clear_conn_err_cache(TSRMLS_C);
+
+	rc = _php_db2_connect_helper( INTERNAL_FUNCTION_PARAM_PASSTHRU, &conn_res, 0 );
+
+	if ( rc != SQL_SUCCESS ) {
+		if (conn_res != NULL && conn_res->handle_active) {
+			rc = SQLFreeHandle( SQL_HANDLE_DBC, conn_res->hdbc);
+		}
+
+		/* free memory */
+		if (conn_res != NULL) {
+			efree(conn_res);
+		}
+
+		RETVAL_FALSE;
+		return;
+	} else {
+		ZEND_REGISTER_RESOURCE(return_value, conn_res, le_conn_struct);
+	}
+}
+/* }}} */
+
+/* {{{ proto resource db2_pconnect(string database_name, string username, string password [, array options])
+Returns a persistent connection to a database */
+PHP_FUNCTION(db2_pconnect)
+{
+#ifdef PASE /* ini file switch all to pconnect */
+	return _php_db2_pconnect(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+#else /* not PASE */
+	int rc;
+	conn_handle *conn_res = NULL;
+
+	_php_db2_clear_conn_err_cache(TSRMLS_C);
+
+	rc = _php_db2_connect_helper( INTERNAL_FUNCTION_PARAM_PASSTHRU, &conn_res, 1);
+
+	if ( rc == SQL_ERROR ) {
+		if (conn_res != NULL && conn_res->handle_active) {
+			rc = SQLFreeHandle( SQL_HANDLE_DBC, conn_res->hdbc);
+		}
+
+		/* free memory */
+		if (conn_res != NULL) {
+			pefree(conn_res, 1);
+		}
+
+		RETVAL_FALSE;
+		return;
+	} else {
+		ZEND_REGISTER_RESOURCE(return_value, conn_res, le_pconn_struct);
+	}
+#endif /* not PASE */
+}
+/* }}} */
+
+
 
 /* {{{ proto mixed db2_autocommit(resource connection[, bool value])
 Returns or sets the AUTOCOMMIT state for a database connection */
@@ -1879,7 +1923,7 @@ PHP_FUNCTION(db2_bind_param)
 	/* LONG types used for data being passed in */
 	long param_no = 0;
 	long data_type = 0;
-	long precision = 0;
+	long precision = -1;
 	long scale = 0;
 	SQLSMALLINT sql_data_type = 0;
 	SQLUINTEGER sql_precision = 0;
@@ -1917,6 +1961,17 @@ PHP_FUNCTION(db2_bind_param)
 					_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
 					RETURN_FALSE;
 				}
+				if((sql_data_type == SQL_XML) && ((param_type == DB2_PARAM_OUT) || (param_type == DB2_PARAM_INOUT)))
+				{
+					if(precision < 0)
+					{
+						sql_precision = 1048576;
+					}
+					else
+					{
+						sql_precision = (SQLUINTEGER)precision;
+					}
+				}
 				/* Add to cache */
 				_php_db2_add_param_cache( stmt_res, (SQLUSMALLINT)param_no, varname, varname_len, param_type, sql_data_type, sql_precision, sql_scale, sql_nullable );
 				break;
@@ -1929,6 +1984,13 @@ PHP_FUNCTION(db2_bind_param)
 				sql_data_type = (SQLSMALLINT)data_type;
 				sql_precision = (SQLUINTEGER)precision;
 				sql_scale = (SQLSMALLINT)scale;
+				if((sql_data_type == SQL_XML) && ((param_type == DB2_PARAM_OUT) || (param_type == DB2_PARAM_INOUT)))
+				{
+					if(precision < 0)
+					{
+						sql_precision = 1048576;
+					}
+				}
 				_php_db2_add_param_cache( stmt_res, (SQLUSMALLINT)param_no, varname, varname_len, param_type, sql_data_type, sql_precision, sql_scale, sql_nullable );
 				break;
 
@@ -2830,6 +2892,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 #ifdef PASE
 		case SQL_UTF8_CHAR:
 #endif
+		case SQL_XML:
 		case SQL_DBCLOB:
 			nullterm = 1;
 		case SQL_BINARY:
@@ -2838,7 +2901,6 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 #endif /* PASE */
 		case SQL_VARBINARY:
 		case SQL_BLOB:
-		case SQL_XML:
 			/* make sure copy in is a string */
 			if (Z_STRVAL_PP(bind_data) && Z_TYPE_PP(bind_data) != IS_STRING)
 				convert_to_string(*bind_data);
@@ -3262,6 +3324,10 @@ PHP_FUNCTION(db2_execute)
 							if the length of the string out parameter is returned
 							then correct the length of the corresponding php variable
 						*/
+						if(Z_STRLEN_P(tmp_curr->value) < tmp_curr->bind_indicator)
+						{
+							tmp_curr->bind_indicator = Z_STRLEN_P(tmp_curr->value);
+						}
 						tmp_curr->value->value.str.val[tmp_curr->bind_indicator] = 0;
 						if (tmp_curr->param_type == DB2_PARAM_INOUT) {
 							int ib = tmp_curr->bind_indicator-1;
@@ -5362,35 +5428,11 @@ PHP_FUNCTION(db2_escape_string)
 	target = new_str;	 
 
 	while (source < end) {		 
-		switch( *source ) {		 
-			case '\n':
-				*target++ = '\\';
-				*target++ = 'n';
-				break;
-			case '\r':
-				*target++ = '\\';
-				*target++ = 'r';
-				break;
-			case '\x1a':
-				*target++ = '\\';		 
-				*target++ = 'Z';	 
-				break;
-			case '\0':
-				*target++ = '\\';		 
-				*target++ = '0';	 
-				break;	 
+		switch( *source ) {		 	 
 			case '\'':
-				*target++ = '\\';		 
 				*target++ = '\'';		 
-				break;	 
-			case '\"':
-				*target++ = '\\';		 
-				*target++ = '\"';		 
-				break;	 
-			case '\\':
-				*target++ = '\\';		 
-				*target++ = '\\';		 
-				break;	 
+				*target++ = '\'';		 
+				break;	 	 
 			default:		 
 				*target++ = *source;	 
 				break;	 
