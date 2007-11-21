@@ -20,7 +20,7 @@
   +----------------------------------------------------------------------+
 */
 
-#define	MODULE_RELEASE	"1.6.3"
+#define	MODULE_RELEASE	"1.6.5"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
