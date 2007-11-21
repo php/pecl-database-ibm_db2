@@ -227,6 +227,7 @@ ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 #ifdef PASE /* i5/OS ease of use turn off commit */
 	long		i5_allow_commit;
 	long		i5_dbcs_alloc;
+	long		i5_all_pconnect;
 #endif /* PASE */
 ZEND_END_MODULE_GLOBALS(ibm_db2)
 
