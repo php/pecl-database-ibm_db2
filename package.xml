@@ -16,12 +16,15 @@
   </maintainer>
  </maintainers>
  <release>
-  <version>1.6.3</version>
-  <date>2007-09-05</date>
+  <version>1.6.4</version>
+  <date>2007-11-20</date>
   <license>Apache License 2.0</license>
   <state>stable</state>
   <notes>
-    Fixed bug -- db2_tables() was failing on i5/OS
+    Fixed db2_escape_string() to correct escaping characters.
+    Fixed segmentation fault caused by XML output parameters when calling stored procedures.
+    Facilitated a convenience override of db2_connect to invoke db2_pconnect for i5/OS, without needing to change PHP app code.
+    Added environment options so that the user can specify whether to use lib64 or lib32 directory.
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
@@ -181,6 +184,7 @@
     <file name="test_252.phpt" role="test" />
     <file name="test_260.phpt" role="test" />
     <file name="test_261.phpt" role="test" />
+    <file name="test_263.phpt" role="test" />
     <file name="test_300.phpt" role="test" />
     <file name="test_310.phpt" role="test" />
     <file name="test_320.phpt" role="test" />
