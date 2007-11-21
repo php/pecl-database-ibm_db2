@@ -16,15 +16,12 @@
   </maintainer>
  </maintainers>
  <release>
-  <version>1.6.4</version>
-  <date>2007-11-20</date>
+  <version>1.6.5</version>
+  <date>2007-11-21</date>
   <license>Apache License 2.0</license>
   <state>stable</state>
   <notes>
-    Fixed db2_escape_string() to correct escaping characters.
-    Fixed segmentation fault caused by XML output parameters when calling stored procedures.
-    Facilitated a convenience override of db2_connect to invoke db2_pconnect for i5/OS, without needing to change PHP app code.
-    Added environment options so that the user can specify whether to use lib64 or lib32 directory.
+    Updating the module version.
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
