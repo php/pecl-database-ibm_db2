@@ -20,8 +20,6 @@
   +----------------------------------------------------------------------+
 */
 
-#define	MODULE_RELEASE	"1.6.5"
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -219,7 +217,7 @@ zend_module_entry ibm_db2_module_entry = {
 	NULL,	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(ibm_db2),
 #if ZEND_MODULE_API_NO >= 20010901
-	MODULE_RELEASE, /* Replace with version number for your extension */
+	PHP_IBM_DB2_VERSION, /* Replace with version number for your extension */
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
@@ -558,29 +556,10 @@ PHP_MSHUTDOWN_FUNCTION(ibm_db2)
 */
 PHP_MINFO_FUNCTION(ibm_db2)
 {
-	char *src, *tgt, *rev;
-	char revision[30];
-
-	src = "$Revision$";
-	rev = (char*)malloc(8*sizeof(char));
-	tgt = rev;
-
-	while( *src != ':' )
-		src++;
-	src++; src++;
-
-	while( *src != '$' )
-		*tgt++ = *src++;
-	tgt--;
-	*tgt = 0;
-
-	sprintf( revision, "%s", rev );
-	free(rev);
-
 	php_info_print_table_start();
 	php_info_print_table_header(2, "IBM DB2, Cloudscape and Apache Derby support", "enabled");
-	php_info_print_table_row(2, "Module release", MODULE_RELEASE);
-	php_info_print_table_row(2, "Module revision", revision);
+	php_info_print_table_row(2, "Module release", PHP_IBM_DB2_VERSION);
+	php_info_print_table_row(2, "Module revision", "$Revision$");
 
 	switch (IBM_DB2_G(bin_mode)) {
 		case DB2_BINARY:
