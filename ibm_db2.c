@@ -1368,13 +1368,16 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 					}
 				}
 				break;
-
 			case SQL_TYPE_DATE:
 			case SQL_TYPE_TIME:
 			case SQL_TYPE_TIMESTAMP:
 			case SQL_DATETIME:
 			case SQL_BIGINT:
 				in_length = stmt_res->column_info[i].size+1;
+				if(column_type == SQL_BIGINT)
+				{
+					in_length++;
+				}
 				row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
 				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
 					SQL_C_CHAR, row_data->str_val, in_length,
@@ -1676,7 +1679,6 @@ static void _php_db2_clear_conn_err_cache(TSRMLS_D)
 }
 /* }}} */
 
-#ifdef PASE /* ini file switch all to pconnect */
 /* {{{ static int _php_db2_connect( INTERNAL_FUNCTION_PARAMETERS)
 */
 static int _php_db2_pconnect( INTERNAL_FUNCTION_PARAMETERS)
@@ -1705,7 +1707,6 @@ static int _php_db2_pconnect( INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 /* }}} */
-#endif /* PASE */
 
 /* {{{ proto resource db2_connect(string database, string uid, string password [, array options])
 Returns a connection to a database */
@@ -1747,36 +1748,9 @@ PHP_FUNCTION(db2_connect)
 Returns a persistent connection to a database */
 PHP_FUNCTION(db2_pconnect)
 {
-#ifdef PASE /* ini file switch all to pconnect */
 	return _php_db2_pconnect(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-#else /* not PASE */
-	int rc;
-	conn_handle *conn_res = NULL;
-
-	_php_db2_clear_conn_err_cache(TSRMLS_C);
-
-	rc = _php_db2_connect_helper( INTERNAL_FUNCTION_PARAM_PASSTHRU, &conn_res, 1);
-
-	if ( rc == SQL_ERROR ) {
-		if (conn_res != NULL && conn_res->handle_active) {
-			rc = SQLFreeHandle( SQL_HANDLE_DBC, conn_res->hdbc);
-		}
-
-		/* free memory */
-		if (conn_res != NULL) {
-			pefree(conn_res, 1);
-		}
-
-		RETVAL_FALSE;
-		return;
-	} else {
-		ZEND_REGISTER_RESOURCE(return_value, conn_res, le_pconn_struct);
-	}
-#endif /* not PASE */
 }
 /* }}} */
-
-
 
 /* {{{ proto mixed db2_autocommit(resource connection[, bool value])
 Returns or sets the AUTOCOMMIT state for a database connection */
@@ -2896,6 +2870,16 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 						Z_STRLEN_PP(bind_data) = curr->param_size;
 				}
 			}
+#ifdef PASE /* zero length valueType = SQL_C_CHAR bad for i5/OS SQLBindParameter */
+			else if (Z_STRLEN_PP(bind_data) == 0) {
+				Z_STRVAL_PP(bind_data) = erealloc(Z_STRVAL_PP(bind_data), curr->param_size+nullterm);
+				memset(Z_STRVAL_PP(bind_data), 0x20, curr->param_size+nullterm);
+				if (nullterm) {
+					Z_STRVAL_PP(bind_data)[curr->param_size] = '\0';
+				}
+				Z_STRLEN_PP(bind_data) = curr->param_size;
+			}
+#endif /* PASE */
 			break;
 
 		default:
@@ -4150,6 +4134,10 @@ PHP_FUNCTION(db2_result)
 				else
 #endif /* not PASE */
 				in_length = stmt_res->column_info[col_num].size+1;
+				if(column_type == SQL_BIGINT)
+				{
+					in_length++;
+				}
 				out_ptr = (SQLPOINTER)ecalloc(1, in_length);
 				if ( out_ptr == NULL ) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory");
@@ -4160,6 +4148,7 @@ PHP_FUNCTION(db2_result)
 					RETURN_FALSE;
 				}
 				if (out_length == SQL_NULL_DATA) {
+					efree(out_ptr);
 					RETURN_NULL();
 				} else {
 					RETVAL_STRING((char*)out_ptr, 1);
