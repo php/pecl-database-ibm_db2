@@ -5,7 +5,11 @@ IBM-DB2: Test for XML OUT parameters in stored procedures.
 --FILE--
 <?php
 
-    $dbconn = db2_connect('manas', 'manas', 'Pswd4QAT');
+require_once('connection.inc');
+
+$dbconn = db2_connect($database, $user, $password);
+
+if ($dbconn) {
 
     $stmt = db2_prepare($dbconn, 'DROP PROCEDURE test_xml1');
     $res = @db2_execute($stmt);
@@ -178,6 +182,10 @@ ENDPROC;
     echo 'charResult: ' . $charResult . "\n";
     echo 'xmlResult: ' . $xmlResult . "\n";
     db2_free_stmt($stmt);
+}
+else {
+    echo "Connection failed.\n";
+}
 
 ?>
 --EXPECT--

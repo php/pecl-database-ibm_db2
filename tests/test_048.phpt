@@ -26,6 +26,6 @@ if(strcmp($file0, $file1) == 0) {
 } else {
     echo "The files are not the same...bad.";
 }
-
+?>
 --EXPECT--
 The files are the same...good.
