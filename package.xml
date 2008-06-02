@@ -22,6 +22,8 @@
   <state>stable</state>
   <notes>
     Updating the module version.
+    Fixing defects in test cases.
+    Bug in zero length string has been fixed.
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
