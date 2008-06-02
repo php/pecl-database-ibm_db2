@@ -16,12 +16,11 @@
   </maintainer>
  </maintainers>
  <release>
-  <version>1.6.5</version>
+  <version>1.6.6</version>
   <date>2008-06-02</date>
   <license>Apache License 2.0</license>
   <state>stable</state>
   <notes>
-    Updating the module version.
     Fixing defects in test cases.
     Bug in zero length string has been fixed.
   </notes>
