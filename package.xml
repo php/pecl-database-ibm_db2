@@ -184,6 +184,7 @@
     <file name="test_260.phpt" role="test" />
     <file name="test_261.phpt" role="test" />
     <file name="test_263.phpt" role="test" />
+    <file name="test_264.phpt" role="test" />
     <file name="test_300.phpt" role="test" />
     <file name="test_310.phpt" role="test" />
     <file name="test_320.phpt" role="test" />
@@ -196,6 +197,7 @@
     <file name="test_6792.phpt" role="test" />
     <file name="test_9173.phpt" role="test" />
     <file name="test_9194.phpt" role="test" />
+    <file name="test_10931.phpt" role="test" />
    </dir>
   </filelist>
  </release>
