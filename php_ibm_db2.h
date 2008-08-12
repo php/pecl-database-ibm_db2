@@ -22,7 +22,7 @@
   $Id$
 */
 
-#define	PHP_IBM_DB2_VERSION	"1.6.6"
+#define	PHP_IBM_DB2_VERSION	"1.7.0"
 
 #ifndef PHP_IBM_DB2_H
 #define PHP_IBM_DB2_H
@@ -38,6 +38,16 @@ extern zend_module_entry ibm_db2_module_entry;
 /* needed for backward compatibility (SQL_XML not defined prior to DB2 v9) */
 #ifndef SQL_XML
 #define SQL_XML -370
+#endif
+
+/* SQL_ATTR_USE_TRUSTED_CONTEXT, 
+ * SQL_ATTR_TRUSTED_CONTEXT_USERID and 
+ * SQL_ATTR_TRUSTED_CONTEXT_PASSWORD
+ * not defined prior to DB2 v9 */
+#ifndef SQL_ATTR_USE_TRUSTED_CONTEXT
+#define SQL_ATTR_USE_TRUSTED_CONTEXT 2561
+#define SQL_ATTR_TRUSTED_CONTEXT_USERID 2562
+#define SQL_ATTR_TRUSTED_CONTEXT_PASSWORD 2563
 #endif
 
 #ifdef PHP_WIN32
@@ -152,6 +162,9 @@ extern zend_module_entry ibm_db2_module_entry;
 #define DB2_CASE_NATURAL 0
 #define DB2_CASE_LOWER 1
 #define DB2_CASE_UPPER 2
+
+/* Trusted context case */
+#define DB2_TRUSTED_CONTEXT_ENABLE SQL_ATTR_USE_TRUSTED_CONTEXT
 
 PHP_MINIT_FUNCTION(ibm_db2);
 PHP_MSHUTDOWN_FUNCTION(ibm_db2);

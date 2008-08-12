@@ -492,6 +492,7 @@ PHP_MINIT_FUNCTION(ibm_db2)
 	REGISTER_LONG_CONSTANT("DB2_PARAM_INOUT", SQL_PARAM_INPUT_OUTPUT, CONST_CS | CONST_PERSISTENT);
 	/* This number chosen is just a place holder to decide binding function to call */
 	REGISTER_LONG_CONSTANT("DB2_PARAM_FILE", 11, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_TRUSTED_CONTEXT_ENABLE", SQL_ATTR_USE_TRUSTED_CONTEXT, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("DB2_AUTOCOMMIT_ON", SQL_AUTOCOMMIT_ON, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DB2_AUTOCOMMIT_OFF", SQL_AUTOCOMMIT_OFF, CONST_CS | CONST_PERSISTENT);
@@ -774,6 +775,81 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 
 			default:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURSOR attribute can only be set on connection or statement resources");
+		}
+	} else if (!STRCASECMP(opt_key, "trustedcontext")) {
+		if (type == SQL_HANDLE_DBC ) { /* Checking for connection resource */
+			if(((conn_handle*)handle)->handle_active == 0) { /* Checking for live connection */
+				switch (option_num) {
+					case DB2_TRUSTED_CONTEXT_ENABLE:
+						rc = SQLSetConnectAttr(
+								(SQLHDBC)((conn_handle*)handle)->hdbc, 
+								SQL_ATTR_USE_TRUSTED_CONTEXT, 
+								(SQLPOINTER)SQL_TRUE, SQL_IS_INTEGER);
+
+						if ( rc == SQL_ERROR ) {
+							_php_db2_check_sql_errors((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+						}
+						break;
+					
+					default:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "TRUSTED CONTEXT connection attribute value must be DB2_TRUSTED_CONTEXT_ENABLE");
+						break;
+				}
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "TRUSTED CONTEXT connection attribute can only be set on connection resources");
+			}
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "TRUSTED CONTEXT connection attribute can only be set while creating connection");
+		}
+	} else if (!STRCASECMP(opt_key, "trusted_user")) {
+		if (type == SQL_HANDLE_DBC ) { /* Checking for connection resource */
+			if(((conn_handle*)handle)->handle_active == 1) { /* Checking for live connection */
+				
+				int val;
+				rc = SQLGetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_USE_TRUSTED_CONTEXT, (SQLPOINTER)&val, 0, NULL);
+				if ( rc == SQL_ERROR ) {
+					_php_db2_check_sql_errors((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				}
+				
+				if(val == SQL_TRUE) { /* Checking for Trusted context */
+					rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_TRUSTED_CONTEXT_USERID, (SQLPOINTER) option_str, SQL_NTS);
+					
+					if ( rc == SQL_ERROR ) {
+						_php_db2_check_sql_errors((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+					}
+				} else {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "TRUSTED USER attribute can only be set when TRUSTED CONTEXT is enabled");
+				}
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "TRUSTED USER attribute can only be set on live connection");
+			}
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "TRUSTED USER attribute can only be set on connection resources");
+		}
+	} else if (!STRCASECMP(opt_key, "trusted_password")) {
+		if (type == SQL_HANDLE_DBC ) { /* Checking for connection resource */
+			if(((conn_handle*)handle)->handle_active == 1) { /* Checking for live connection */
+				
+				int val;
+				rc = SQLGetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_USE_TRUSTED_CONTEXT, (SQLPOINTER)&val, 0, NULL);
+				if ( rc == SQL_ERROR ) {
+					_php_db2_check_sql_errors((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				}
+
+				if(val == SQL_TRUE) { /* Checking for Trusted context */
+					rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_TRUSTED_CONTEXT_PASSWORD, (SQLPOINTER) option_str, SQL_NTS);
+					
+					if ( rc == SQL_ERROR ) {
+						_php_db2_check_sql_errors((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+					}
+				} else {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "TRUSTED PASSWORD attribute can only be set when TRUSTED CONTEXT is enabled");
+				}
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "TRUSTED PASSWORD attribute can only be set on live connection");
+			} 
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "TRUSTED PASSWORD attribute can only be set on connection resources");
 		}
 	} else if (!STRCASECMP(opt_key, "autocommit")) {
 		if (type == SQL_HANDLE_DBC ) {
@@ -1196,6 +1272,7 @@ static int _php_db2_parse_options ( zval *options, int type, void *handle TSRMLS
 	ulong num_idx;
 	char *opt_key; /* Holds the Option Index Key */
 	zval **data;
+	zval **tc_pass = NULL;
 
 	if ( options != NULL) {
 		numOpts = zend_hash_num_elements(Z_ARRVAL_P(options));
@@ -1204,23 +1281,31 @@ static int _php_db2_parse_options ( zval *options, int type, void *handle TSRMLS
 		for ( i = 0; i < numOpts; i++) {
 			if (zend_hash_get_current_key(Z_ARRVAL_P(options), &opt_key,
 				&num_idx, 1) == HASH_KEY_IS_STRING) {
-
-				zend_hash_get_current_data(Z_ARRVAL_P(options), (void**)&data);
-
-				/* Assign options to handle. */
-				/* Sets the options in the handle with CLI/ODBC calls */
-				_php_db2_assign_options( handle, type, opt_key, data TSRMLS_CC );
-
-				zend_hash_move_forward(Z_ARRVAL_P(options));
-
-				/* Since zend_hash_get_current_key assigns memory to this
+					zend_hash_get_current_data(Z_ARRVAL_P(options), (void**)&data);
+					
+					if (!STRCASECMP(opt_key, "trusted_password")) {
+						tc_pass = data;
+					} else {
+						/* Assign options to handle. */
+						/* Sets the options in the handle with CLI/ODBC calls */
+						_php_db2_assign_options( handle, type, opt_key, data TSRMLS_CC );
+					}
+					
+					zend_hash_move_forward(Z_ARRVAL_P(options));
+					/* Since zend_hash_get_current_key assigns memory to this
 					string each time it is called */
-				if (opt_key) {
-					efree(opt_key);
-				}
+
+					if (opt_key) {
+						efree(opt_key);
+					}
 			} else {
 				return -1;
 			}
+		}
+		if(tc_pass != NULL) {
+			/* Assign options to handle. */
+			/* Sets the options in the handle with CLI/ODBC calls */
+			_php_db2_assign_options( handle, type, "trusted_password", tc_pass TSRMLS_CC );
 		}
 	}
 	return 0;
@@ -2813,15 +2898,9 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 		case SQL_BIGINT:
 		case SQL_SMALLINT:
 		case SQL_INTEGER:
-			if (Z_STRVAL_PP(bind_data) && !(Z_TYPE_PP(bind_data) == IS_BOOL || Z_TYPE_PP(bind_data) == IS_LONG))
-				convert_to_long(*bind_data);
-			break;
-
 		case SQL_REAL:
 		case SQL_FLOAT:
 		case SQL_DOUBLE:
-			if (Z_STRVAL_PP(bind_data) && Z_TYPE_PP(bind_data) != IS_DOUBLE)
-				convert_to_double(*bind_data);
 			break;
 
 		case SQL_CHAR:
@@ -4007,8 +4086,8 @@ static RETCODE _php_db2_get_length(stmt_handle* stmt_res, SQLUSMALLINT col_num, 
 }
 /* }}} */
 
-/* {{{ static RETCODE _php_db2_get_data2(stmt_handle *stmt_res, int col_num, short ctype, void *buff, int in_length, SQLINTEGER *out_length TSRMLS_DC) */
-static RETCODE _php_db2_get_data2(stmt_handle *stmt_res, SQLUSMALLINT col_num, SQLSMALLINT ctype, SQLPOINTER buff, SQLLEN in_length, SQLINTEGER *out_length TSRMLS_DC)
+/* {{{ static RETCODE _php_db2_get_data2(stmt_handle *stmt_res, int col_num, short ctype, void *buff, int read_length, int buff_length, SQLINTEGER *out_length TSRMLS_DC) */
+static RETCODE _php_db2_get_data2(stmt_handle *stmt_res, SQLUSMALLINT col_num, SQLSMALLINT ctype, SQLPOINTER buff, SQLLEN read_length, SQLLEN buff_length, SQLINTEGER *out_length TSRMLS_DC)
 {
 	RETCODE rc=SQL_SUCCESS;
 	SQLHANDLE new_hstmt;
@@ -4021,8 +4100,8 @@ static RETCODE _php_db2_get_data2(stmt_handle *stmt_res, SQLUSMALLINT col_num, S
 		return SQL_ERROR;
 	}
 	rc = SQLGetSubString((SQLHSTMT)new_hstmt, stmt_res->column_info[col_num-1].loc_type,
-				stmt_res->column_info[col_num-1].lob_loc, 1, in_length, targetCType,
-				buff, in_length, out_length, &stmt_res->column_info[col_num-1].loc_ind);
+				stmt_res->column_info[col_num-1].lob_loc, 1, read_length, targetCType,
+				buff, buff_length, out_length, &stmt_res->column_info[col_num-1].loc_ind);
 	if ( rc == SQL_ERROR ) {
 		_php_db2_check_sql_errors((SQLHSTMT)stmt_res, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
 	}
@@ -4207,11 +4286,11 @@ PHP_FUNCTION(db2_result)
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for LOB Data");
 					RETURN_FALSE;
 				}
-				rc = _php_db2_get_data2(stmt_res, col_num+1, SQL_C_CHAR, (void*)out_char_ptr, in_length+1, &out_length TSRMLS_CC);
+				rc = _php_db2_get_data2(stmt_res, col_num+1, SQL_C_CHAR, (void*)out_char_ptr, in_length, in_length+1, &out_length TSRMLS_CC);
 				if (rc == SQL_ERROR) {
 					RETURN_FALSE;
 				}
-				RETURN_STRINGL(out_char_ptr, in_length, 0);
+				RETURN_STRINGL(out_char_ptr, out_length, 0);
 				break;
 
 #ifdef PASE /* i5/OS SQL_DBCLOB */
@@ -4271,7 +4350,7 @@ PHP_FUNCTION(db2_result)
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for LOB Data");
 							RETURN_FALSE;
 						}
-						rc = _php_db2_get_data2(stmt_res, col_num+1, lob_bind_type, (char *)out_ptr, in_length, &out_length TSRMLS_CC);
+						rc = _php_db2_get_data2(stmt_res, col_num+1, lob_bind_type, (char *)out_ptr, in_length, in_length, &out_length TSRMLS_CC);
 						if (rc == SQL_ERROR) {
 							RETURN_FALSE;
 						}
@@ -4579,7 +4658,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 									php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for LOB Data");
 									RETURN_FALSE;
 								}
-								rc = _php_db2_get_data2(stmt_res, i+1, lob_bind_type, (char *)out_ptr, tmp_length, &out_length TSRMLS_CC);
+								rc = _php_db2_get_data2(stmt_res, i+1, lob_bind_type, (char *)out_ptr, tmp_length, tmp_length, &out_length TSRMLS_CC);
 								if (rc == SQL_ERROR) {
 									RETURN_FALSE;
 								}
@@ -4659,17 +4738,17 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Allocate Memory for LOB Data");
 							RETURN_FALSE;
 						}
-						rc = _php_db2_get_data2(stmt_res, i+1, SQL_C_CHAR, out_ptr, tmp_length+1, &out_length TSRMLS_CC);
+						rc = _php_db2_get_data2(stmt_res, i+1, SQL_C_CHAR, out_ptr, tmp_length, tmp_length+1, &out_length TSRMLS_CC);
 						if (rc == SQL_ERROR) {
 							efree(out_ptr);
 							RETURN_FALSE;
 						}
 
 						if ( op & DB2_FETCH_ASSOC ) {
-							add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, tmp_length, 1);
+							add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, out_length, 1);
 						}
 						if ( op & DB2_FETCH_INDEX ) {
-							add_index_stringl(return_value, i, (char *)out_ptr, tmp_length, DB2_FETCH_BOTH & op);
+							add_index_stringl(return_value, i, (char *)out_ptr, out_length, DB2_FETCH_BOTH & op);
 						}
 
 						efree(out_ptr);
@@ -5479,6 +5558,7 @@ PHP_FUNCTION(db2_get_option)
 	SQLCHAR *value = NULL;
 	int connection_id = -1;
 	int rc;
+	int val = 0;
 
 	/* Parse out the parameters */
 	if (zend_parse_parameters(argc TSRMLS_CC, "rs", &connection, &option, &option_len) == FAILURE) {
@@ -5523,6 +5603,24 @@ PHP_FUNCTION(db2_get_option)
 			} else if (!STRCASECMP(option, "wrkstnname")) {
 				value = ecalloc(1, WRKSTNNAME_LEN + 1);
 				rc = SQLGetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_INFO_WRKSTNNAME, (SQLPOINTER)value, WRKSTNNAME_LEN, NULL);
+				if ( rc == SQL_ERROR ) {
+					_php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+					RETURN_FALSE;
+				}
+			} else if(!STRCASECMP(option, "trustedcontext")) {
+				rc = SQLGetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_USE_TRUSTED_CONTEXT, (SQLPOINTER)&val, 0, NULL);
+				if ( rc == SQL_ERROR ) {
+					_php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+					RETURN_FALSE;
+				}
+				if(val == SQL_TRUE) {
+					RETURN_TRUE;
+				} else {
+					RETURN_FALSE;
+				}
+			} else if (!STRCASECMP(option, "trusted_user")) {
+				value = ecalloc(1, USERID_LEN + 1);
+				rc = SQLGetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_TRUSTED_CONTEXT_USERID, (SQLPOINTER)value, USERID_LEN, NULL);
 				if ( rc == SQL_ERROR ) {
 					_php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
 					RETURN_FALSE;

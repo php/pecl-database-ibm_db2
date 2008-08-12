@@ -16,13 +16,14 @@
   </maintainer>
  </maintainers>
  <release>
-  <version>1.6.6</version>
-  <date>2008-06-02</date>
+  <version>1.7.0</version>
+  <date>2008-08-12</date>
   <license>Apache License 2.0</license>
   <state>stable</state>
   <notes>
-    Fixing defects in test cases.
-    Bug in zero length string has been fixed.
+	  Add trusted context support.
+	  Bug 13185 - Updating wrong row (fixed).
+	  Bug related to special character fixed.
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
@@ -38,6 +39,7 @@
    </dir>
    <dir name="tests" role="test">
     <file name="connection.inc" role="test" />
+    <file name="trusted_connection.inc" role="test" />
     <file name="escape.dat" role="test" />
     <file name="pic1.jpg" role="test" />
     <file name="resume_000130.txt" role="test" />
@@ -47,6 +49,7 @@
     <file name="skipif.inc" role="test" />
     <file name="skipif2.inc" role="test" />
     <file name="skipif3.inc" role="test" />
+    <file name="skipifNotTrustedContext.inc" role="test" />
     <file name="spook.png" role="test" />
     <file name="test_000.phpt" role="test" />
     <file name="test_001.phpt" role="test" />
@@ -125,6 +128,7 @@
     <file name="test_125.phpt" role="test" />
     <file name="test_130.phpt" role="test" />
     <file name="test_131.phpt" role="test" />
+    <file name="test_131a.phpt" role="test" />
     <file name="test_132.phpt" role="test" />
     <file name="test_133.phpt" role="test" />
     <file name="test_140.phpt" role="test" />
@@ -197,6 +201,9 @@
     <file name="test_9173.phpt" role="test" />
     <file name="test_9194.phpt" role="test" />
     <file name="test_10931.phpt" role="test" />
+    <file name="test_clob_special_char.phpt" role="test" />
+    <file name="test_trusted_context_connect.phpt" role="test" />
+    <file name="test_trusted_context_pconnect.phpt" role="test" />
    </dir>
   </filelist>
  </release>
