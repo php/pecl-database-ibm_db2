@@ -14,6 +14,12 @@
      <email>opendev@us.ibm.com</email>
      <role>lead</role>
   </maintainer>
+  <maintainer>
+     <user>ambrish</user>
+     <name>Ambrish Bhargava</name>
+     <email>abhargav@in.ibm.com</email>
+     <role>lead</role>
+  </maintainer>
  </maintainers>
  <release>
   <version>1.7.0</version>
