@@ -16,7 +16,7 @@
   +----------------------------------------------------------------------+
   | Authors: Sushant Koduru, Lynh Nguyen, Kanchana Padmanabhan,          |
   |          Dan Scott, Helmut Tessarek, Kellen Bombardier,              |
-  |          Tony Cairns, Krishna Raman                                  |
+  |          Tony Cairns, Krishna Raman, Ambrish Bhargava                |
   +----------------------------------------------------------------------+
 */
 
@@ -199,6 +199,7 @@ function_entry ibm_db2_functions[] = {
 	PHP_FE(db2_lob_read,	NULL)
 	PHP_FE(db2_get_option,	NULL)
 	PHP_FALIAS(db2_getoption, db2_get_option,   NULL)
+	PHP_FE(db2_last_insert_id,	NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in ibm_db2_functions[] */
 };
 /* }}} */
@@ -3317,7 +3318,7 @@ PHP_FUNCTION(db2_execute)
 	}
 
 	if ( rc == SQL_NEED_DATA ) {
-		while ( (SQLParamData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER *)&valuePtr)) == SQL_NEED_DATA ) {
+		while ( (rc = (SQLParamData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER *)&valuePtr))) == SQL_NEED_DATA ) {
 			/* passing data value for a parameter */
 			rc = SQLPutData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER)(((zvalue_value*)valuePtr)->str.val), ((zvalue_value*)valuePtr)->str.len);
 			if ( rc == SQL_ERROR ) {
@@ -3325,6 +3326,11 @@ PHP_FUNCTION(db2_execute)
 				_php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
 				RETVAL_FALSE;
 			}
+		}
+		if ( rc == SQL_ERROR ) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Execute Failed");
+			_php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			RETVAL_FALSE;
 		}
 	}
 
@@ -5635,6 +5641,66 @@ PHP_FUNCTION(db2_get_option)
 			RETURN_FALSE;
 		}
 #endif /* not PASE */
+	}
+}
+/* }}} */
+
+/* {{{ proto resource db2_last_insert_id(resource connection)
+Returns the last insert id as a string. */
+PHP_FUNCTION(db2_last_insert_id)
+{
+	int argc = ZEND_NUM_ARGS();
+	int connection_id = -1;
+	zval *connection = NULL;
+	conn_handle *conn_res;
+	int rc;
+	char *last_id = emalloc( MAX_IDENTITY_DIGITS );
+	char *sql;
+	SQLHANDLE hstmt;
+	SQLUINTEGER out_length;
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "r", &connection) == FAILURE) {
+		return;
+	}
+
+	if (connection) {
+		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id,
+			"Connection Resource", le_conn_struct, le_pconn_struct);
+		
+		/* get a new statement handle */
+		strcpy( last_id, "" );
+		rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &hstmt);
+		if ( rc == SQL_ERROR ) {
+			_php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+		}
+
+		/* Selecting last insert ID from current connection resource. */
+		sql = "VALUES IDENTITY_VAL_LOCAL()";
+		rc = SQLExecDirect(hstmt, (SQLCHAR *) sql, strlen(sql));
+		if ( rc == SQL_ERROR ) {
+			_php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+		}
+
+		/* Binding and fetching last insert ID. */
+		rc = SQLBindCol(hstmt, 1, SQL_C_CHAR, last_id, MAX_IDENTITY_DIGITS, &out_length);
+		if ( rc == SQL_ERROR ) {
+			_php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+		}
+
+		rc = SQLFetch(hstmt);
+		if ( rc == SQL_ERROR ) {
+			_php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+		}
+
+		/* Free allocated statement handle. */
+		SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+
+		/* Returning last insert ID (if any), or otherwise NULL */
+		if(last_id != "") {
+			RETURN_STRING(last_id, 0);
+		} else {
+			RETURN_NULL();
+		}
 	}
 }
 /* }}} */

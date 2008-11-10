@@ -16,13 +16,13 @@
   | permissions and limitations under the License.                       |
   +----------------------------------------------------------------------+
   | Authors: Sushant Koduru, Lynh Nguyen, Kanchana Padmanabhan,          |
-  |          Dan Scott, Helmut Tessarek                                  |
+  |          Dan Scott, Helmut Tessarek, Ambrish Bhargava                |
   +----------------------------------------------------------------------+
 
   $Id$
 */
 
-#define	PHP_IBM_DB2_VERSION	"1.7.0"
+#define	PHP_IBM_DB2_VERSION	"1.7.1"
 
 #ifndef PHP_IBM_DB2_H
 #define PHP_IBM_DB2_H
@@ -62,6 +62,11 @@ extern zend_module_entry ibm_db2_module_entry;
 
 /* strlen(" SQLCODE=") added in */
 #define DB2_MAX_ERR_MSG_LEN (SQL_MAX_MESSAGE_LENGTH + SQL_SQLSTATE_SIZE + 10)
+
+/* This is used in db2_last_insert_id.
+ * We allocate a buffer of size 32 as per 
+ * recommendations from the CLI IDS team */
+#define MAX_IDENTITY_DIGITS 32
 
 /* Used in _php_parse_options */
 #define DB2_ERRMSG 1
@@ -228,6 +233,7 @@ PHP_FUNCTION(db2_escape_string);
 PHP_FUNCTION(db2_lob_read);
 PHP_FUNCTION(db2_get_option);
 PHP_FUNCTION(db2_getoption);
+PHP_FUNCTION(db2_last_insert_id);
 
 /*
 	Declare any global variables you may need between the BEGIN

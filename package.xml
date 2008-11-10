@@ -22,14 +22,12 @@
   </maintainer>
  </maintainers>
  <release>
-  <version>1.7.0</version>
-  <date>2008-08-12</date>
+  <version>1.7.1</version>
+  <date>2008-11-10</date>
   <license>Apache License 2.0</license>
   <state>stable</state>
   <notes>
-	  Add trusted context support.
-	  Bug 13185 - Updating wrong row (fixed).
-	  Bug related to special character fixed.
+	  Added last insert ID feature.
   </notes>
   <configureoptions>
    <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
@@ -208,6 +206,7 @@
     <file name="test_9194.phpt" role="test" />
     <file name="test_10931.phpt" role="test" />
     <file name="test_clob_special_char.phpt" role="test" />
+    <file name="test_last_insert_id.phpt" role="test" />
     <file name="test_trusted_context_connect.phpt" role="test" />
     <file name="test_trusted_context_pconnect.phpt" role="test" />
    </dir>

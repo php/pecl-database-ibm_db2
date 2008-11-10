@@ -34,6 +34,7 @@ while ($row = db2_fetch_assoc($result)) {
 }
 
 echo "\nIterated over $count rows.";
+?>
 --EXPECT--
 The files are the same...good.
 Iterated over 8 rows.
