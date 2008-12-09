@@ -1,7 +1,7 @@
 /*
 
   +----------------------------------------------------------------------+
-  | Copyright IBM Corporation 2005.                                      |
+  | Copyright IBM Corporation 2005-2008                                  |
   +----------------------------------------------------------------------+
   |                                                                      |
   | Licensed under the Apache License, Version 2.0 (the "License"); you  |
@@ -22,7 +22,7 @@
   $Id$
 */
 
-#define	PHP_IBM_DB2_VERSION	"1.7.1"
+#define	PHP_IBM_DB2_VERSION	"1.8.0"
 
 #ifndef PHP_IBM_DB2_H
 #define PHP_IBM_DB2_H
@@ -38,6 +38,13 @@ extern zend_module_entry ibm_db2_module_entry;
 /* needed for backward compatibility (SQL_XML not defined prior to DB2 v9) */
 #ifndef SQL_XML
 #define SQL_XML -370
+#endif
+
+/* needed for backward compatibility (SQL_ATTR_ROWCOUNT_PREFETCH not defined prior to DB2 9.5.0.3) */
+#ifndef SQL_ATTR_ROWCOUNT_PREFETCH
+#define SQL_ATTR_ROWCOUNT_PREFETCH 2592
+#define SQL_ROWCOUNT_PREFETCH_OFF   0
+#define SQL_ROWCOUNT_PREFETCH_ON    1
 #endif
 
 /* SQL_ATTR_USE_TRUSTED_CONTEXT, 
@@ -147,6 +154,9 @@ extern zend_module_entry ibm_db2_module_entry;
 #define DB2_AUTOCOMMIT_ON SQL_AUTOCOMMIT_ON
 #define DB2_AUTOCOMMIT_OFF SQL_AUTOCOMMIT_OFF
 
+#define DB2_ROWCOUNT_PREFETCH_OFF SQL_ROWCOUNT_PREFETCH_OFF
+#define DB2_ROWCOUNT_PREFETCH_ON SQL_ROWCOUNT_PREFETCH_ON
+
 #ifndef PASE
 #define DB2_DEFERRED_PREPARE_ON SQL_DEFERRED_PREPARE_ON
 #define DB2_DEFERRED_PREPARE_OFF SQL_DEFERRED_PREPARE_OFF
@@ -181,6 +191,9 @@ PHP_FUNCTION(db2_pconnect);
 PHP_FUNCTION(db2_autocommit);
 PHP_FUNCTION(db2_bind_param);
 PHP_FUNCTION(db2_close);
+#ifdef PASE /* db2_pclose - last ditch persistent close */
+PHP_FUNCTION(db2_pclose);
+#endif /* PASE */
 PHP_FUNCTION(db2_columnprivileges);
 PHP_FUNCTION(db2_column_privileges);
 PHP_FUNCTION(db2_columns);
@@ -249,6 +262,7 @@ ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 	long		i5_allow_commit;
 	long		i5_dbcs_alloc;
 	long		i5_all_pconnect;
+	long		i5_ignore_userid;
 #endif /* PASE */
 ZEND_END_MODULE_GLOBALS(ibm_db2)
 
