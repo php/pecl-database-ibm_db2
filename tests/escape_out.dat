@@ -1,0 +1,25 @@
+
+Original:                 Some random special characters: 
+ , 
+ , \ , ' , "  .
+db2_escape_string:        Some random special characters: 
+ , 
+ , \ , ' , "  .
+
+Original:                 Backslash (\). Single quote ('). Double quote (")
+db2_escape_string:        Backslash (\). Single quote ('). Double quote (")
+
+Original:                 The NULL character \0 must be escaped manually
+db2_escape_string:        The NULL character \0 must be escaped manually
+
+Original:                 Intersting characters must be escaped manually: \x1a , \x00 .
+db2_escape_string:        Intersting characters must be escaped manually: \x1a , \x00 .
+
+Original:                 Nothing to quote
+db2_escape_string:        Nothing to quote
+
+Original:                 200676
+db2_escape_string:        200676
+
+Original:                 
+db2_escape_string:        

@@ -23,8 +23,8 @@ else {
 }
 
 ?>
---EXPECTF--
-object(stdClass)#%d (4) {
+--EXPECT--
+object(stdClass)#2 (4) {
   ["ID"]=>
   int(0)
   ["BREED"]=>

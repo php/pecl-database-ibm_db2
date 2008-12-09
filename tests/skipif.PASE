@@ -1,0 +1,49 @@
+test_002.phpt|PASE|V5|V6|test specific protocol not valid|
+test_023.phpt|PASE|V5|V6|i5 column priv (bug?) vs LUW column priv|
+test_039.phpt|PASE|V5|V6|i5 .10 vs LUW 0.10|
+test_041.phpt|PASE|V5|V6|i5 .10 vs LUW 0.10|
+test_053.phpt|PASE|V5|V6|i5 no support (V6R1?) vs LUW client attributes|
+test_060.phpt|PASE|V5|V6|i5 BASE TABLE + journal tables vs LUW TABLE|
+test_061.phpt|PASE|V5|V6|i5 BASE TABLE + journal tables vs LUW TABLE|
+test_062.phpt|PASE|V5|V6|i5 BASE TABLE + journal tables vs LUW TABLE|
+test_064.phpt|PASE|V5|V6|i5 BASE TABLE + journal tables vs LUW TABLE|
+test_065.phpt|PASE|V5|V6|i5 BASE TABLE + journal tables vs LUW TABLE|
+test_066.phpt|PASE|V5|V6|i5 BASE TABLE + journal tables vs LUW TABLE|
+test_080.phpt|PASE|V5|V6|i5 SQLSTATE=42705 vs LUW SQLSTATE=800xxx|
+test_090.phpt|PASE|V5|V6|i5 different error msg vs LUW|
+test_091.phpt|PASE|V5|V6|i5 different error msg vs LUW|
+test_092.phpt|PASE|V5|V6|i5 different error msg vs LUW|
+test_102.phpt|PASE|V5|V6|i5 no support vs LUW SQL VALUES(1)|
+test_131a.phpt|PASE|V5|V6|i5 db2_num_rows error vs LUW -1|
+test_133.phpt|PASE|V5|V6|i5 different error msg vs LUW|
+test_149.phpt|PASE|V5|V6|i5 varchar len 10 vs LUW data len|
+test_160.phpt|PASE|V5|V6|i5 .50 vs LUW 0.50|
+test_161.phpt|PASE|V5|V6|i5 .50 vs LUW 0.50|
+test_162.phpt|PASE|V5|V6|i5 .50 vs LUW 0.50|
+test_180.phpt|PASE|V5|V6|i5 different error msg vs LUW|
+test_191.phpt|PASE|V5|V6|i5 IS_NULLABLE (na v5r4) and need schema (v6r1)|
+test_192.phpt|PASE|V5|i5 IS_NULLABLE (na v5r4)|
+test_194.phpt|PASE|V5|V6|i5 data ok vs LUW error (LUW bug)|
+test_195.phpt|PASE|V5|V6|i5 no XML VIPER vs LUW XML VIPER|
+test_196.phpt|PASE|V5|V6|i5 no XML VIPER vs LUW XML VIPER|
+test_198.phpt|PASE|V5|V6|i5 blob data ASCII vs LUW blob data hex|
+test_201.phpt|PASE|V5|V6|i5 .20 vs LUW 0.20|
+test_210.phpt|PASE|V6|i5 display size (v5r4 match LUW) vs LUW display size|
+test_211.phpt|PASE|V6|i5 display size (v5r4 match LUW) vs LUW display size|
+test_212.phpt|PASE|V6|i5 display size (v5r4 match LUW) vs LUW display size|
+test_213.phpt|PASE|V6|i5 display size (v5r4 match LUW) vs LUW display size|
+test_240.phpt|PASE|V5|V6|i5 field widths (bug?) vs LUW field widths|
+test_241.phpt|PASE|V5|V6|i5 field widths (bug?) vs LUW field widths|
+test_260.phpt|PASE|V5|V6|stdClass)#2 vs LUW stdClass)#1 (bug?)|
+test_263.phpt|PASE|V5|V6|i5 no XML VIPER vs LUW XML VIPER|
+test_300.phpt|PASE|V5|V6|i5 server info (V6R1?) vs LUW server info|
+test_310.phpt|PASE|V5|V6|i5 client info (V6R1?) vs LUW client info|
+test_321.phpt|PASE|V5|V6|i5 no XML VIPER vs LUW XML VIPER|
+test_6792.phpt|PASE|V5|V6|i5 time seperator vs LUW time seperator|
+test_9173.phpt|PASE|V5|V6|i5 store proc info vs LUW store proc info|
+test_10931.phpt|PASE|V5|V6|i5 default schema is DB2 not TEST|
+test_clob_special_char.phpt|PASE|V5|V6|insert:3030802e expect:3030802e actual:30301a2e |
+test_trusted_context_connect.phpt|PASE|V5|V6|i5 no trust?|
+test_trusted_context_pconnect.phpt|PASE|V5|V6|i5 no trust?|
+test_10353.phpt|PASE|V5|V6|i5 PHP no compiled debug mode|
+test_last_insert_id.phpt|PASE|V5|V6|i5 sql IDENTITY_VAL_LOCAL()|
