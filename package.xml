@@ -2,8 +2,7 @@
 <package version="1.0">
 	<name>ibm_db2</name>
 	<summary>
-		Extension for IBM DB2 Universal Database, IBM Cloudscape, and
-		Apache Derby
+		Extension for IBM DB2 Universal Database, IBM Cloudscape, and Apache Derby
 	</summary>
 	<description>
 		This extension supports IBM DB2 Universal Database, IBM
