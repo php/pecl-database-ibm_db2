@@ -22,7 +22,7 @@
   $Id$
 */
 
-#define	PHP_IBM_DB2_VERSION	"1.8.0"
+#define	PHP_IBM_DB2_VERSION	"1.8.1"
 
 #ifndef PHP_IBM_DB2_H
 #define PHP_IBM_DB2_H
@@ -55,6 +55,11 @@ extern zend_module_entry ibm_db2_module_entry;
 #define SQL_ATTR_USE_TRUSTED_CONTEXT 2561
 #define SQL_ATTR_TRUSTED_CONTEXT_USERID 2562
 #define SQL_ATTR_TRUSTED_CONTEXT_PASSWORD 2563
+#endif
+
+/* Needed for Backward compatibility */
+#ifndef SQL_DECFLOAT
+#define SQL_DECFLOAT -360
 #endif
 
 #ifdef PHP_WIN32

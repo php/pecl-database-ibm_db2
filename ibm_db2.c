@@ -48,6 +48,7 @@ static void _php_db2_assign_options( void* handle, int type, char* opt_key, zval
 static int _php_db2_parse_options( zval* options, int type, void* handle TSRMLS_DC );
 static void _php_db2_clear_conn_err_cache(TSRMLS_D);
 static void _php_db2_clear_stmt_err_cache(TSRMLS_D);
+static void _php_db2_set_decfloat_rounding_mode_client(void* handle TSRMLS_DC);
 static char * _php_db2_instance_name;
 static int is_ios, is_zos;		/* 1 == TRUE; 0 == FALSE; */
 #ifdef PASE 
@@ -426,6 +427,7 @@ static void _php_db2_free_result_struct(stmt_handle* handle)
 				case SQL_DECIMAL:
 				case SQL_NUMERIC:
 				case SQL_XML:
+				case SQL_DECFLOAT:
 					if ( handle->row_data[i].data.str_val != NULL ) {
 						efree(handle->row_data[i].data.str_val);
 						handle->row_data[i].data.str_val = NULL;
@@ -1732,7 +1734,8 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 			case SQL_TYPE_TIMESTAMP:
 			case SQL_DATETIME:
 			case SQL_BIGINT:
-				in_length = stmt_res->column_info[i].size + 1;
+			case SQL_DECFLOAT:
+				in_length = stmt_res->column_info[i].size + 2;
 				if(column_type == SQL_BIGINT) {
 					in_length++;
 				}
@@ -2042,7 +2045,15 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
                 SQLFreeHandle(SQL_HANDLE_ENV, conn_res->henv);
 				break;
 			}
-
+#ifdef CLI_DBC_SERVER_TYPE_DB2LUW
+#ifdef SQL_ATTR_DECFLOAT_ROUNDING_MODE
+			/**
+			 * Code for setting SQL_ATTR_DECFLOAT_ROUNDING_MODE
+			 * for implementation of Decfloat Datatype
+			 * */
+			_php_db2_set_decfloat_rounding_mode_client(conn_res TSRMLS_CC);
+#endif
+#endif
 			/* Get the server name */
 			memset(server, 0, sizeof(server));
 			rc = SQLGetInfo(conn_res->hdbc, SQL_DBMS_NAME, (SQLPOINTER)server, 2048, NULL);
@@ -2086,6 +2097,83 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	return rc;
 }
 /* }}} */
+
+#ifdef CLI_DBC_SERVER_TYPE_DB2LUW
+#ifdef SQL_ATTR_DECFLOAT_ROUNDING_MODE
+/**
+ * Function for implementation of DECFLOAT Datatype
+ * 
+ * Description :
+ * This function retrieves the value of special register decflt_rounding
+ * from the database server which signifies the current rounding mode set
+ * on the server. For using decfloat, the rounding mode has to be in sync
+ * on the client as well as server. Thus we set here on the client, the
+ * same rounding mode as the server.
+ * @return: success or failure
+ * */
+static void _php_db2_set_decfloat_rounding_mode_client(void* handle TSRMLS_DC)
+{
+	SQLCHAR decflt_rounding[20];
+	SQLHANDLE hstmt;
+	SQLHDBC hdbc = ((conn_handle*) handle)->hdbc;
+	int rc = 0;
+	int rounding_mode;
+	SQLINTEGER decfloat;
+	
+	SQLCHAR *stmt = (SQLCHAR *)"values current decfloat rounding mode";
+	
+	/* Allocate a Statement Handle */
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
+	if (rc == SQL_ERROR) {
+		_php_db2_db_check_sql_errors((SQLHDBC) hdbc, SQL_HANDLE_DBC, rc, 1,
+				NULL, -1, 1 TSRMLS_CC);
+		return;
+	}
+	rc = SQLExecDirect((SQLHSTMT)hstmt, (SQLPOINTER)stmt, SQL_NTS);
+	if ( rc == SQL_ERROR ) {
+		_php_db2_check_sql_errors(hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+	}
+	if ( rc < SQL_SUCCESS ) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Execute Failed");
+		SQLFreeHandle( SQL_HANDLE_STMT, hstmt );
+		return;
+	}
+
+	rc = SQLBindCol((SQLHSTMT)hstmt, 1, SQL_C_DEFAULT, decflt_rounding, 20, NULL);
+	if (rc == SQL_ERROR) {
+		_php_db2_db_check_sql_errors((SQLHANDLE) hdbc, SQL_HANDLE_DBC, rc, 1,
+				NULL, -1, 1 TSRMLS_CC);
+		return;
+	 }
+
+	rc = SQLFetch(hstmt);
+	rc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+	/* Now setting up the same rounding mode on the client*/
+	if(strcmp(decflt_rounding, "ROUND_HALF_EVEN") == 0) {
+		rounding_mode = SQL_ROUND_HALF_EVEN;
+	}
+	if(strcmp(decflt_rounding, "ROUND_HALF_UP") == 0) {
+		rounding_mode = SQL_ROUND_HALF_UP;
+	}
+	if(strcmp(decflt_rounding, "ROUND_DOWN") == 0) {
+		rounding_mode = SQL_ROUND_DOWN;
+	}
+	if(strcmp(decflt_rounding, "ROUND_CEILING") == 0) {
+		rounding_mode = SQL_ROUND_CEILING;
+	}
+	if(strcmp(decflt_rounding, "ROUND_FLOOR") == 0) {
+		rounding_mode = SQL_ROUND_FLOOR;
+	}
+#ifndef PASE
+	rc = SQLSetConnectAttr((SQLHDBC)hdbc, SQL_ATTR_DECFLOAT_ROUNDING_MODE, (SQLPOINTER)rounding_mode, SQL_NTS);
+#else
+	rc = SQLSetConnectAttr((SQLHDBC)hdbc, SQL_ATTR_DECFLOAT_ROUNDING_MODE, (SQLPOINTER)&rounding_mode, SQL_NTS);
+#endif
+	
+	return;
+}
+#endif
+#endif
 
 /* {{{ static void _php_db2_clear_conn_err_cache (TSRMLS_D)
 */
@@ -3399,6 +3487,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 #endif /* PASE */
 		case SQL_DECIMAL:
 		case SQL_NUMERIC:
+		case SQL_DECFLOAT:
 		case SQL_TYPE_DATE:
 		case SQL_DATETIME:
 		case SQL_TYPE_TIME:
@@ -4418,6 +4507,7 @@ PHP_FUNCTION(db2_field_type)
 		case SQL_DOUBLE:
 		case SQL_DECIMAL:
 		case SQL_NUMERIC:
+		case SQL_DECFLOAT:
 			str_val = "real";
 			break;
 		case SQL_CLOB:
@@ -4723,6 +4813,7 @@ PHP_FUNCTION(db2_result)
 			case SQL_BIGINT:
 			case SQL_DECIMAL:
 			case SQL_NUMERIC:
+			case SQL_DECFLOAT:
 
 #ifdef PASE /* i5/OS example of "too small" allocation convert problem SQL_C_CHAR */
 				switch(column_type) {
@@ -5099,6 +5190,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 				case SQL_BIGINT:
 				case SQL_DECIMAL:
 				case SQL_NUMERIC:
+				case SQL_DECFLOAT:
 
 					if ( op & DB2_FETCH_ASSOC ) {
 						add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name,

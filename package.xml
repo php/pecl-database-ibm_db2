@@ -1,283 +1,275 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <package version="1.0">
-	<name>ibm_db2</name>
-	<summary>
-		Extension for IBM DB2 Universal Database, IBM Cloudscape, and Apache Derby
-	</summary>
-	<description>
-		This extension supports IBM DB2 Universal Database, IBM
-		Cloudscape, and Apache Derby databases.
-	</description>
-	<license>Apache License 2.0</license>
-	<maintainers>
-		<maintainer>
-			<user>ambrish</user>
-			<name>Ambrish Bhargava</name>
-			<email>abhargav@in.ibm.com</email>
-			<role>lead</role>
-		</maintainer>
-		<maintainer>
-			<user>kfbombar</user>
-			<name>IBM OpenDev</name>
-			<email>opendev@us.ibm.com</email>
-			<role>lead</role>
-		</maintainer>
-	</maintainers>
-	<release>
-		<version>1.8.0</version>
-		<date>2008-12-11</date>
-		<license>Apache License 2.0</license>
-		<state>stable</state>
-		<notes>
-		      Adding SQLRowCount feature.
-			  changed to support popular connect("","","") as ptr to null and connect(null,null,null) as "pure" null.
-			  Added php.ini ibm_db2.i5_all_pconnect - auto change all connects to persistent connections
-			  Added php.ini ibm_db2.i5_ignore_userid - ignore all userid/password, no server mode, just connect("","","") (see above)
-			  Added DBCLOB for V6R1 meta data and DBCLOB/CLOB call SQLGetSubstring
-			  BIGINT problem SQLDescribeCol size=8 to size=20 for BIGINT avoid string truncations 
-			  Added pclose for last ditch persistent connection close without Apache restart (customer request)
-			  Added "i5_libl" option libl support to set i5/OS library list (customer request) 
-			  Added _php_db2_meta_helper for V6R1 changed meta data APIs to select NULL or SQL_NTS
-			  V6R1 Ordinal value SQL_BINARY/SQL_C_BINARY 96 to -2 and SQL_VARBINARY 97 to -3. 
-			  Introduced a new is_i5os_classic runtime check based on version to enable V5 and V6 in one binary (Zend requirement)
-			  Tests: skip.PASE various mismatch LUW vs. i5/OS V5/V6
-		</notes>
-		<configureoptions>
-			<configureoption name="with-IBM_DB2"
-				prompt="DB2 Installation Directory?" />
-		</configureoptions>
-		<filelist>
-			<dir name="/" baseinstalldir="ibm_db2" role="src">
-				<file name="ibm_db2.c" role="src" />
-				<file name="ibm_db2.dsp" role="src" />
-				<file name="php_ibm_db2.h" role="src" />
-				<file name="config.m4" role="src" />
-				<file name="config.w32" role="src" />
-				<file name="TODO" role="doc" />
-			</dir>
-			<dir name="tests" role="test">
-				<file name="connection.inc" role="test" />
-				<file name="trusted_connection.inc" role="test" />
-				<file name="escape.dat" role="test" />
-				<file name="escape_out.dat" role="test" />
-				<file name="pic1.jpg" role="test" />
-				<file name="pic1_out.jpg" role="test" />
-				<file name="resume_000130.txt" role="test" />
-				<file name="resume_000140.txt" role="test" />
-				<file name="resume_000150.txt" role="test" />
-				<file name="resume_000190.txt" role="test" />
-				<file name="skipif.inc" role="test" />
-				<file name="skipif2.inc" role="test" />
-				<file name="skipif3.inc" role="test" />
-				<file name="skipif.PASE" role="test" />
-				<file name="skipifNotRowcountPrefetch.inc" role="test" />
-				<file name="skipifNotTrustedContext.inc" role="test" />
-				<file name="spook.png" role="test" />
-				<file name="spook_out.png" role="test" />
-				<file name="test_000.phpt" role="test" />
-				<file name="test_001.phpt" role="test" />
-				<file name="test_002.phpt" role="test" />
-				<file name="test_003.phpt" role="test" />
-				<file name="test_004.phpt" role="test" />
-				<file name="test_005.phpt" role="test" />
-				<file name="test_006.phpt" role="test" />
-				<file name="test_007.phpt" role="test" />
-				<file name="test_010.phpt" role="test" />
-				<file name="test_011.phpt" role="test" />
-				<file name="test_012.phpt" role="test" />
-				<file name="test_013.phpt" role="test" />
-				<file name="test_014.phpt" role="test" />
-				<file name="test_015.phpt" role="test" />
-				<file name="test_016.phpt" role="test" />
-				<file name="test_017.phpt" role="test" />
-				<file name="test_018.phpt" role="test" />
-				<file name="test_019.phpt" role="test" />
-				<file name="test_020.phpt" role="test" />
-				<file name="test_021.phpt" role="test" />
-				<file name="test_022.phpt" role="test" />
-				<file name="test_023.phpt" role="test" />
-				<file name="test_023_V5V6.phpt" role="test" />
-				<file name="test_024.phpt" role="test" />
-				<file name="test_025.phpt" role="test" />
-				<file name="test_026.phpt" role="test" />
-				<file name="test_030.phpt" role="test" />
-				<file name="test_031.phpt" role="test" />
-				<file name="test_032.phpt" role="test" />
-				<file name="test_033.phpt" role="test" />
-				<file name="test_034.phpt" role="test" />
-				<file name="test_035.phpt" role="test" />
-				<file name="test_036.phpt" role="test" />
-				<file name="test_037.phpt" role="test" />
-				<file name="test_038.phpt" role="test" />
-				<file name="test_039.phpt" role="test" />
-				<file name="test_039_V5V6.phpt" role="test" />
-				<file name="test_03a.phpt" role="test" />
-				<file name="test_040.phpt" role="test" />
-				<file name="test_041.phpt" role="test" />
-				<file name="test_041_V5V6.phpt" role="test" />
-				<file name="test_042.phpt" role="test" />
-				<file name="test_043.phpt" role="test" />
-				<file name="test_044.phpt" role="test" />
-				<file name="test_045.phpt" role="test" />
-				<file name="test_046.phpt" role="test" />
-				<file name="test_047.phpt" role="test" />
-				<file name="test_048.phpt" role="test" />
-				<file name="test_049.phpt" role="test" />
-				<file name="test_050.phpt" role="test" />
-				<file name="test_051.phpt" role="test" />
-				<file name="test_052.phpt" role="test" />
-				<file name="test_053.phpt" role="test" />
-				<file name="test_060.phpt" role="test" />
-				<file name="test_060_V5V6.phpt" role="test" />
-				<file name="test_061.phpt" role="test" />
-				<file name="test_061_V5.phpt" role="test" />
-				<file name="test_061_V6.phpt" role="test" />
-				<file name="test_062.phpt" role="test" />
-				<file name="test_062_V5.phpt" role="test" />
-				<file name="test_062_V6.phpt" role="test" />
-				<file name="test_063.phpt" role="test" />
-				<file name="test_064.phpt" role="test" />
-				<file name="test_064_V5.phpt" role="test" />
-				<file name="test_064_V6.phpt" role="test" />
-				<file name="test_065.phpt" role="test" />
-				<file name="test_066.phpt" role="test" />
-				<file name="test_066_V5.phpt" role="test" />
-				<file name="test_066_V6.phpt" role="test" />
-				<file name="test_070.phpt" role="test" />
-				<file name="test_071.phpt" role="test" />
-				<file name="test_080.phpt" role="test" />
-				<file name="test_080_V5V6.phpt" role="test" />
-				<file name="test_081.phpt" role="test" />
-				<file name="test_082.phpt" role="test" />
-				<file name="test_090.phpt" role="test" />
-				<file name="test_090_V5V6.phpt" role="test" />
-				<file name="test_091.phpt" role="test" />
-				<file name="test_091_V5V6.phpt" role="test" />
-				<file name="test_092.phpt" role="test" />
-				<file name="test_092_V5V6.phpt" role="test" />
-				<file name="test_100.phpt" role="test" />
-				<file name="test_101.phpt" role="test" />
-				<file name="test_102.phpt" role="test" />
-				<file name="test_103.phpt" role="test" />
-				<file name="test_110.phpt" role="test" />
-				<file name="test_111.phpt" role="test" />
-				<file name="test_112.phpt" role="test" />
-				<file name="test_120.phpt" role="test" />
-				<file name="test_121.phpt" role="test" />
-				<file name="test_122.phpt" role="test" />
-				<file name="test_123.phpt" role="test" />
-				<file name="test_124.phpt" role="test" />
-				<file name="test_125.phpt" role="test" />
-				<file name="test_130.phpt" role="test" />
-				<file name="test_131.phpt" role="test" />
-				<file name="test_131a.phpt" role="test" />
-				<file name="test_131a_V5V6.phpt" role="test" />
-				<file name="test_132.phpt" role="test" />
-				<file name="test_133.phpt" role="test" />
-				<file name="test_133_V5V6.phpt" role="test" />
-				<file name="test_140.phpt" role="test" />
-				<file name="test_141.phpt" role="test" />
-				<file name="test_142.phpt" role="test" />
-				<file name="test_143.phpt" role="test" />
-				<file name="test_144.phpt" role="test" />
-				<file name="test_145.phpt" role="test" />
-				<file name="test_146.phpt" role="test" />
-				<file name="test_147.phpt" role="test" />
-				<file name="test_148.phpt" role="test" />
-				<file name="test_148_V5V6.phpt" role="test" />
-				<file name="test_149.phpt" role="test" />
-				<file name="test_149_V5V6.phpt" role="test" />
-				<file name="test_150.phpt" role="test" />
-				<file name="test_151.phpt" role="test" />
-				<file name="test_152.phpt" role="test" />
-				<file name="test_153.phpt" role="test" />
-				<file name="test_154.phpt" role="test" />
-				<file name="test_155.phpt" role="test" />
-				<file name="test_156.phpt" role="test" />
-				<file name="test_157.phpt" role="test" />
-				<file name="test_157a.phpt" role="test" />
-				<file name="test_157b.phpt" role="test" />
-				<file name="test_158.phpt" role="test" />
-				<file name="test_159.phpt" role="test" />
-				<file name="test_159a.phpt" role="test" />
-				<file name="test_160.phpt" role="test" />
-				<file name="test_160_V5V6.phpt" role="test" />
-				<file name="test_161.phpt" role="test" />
-				<file name="test_161_V5V6.phpt" role="test" />
-				<file name="test_162.phpt" role="test" />
-				<file name="test_162_V5V6.phpt" role="test" />
-				<file name="test_163.phpt" role="test" />
-				<file name="test_180.phpt" role="test" />
-				<file name="test_180_V5V6.phpt" role="test" />
-				<file name="test_190.phpt" role="test" />
-				<file name="test_191.phpt" role="test" />
-				<file name="test_191_V5.phpt" role="test" />
-				<file name="test_191_V6.phpt" role="test" />
-				<file name="test_192.phpt" role="test" />
-				<file name="test_192_V5V6.phpt" role="test" />
-				<file name="test_193.phpt" role="test" />
-				<file name="test_194.phpt" role="test" />
-				<file name="test_194_V5V6.phpt" role="test" />
-				<file name="test_195.phpt" role="test" />
-				<file name="test_196.phpt" role="test" />
-				<file name="test_197.phpt" role="test" />
-				<file name="test_198.phpt" role="test" />
-				<file name="test_198_V5V6.phpt" role="test" />
-				<file name="test_200.phpt" role="test" />
-				<file name="test_201.phpt" role="test" />
-				<file name="test_201_V5V6.phpt" role="test" />
-				<file name="test_210.phpt" role="test" />
-				<file name="test_210_V6.phpt" role="test" />
-				<file name="test_211.phpt" role="test" />
-				<file name="test_211_V6.phpt" role="test" />
-				<file name="test_212.phpt" role="test" />
-				<file name="test_212_V6.phpt" role="test" />
-				<file name="test_213.phpt" role="test" />
-				<file name="test_213_V6.phpt" role="test" />
-				<file name="test_220.phpt" role="test" />
-				<file name="test_221.phpt" role="test" />
-				<file name="test_230.phpt" role="test" />
-				<file name="test_231.phpt" role="test" />
-				<file name="test_232.phpt" role="test" />
-				<file name="test_240.phpt" role="test" />
-				<file name="test_240_V5.phpt" role="test" />
-				<file name="test_240_V6.phpt" role="test" />
-				<file name="test_241.phpt" role="test" />
-				<file name="test_241_V5.phpt" role="test" />
-				<file name="test_250.phpt" role="test" />
-				<file name="test_251.phpt" role="test" />
-				<file name="test_252.phpt" role="test" />
-				<file name="test_260.phpt" role="test" />
-				<file name="test_260_V5V6.phpt" role="test" />
-				<file name="test_261.phpt" role="test" />
-				<file name="test_263.phpt" role="test" />
-				<file name="test_264.phpt" role="test" />
-				<file name="test_300.phpt" role="test" />
-				<file name="test_300_V5V6.phpt" role="test" />
-				<file name="test_310.phpt" role="test" />
-				<file name="test_310_V5V6.phpt" role="test" />
-				<file name="test_320.phpt" role="test" />
-				<file name="test_321.phpt" role="test" />
-				<file name="test_1551.phpt" role="test" />
-				<file name="test_6528.phpt" role="test" />
-				<file name="test_6561.phpt" role="test" />
-				<file name="test_6572.phpt" role="test" />
-				<file name="test_6755.phpt" role="test" />
-				<file name="test_6792.phpt" role="test" />
-				<file name="test_6792_V5V6.phpt" role="test" />
-				<file name="test_9173.phpt" role="test" />
-				<file name="test_9173_V5.phpt" role="test" />
-				<file name="test_9173_V6.phpt" role="test" />
-				<file name="test_9194.phpt" role="test" />
-				<file name="test_10931.phpt" role="test" />
-				<file name="test_10931_V5.phpt" role="test" />
-				<file name="test_10931_V6.phpt" role="test" />
-				<file name="test_clob_special_char.phpt" role="test" />
-				<file name="test_last_insert_id.phpt" role="test" />
-				<file name="test_last_insert_id_V5V6.phpt" role="test" />
-				<file name="test_trusted_context_connect.phpt" role="test" />
-				<file name="test_trusted_context_pconnect.phpt" role="test" />
-			</dir>
-		</filelist>
-	</release>
+    <name>ibm_db2</name>
+    <summary>
+        Extension for IBM DB2 Universal Database, IBM Cloudscape, and
+        Apache Derby
+    </summary>
+    <description>
+        This extension supports IBM DB2 Universal Database, IBM
+        Cloudscape, and Apache Derby databases.
+    </description>
+    <license>Apache License 2.0</license>
+    <maintainers>
+        <maintainer>
+            <user>ambrish</user>
+            <name>Ambrish Bhargava</name>
+            <email>abhargav@in.ibm.com</email>
+            <role>lead</role>
+        </maintainer>
+        <maintainer>
+            <user>kfbombar</user>
+            <name>IBM OpenDev</name>
+            <email>opendev@us.ibm.com</email>
+            <role>lead</role>
+        </maintainer>
+    </maintainers>
+    <release>
+        <version>1.8.1</version>
+        <date>2008-02-09</date>
+        <license>Apache License 2.0</license>
+        <state>stable</state>
+        <notes>
+            Adding Mac OS support.
+            Adding DecFloat Datatype support.
+            Updating test case names.
+        </notes>
+        <configureoptions>
+            <configureoption name="with-IBM_DB2"
+                prompt="DB2 Installation Directory?" />
+        </configureoptions>
+        <filelist>
+            <dir name="/" baseinstalldir="ibm_db2" role="src">
+                <file name="ibm_db2.c" role="src" />
+                <file name="ibm_db2.dsp" role="src" />
+                <file name="php_ibm_db2.h" role="src" />
+                <file name="config.m4" role="src" />
+                <file name="config.w32" role="src" />
+                <file name="TODO" role="doc" />
+            </dir>
+            <dir name="tests" role="test">
+                <file name="connection.inc" role="test" />
+                <file name="trusted_connection.inc" role="test" />
+                <file name="escape.dat" role="test" />
+                <file name="pic1.jpg" role="test" />
+                <file name="resume_000130.txt" role="test" />
+                <file name="resume_000140.txt" role="test" />
+                <file name="resume_000150.txt" role="test" />
+                <file name="resume_000190.txt" role="test" />
+                <file name="skipif.inc" role="test" />
+                <file name="skipif2.inc" role="test" />
+                <file name="skipif3.inc" role="test" />
+                <file name="skipif.PASE" role="test" />
+                <file name="skipifNotTrustedContext.inc" role="test" />
+                <file name="spook.png" role="test" />
+                <file name="test_000_PrepareDb.phpt" role="test" />
+                <file name="test_001_ConnDb.phpt" role="test" />
+                <file name="test_002_ConnDbUncatalogedConn.phpt" role="test" />
+                <file name="test_003_NumAffectedRows.phpt" role="test" />
+                <file name="test_004_ConnWrongUserPwd.phpt" role="test" />
+                <file name="test_005_ConnBadUserBadPwd.phpt" role="test" />
+                <file name="test_006_ConnPassingOpts.phpt" role="test" />
+                <file name="test_007_pConnPassingOpts.phpt" role="test" />
+                <file name="test_010_UpdateRowCount.phpt" role="test" />
+                <file name="test_011_DeleteRowCount.phpt" role="test" />
+                <file name="test_012_ScrollableCursorSelectRowCount01.phpt" role="test" />
+                <file name="test_013_ScrollableCursorSelectRowCount02.phpt" role="test" />
+                <file name="test_014_ScrollableCursorRetrieveNegativeRow.phpt" role="test" />
+                <file name="test_015_InsertDeleteRowCount_01.phpt" role="test" />
+                <file name="test_016_InsertDeleteRowCount_02.phpt" role="test" />
+                <file name="test_017_selectRowcountPrefetchSTMTOpt.phpt" role="test" />
+                <file name="test_018_selectRowcountPrefetchSetOpt.phpt" role="test" />
+                <file name="test_019_selectRowcountPrefetchPrepOpt.phpt" role="test" />
+                <file name="test_020_RollbackDelete.phpt" role="test" />
+                <file name="test_021_CommitDelete.phpt" role="test" />
+                <file name="test_022_RollbackInsert.phpt" role="test" />
+                <file name="test_023_ColumnPrivileges.phpt" role="test" />
+                <file name="test_023_V5V6_ColumnPrivileges.phpt" role="test" />
+                <file name="test_024_ForeignKeys.phpt" role="test" />
+                <file name="test_025_PrimaryKeys.phpt" role="test" />
+                <file name="test_026_BindParam.phpt" role="test" />
+                <file name="test_030_Result.phpt" role="test" />
+                <file name="test_031_ResultIndexPosition.phpt" role="test" />
+                <file name="test_032_ResultIndexName.phpt" role="test" />
+                <file name="test_033_ResultOutSequenceColumn.phpt" role="test" />
+                <file name="test_034_FetchRow.phpt" role="test" />
+                <file name="test_035_FetchRowMany_01.phpt" role="test" />
+                <file name="test_036_FetchRowMany_02.phpt" role="test" />
+                <file name="test_037_FetchRowIndexPos.phpt" role="test" />
+                <file name="test_038_FetchRowIndexPosNested_01.phpt" role="test" />
+                <file name="test_039_FetchRowIndexPosNested_02.phpt" role="test" />
+                <file name="test_039_V5V6_FetchRowIndexPosNested_02.phpt" role="test" />
+                <file name="test_03a_ResultNonExistCol.phpt" role="test" />
+                <file name="test_040_FetchArray.phpt" role="test" />
+                <file name="test_041_FetchArrayMany_01.phpt" role="test" />
+                <file name="test_041_V5V6_FetchArrayMany_01.phpt" role="test" />
+                <file name="test_042_FetchArrayMany_02.phpt" role="test" />
+                <file name="test_043_FetchArrayMany_03.phpt" role="test" />
+                <file name="test_044_FetchArrayMany_04.phpt" role="test" />
+                <file name="test_045_FetchArrayBinaryData.phpt" role="test" />
+                <file name="test_046_FetchArrayMany_05.phpt" role="test" />
+                <file name="test_047_FetchArrayMany_06.phpt" role="test" />
+                <file name="test_048_FetchArrayBinaryData.phpt" role="test" />
+                <file name="test_049_BindParamInsertStmtNULL.phpt" role="test" />
+                <file name="test_050_GetAutocommit.phpt" role="test" />
+                <file name="test_051_SetAutocommit.phpt" role="test" />
+                <file name="test_052_SetAutocommit_01.phpt" role="test" />
+                <file name="test_053_SetAutocommit_02.phpt" role="test" />
+                <file name="test_060_Tables_01.phpt" role="test" />
+                <file name="test_060_V5V6_Tables_01.phpt" role="test" />
+                <file name="test_061_Tables_02.phpt" role="test" />
+                <file name="test_061_V5_Tables_02.phpt" role="test" />
+                <file name="test_061_V6_Tables_02.phpt" role="test" />
+                <file name="test_062_Tables_03.phpt" role="test" />
+                <file name="test_062_V5_Tables_03.phpt" role="test" />
+                <file name="test_062_V6_Tables_03.phpt" role="test" />
+                <file name="test_063_Tables_04.phpt" role="test" />
+                <file name="test_064_Tables_05.phpt" role="test" />
+                <file name="test_064_V5_Tables_05.phpt" role="test" />
+                <file name="test_064_V6_Tables_05.phpt" role="test" />
+                <file name="test_065_FilterTableName.phpt" role="test" />
+                <file name="test_065_V5_FilterTableName.phpt" role="test" />
+                <file name="test_065_V6_FilterTableName.phpt" role="test" />
+                <file name="test_066_TableObjects.phpt" role="test" />
+                <file name="test_066_V5_TableObjects.phpt" role="test" />
+                <file name="test_066_V6_TableObjects.phpt" role="test" />
+                <file name="test_070_Close.phpt" role="test" />
+                <file name="test_071_CloseSuccess.phpt" role="test" />
+                <file name="test_080_ConnWrongDbAlias.phpt" role="test" />
+                <file name="test_080_V5V6_ConnWrongDbAlias.phpt" role="test" />
+                <file name="test_081_ConnWrongUser.phpt" role="test" />
+                <file name="test_082_ConnWrongPwd.phpt" role="test" />
+                <file name="test_090_ConnmsgWrongDbAlias.phpt" role="test" />
+                <file name="test_090_V5V6_ConnmsgWrongDbAlias.phpt" role="test" />
+                <file name="test_091_ConnmsgWrongUser.phpt" role="test" />
+                <file name="test_091_V5V6_ConnmsgWrongUser.phpt" role="test" />
+                <file name="test_092_ConnmsgWrongPwd.phpt" role="test" />
+                <file name="test_092_V5V6_ConnmsgWrongPwd.phpt" role="test" />
+                <file name="test_100_SelectDeleteInsertFieldCount.phpt" role="test" />
+                <file name="test_101_InsertDeleteFieldCount.phpt" role="test" />
+                <file name="test_102_NumFieldsSelect_01.phpt" role="test" />
+                <file name="test_103_NumFieldsSelect_02.phpt" role="test" />
+                <file name="test_110_FieldNum.phpt" role="test" />
+                <file name="test_111_FieldNumAddCol.phpt" role="test" />
+                <file name="test_112_FieldNumDiffCaseColNames.phpt" role="test" />
+                <file name="test_120_FieldName.phpt" role="test" />
+                <file name="test_121_FieldNameAddCol.phpt" role="test" />
+                <file name="test_122_FieldNameDiffCaseColNames.phpt" role="test" />
+                <file name="test_123_FieldNamePos_01.phpt" role="test" />
+                <file name="test_124_FieldNamePos_02.phpt" role="test" />
+                <file name="test_125_FieldNamePos_03.phpt" role="test" />
+                <file name="test_130_PrepExecuteSelectStmt.phpt" role="test" />
+                <file name="test_131_PrepareExecuteSelectStatementParams.phpt" role="test" />
+                <file name="test_131a_PrepExecuteDataTypeConversionsErrs.phpt" role="test" />
+                <file name="test_131a_V5V6_PrepExecuteDataTypeConversionsErrs.phpt" role="test" />
+                <file name="test_132_ExecuteStatementArrayMultipleParams.phpt" role="test" />
+                <file name="test_133_ExecuteLongInputParams.phpt" role="test" />
+                <file name="test_133_V5V6_ExecuteLongInputParams.phpt" role="test" />
+                <file name="test_140_BindParamSelectStmt.phpt" role="test" />
+                <file name="test_141_BindParamSelectStmtMultipleParams_01.phpt" role="test" />
+                <file name="test_142_BindParamSelectStmtMultipleParams_02.phpt" role="test" />
+                <file name="test_143_BindParamInsertStmtNULLParam.phpt" role="test" />
+                <file name="test_144_BindParamInsertStmtPARAM_FILE.phpt" role="test" />
+                <file name="test_145_BindRetrieveNULLEmptyString.phpt" role="test" />
+                <file name="test_146_CallSPINAndOUTParams.phpt" role="test" />
+                <file name="test_147_CallSPINAndOUTParamsMultipleTimes.phpt" role="test" />
+                <file name="test_148_CallSPDiffBindPattern_01.phpt" role="test" />
+                <file name="test_148_V5V6_CallSPDiffBindPattern_01.phpt" role="test" />
+                <file name="test_149_CallSPDiffBindPattern_02.phpt" role="test" />
+                <file name="test_149_V5V6_CallSPDiffBindPattern_02.phpt" role="test" />
+                <file name="test_150_FetchAssocSelect_01.phpt" role="test" />
+                <file name="test_151_FetchAssocSelect_02.phpt" role="test" />
+                <file name="test_152_FetchAssocSelect_03.phpt" role="test" />
+                <file name="test_153_FetchAssocSelect_04.phpt" role="test" />
+                <file name="test_154_AllFetches.phpt" role="test" />
+                <file name="test_155_FetchAssocSelect_06.phpt" role="test" />
+                <file name="test_156_FetchAssocNestedSelects_01.phpt" role="test" />
+                <file name="test_157_FetchAssocScrollableCursor_02.phpt" role="test" />
+                <file name="test_157a_FetchAssocWithoutScrollableCursorErr.phpt" role="test" />
+                <file name="test_157b_FetchAssocScrollableCursor_01.phpt" role="test" />
+                <file name="test_158_FetchAssocNestedSelects_02.phpt" role="test" />
+                <file name="test_159_FetchAssocSeveralRows_01.phpt" role="test" />
+                <file name="test_159a_FetchAssocSeveralRows_02.phpt" role="test" />
+                <file name="test_160_FetchBoth.phpt" role="test" />
+                <file name="test_160_V5V6_FetchBoth.phpt" role="test" />
+                <file name="test_161_FetchBothNestedSelects_01.phpt" role="test" />
+                <file name="test_161_V5V6_FetchBothNestedSelects_01.phpt" role="test" />
+                <file name="test_162_FetchBothNestedSelects_02.phpt" role="test" />
+                <file name="test_162_V5V6_FetchBothNestedSelects_02.phpt" role="test" />
+                <file name="test_163_FetchBothBinary.phpt" role="test" />
+                <file name="test_180_StmtErrMsg.phpt" role="test" />
+                <file name="test_180_V5V6_StmtErrMsg.phpt" role="test" />
+                <file name="test_190_ColumnsTable_01.phpt" role="test" />
+                <file name="test_191_ColumnsTable_02.phpt" role="test" />
+                <file name="test_191_V5_ColumnsTable_02.phpt" role="test" />
+                <file name="test_191_V6_ColumnsTable_02.phpt" role="test" />
+                <file name="test_192_ColumnsTable_03.phpt" role="test" />
+                <file name="test_192_V5V6_ColumnsTable_03.phpt" role="test" />
+                <file name="test_193_RetrieveCLOBColFwdOnly.phpt" role="test" />
+                <file name="test_194_RetrieveCLOBColScrollable.phpt" role="test" />
+                <file name="test_194_V5V6_RetrieveCLOBColScrollable.phpt" role="test" />
+                <file name="test_195_InsertRetrieveXMLData_01.phpt" role="test" />
+                <file name="test_196_InsertRetrieveXMLData_02.phpt" role="test" />
+                <file name="test_197_StatisticsIndexes.phpt" role="test" />
+                <file name="test_198_LobReadWriteFromMemory.phpt" role="test" />
+                <file name="test_198_V5V6_LobReadWriteFromMemory.phpt" role="test" />
+                <file name="test_200_MultipleRsltsetsUniformColDefs.phpt" role="test" />
+                <file name="test_201_MultipleRsltsetsDiffColDefs.phpt" role="test" />
+                <file name="test_201_V5V6_MultipleRsltsetsDiffColDefs.phpt" role="test" />
+                <file name="test_210_FieldDisplaySize_01.phpt" role="test" />
+                <file name="test_210_V6_FieldDisplaySize_01.phpt" role="test" />
+                <file name="test_211_FieldDisplaySize_02.phpt" role="test" />
+                <file name="test_211_V6_FieldDisplaySize_02.phpt" role="test" />
+                <file name="test_212_FieldDisplaySize_03.phpt" role="test" />
+                <file name="test_212_V6_FieldDisplaySize_03.phpt" role="test" />
+                <file name="test_213_FieldDisplaySize_04.phpt" role="test" />
+                <file name="test_213_V6_FieldDisplaySize_04.phpt" role="test" />
+                <file name="test_220_PersistentConn.phpt" role="test" />
+                <file name="test_221_100PersistentConns.phpt" role="test" />
+                <file name="test_230_FieldTypePos.phpt" role="test" />
+                <file name="test_231_FieldTypeName.phpt" role="test" />
+                <file name="test_232_FieldTypePosName.phpt" role="test" />
+                <file name="test_240_FieldWidthPosName_01.phpt" role="test" />
+                <file name="test_240_V5_FieldWidthPosName_01.phpt" role="test" />
+                <file name="test_240_V6_FieldWidthPosName_01.phpt" role="test" />
+                <file name="test_241_FieldWidthPosName_02.phpt" role="test" />
+                <file name="test_241_V5_FieldWidthPosName_02.phpt" role="test" />
+                <file name="test_250_FreeResult_01.phpt" role="test" />
+                <file name="test_251_FreeResult_02.phpt" role="test" />
+                <file name="test_252_FreeResult_03.phpt" role="test" />
+                <file name="test_260_FetchObject.phpt" role="test" />
+                <file name="test_260_V5V6_FetchObject.phpt" role="test" />
+                <file name="test_261_FetchObjectAccess.phpt" role="test" />
+                <file name="test_263_XML_OUTParamsInSPs.phpt" role="test" />
+                <file name="test_264_InsertRetrieveBIGINTTypeColumn.phpt" role="test" />
+                <file name="test_300_ServerInfo.phpt" role="test" />
+                <file name="test_300_V5V6_ServerInfo.phpt" role="test" />
+                <file name="test_310_ClientInfo.phpt" role="test" />
+                <file name="test_310_V5V6_ClientInfo.phpt" role="test" />
+                <file name="test_320_EscapeString.phpt" role="test" />
+                <file name="test_321_ResultFetchArraysLobsXMLTypes.phpt" role="test" />
+                <file name="test_1551_FetchAssocBinary.phpt" role="test" />
+                <file name="test_6528_ScopingProblemBindParam.phpt" role="test" />
+                <file name="test_6561_ReturnNULLValues.phpt" role="test" />
+                <file name="test_6572_SQLStringsContNULLChar.phpt" role="test" />
+                <file name="test_6755_ExtraNULLChar_ResultCLOBCol.phpt" role="test" />
+                <file name="test_6792_FieldTypeRetStrDatetimeTimestamp.phpt" role="test" />
+                <file name="test_6792_V5V6_FieldTypeRetStrDatetimeTimestamp.phpt" role="test" />
+                <file name="test_9173_ProcedurePersistentConn.phpt" role="test" />
+                <file name="test_9173_V5_ProcedurePersistentConn.phpt" role="test" />
+                <file name="test_9173_V6_ProcedurePersistentConn.phpt" role="test" />
+                <file name="test_9194_FetchBothCLOBColumns.phpt" role="test" />
+                <file name="test_10353_MemLeak.phpt" role="test" />
+                <file name="test_10931_LcaseTableName.phpt" role="test" />
+                <file name="test_10931_V5_LcaseTableName.phpt" role="test" />
+                <file name="test_10931_V6_LcaseTableName.phpt" role="test" />
+                <file name="test_clob_special_char.phpt" role="test" />
+                <file name="test_decfloat.phpt" role="test" />
+                <file name="test_last_insert_id.phpt" role="test" />
+                <file name="test_last_insert_id_V5V6.phpt" role="test" />
+                <file name="test_trusted_context_connect.phpt" role="test" />
+                <file name="test_trusted_context_pconnect.phpt" role="test" />
+            </dir>
+        </filelist>
+    </release>
 </package>
