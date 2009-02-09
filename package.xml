@@ -61,6 +61,7 @@
                 <file name="skipif3.inc" role="test" />
                 <file name="skipif.PASE" role="test" />
                 <file name="skipifNotTrustedContext.inc" role="test" />
+                <file name="skipifNotRowcountPrefetch.inc" role="test" />
                 <file name="spook.png" role="test" />
                 <file name="test_000_PrepareDb.phpt" role="test" />
                 <file name="test_001_ConnDb.phpt" role="test" />
