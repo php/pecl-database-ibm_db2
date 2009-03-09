@@ -25,14 +25,12 @@
         </maintainer>
     </maintainers>
     <release>
-        <version>1.8.1</version>
-        <date>2008-02-09</date>
+        <version>1.8.2</version>
+        <date>2009-03-09</date>
         <license>Apache License 2.0</license>
         <state>stable</state>
         <notes>
-            Adding Mac OS support.
-            Adding DecFloat Datatype support.
-            Updating test case names.
+            Adding Real Datatype support.
         </notes>
         <configureoptions>
             <configureoption name="with-IBM_DB2"
@@ -268,6 +266,7 @@
                 <file name="test_decfloat.phpt" role="test" />
                 <file name="test_last_insert_id.phpt" role="test" />
                 <file name="test_last_insert_id_V5V6.phpt" role="test" />
+                <file name="test_RealDataType.phpt" role="test" />
                 <file name="test_trusted_context_connect.phpt" role="test" />
                 <file name="test_trusted_context_pconnect.phpt" role="test" />
             </dir>

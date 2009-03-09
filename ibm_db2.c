@@ -113,6 +113,7 @@ typedef union {
 	SQLINTEGER i_val;
 	SQLDOUBLE d_val;
 	SQLFLOAT f_val;
+	SQLREAL r_val;
 	SQLSMALLINT s_val;
 	SQLCHAR *str_val;
 } db2_row_data_type;
@@ -1767,6 +1768,13 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 				break;
 
 			case SQL_REAL:
+				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
+					SQL_C_FLOAT, &row_data->r_val, sizeof(row_data->r_val),
+					(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
+				if ( rc == SQL_ERROR ) {
+					_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				}
+				break;
 			case SQL_FLOAT:
 				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
 					SQL_C_DEFAULT, &row_data->f_val, sizeof(row_data->f_val),
@@ -5220,6 +5228,14 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 					break;
 
 				case SQL_REAL:
+					if ( op & DB2_FETCH_ASSOC ) {
+						add_assoc_double(return_value, (char *)stmt_res->column_info[i].name, row_data->r_val);
+					}
+					if ( op & DB2_FETCH_INDEX ) {
+						add_index_double(return_value, i, row_data->r_val);
+					}
+					break;
+
 				case SQL_FLOAT:
 					if ( op & DB2_FETCH_ASSOC ) {
 						add_assoc_double(return_value, (char *)stmt_res->column_info[i].name, row_data->f_val);
