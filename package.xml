@@ -30,7 +30,7 @@
         <license>Apache License 2.0</license>
         <state>stable</state>
         <notes>
-            Adding Real Datatype support.
+            Fixed 15601: Adding Real Datatype support.
         </notes>
         <configureoptions>
             <configureoption name="with-IBM_DB2"
