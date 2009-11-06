@@ -1,275 +1,288 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
-<package version="1.0">
-    <name>ibm_db2</name>
-    <summary>
-        Extension for IBM DB2 Universal Database, IBM Cloudscape, and
-        Apache Derby
-    </summary>
-    <description>
-        This extension supports IBM DB2 Universal Database, IBM
-        Cloudscape, and Apache Derby databases.
-    </description>
-    <license>Apache License 2.0</license>
-    <maintainers>
-        <maintainer>
-            <user>ambrish</user>
-            <name>Ambrish Bhargava</name>
-            <email>abhargav@in.ibm.com</email>
-            <role>lead</role>
-        </maintainer>
-        <maintainer>
-            <user>kfbombar</user>
-            <name>IBM OpenDev</name>
-            <email>opendev@us.ibm.com</email>
-            <role>lead</role>
-        </maintainer>
-    </maintainers>
-    <release>
-        <version>1.8.2</version>
-        <date>2009-03-09</date>
-        <license>Apache License 2.0</license>
-        <state>stable</state>
-        <notes>
-            Fixed 15601: Adding Real Datatype support.
-        </notes>
-        <configureoptions>
-            <configureoption name="with-IBM_DB2"
-                prompt="DB2 Installation Directory?" />
-        </configureoptions>
-        <filelist>
-            <dir name="/" baseinstalldir="ibm_db2" role="src">
-                <file name="ibm_db2.c" role="src" />
-                <file name="ibm_db2.dsp" role="src" />
-                <file name="php_ibm_db2.h" role="src" />
-                <file name="config.m4" role="src" />
-                <file name="config.w32" role="src" />
-                <file name="TODO" role="doc" />
-            </dir>
-            <dir name="tests" role="test">
-                <file name="connection.inc" role="test" />
-                <file name="trusted_connection.inc" role="test" />
-                <file name="escape.dat" role="test" />
-                <file name="pic1.jpg" role="test" />
-                <file name="resume_000130.txt" role="test" />
-                <file name="resume_000140.txt" role="test" />
-                <file name="resume_000150.txt" role="test" />
-                <file name="resume_000190.txt" role="test" />
-                <file name="skipif.inc" role="test" />
-                <file name="skipif2.inc" role="test" />
-                <file name="skipif3.inc" role="test" />
-                <file name="skipif.PASE" role="test" />
-                <file name="skipifNotTrustedContext.inc" role="test" />
-                <file name="skipifNotRowcountPrefetch.inc" role="test" />
-                <file name="spook.png" role="test" />
-                <file name="test_000_PrepareDb.phpt" role="test" />
-                <file name="test_001_ConnDb.phpt" role="test" />
-                <file name="test_002_ConnDbUncatalogedConn.phpt" role="test" />
-                <file name="test_003_NumAffectedRows.phpt" role="test" />
-                <file name="test_004_ConnWrongUserPwd.phpt" role="test" />
-                <file name="test_005_ConnBadUserBadPwd.phpt" role="test" />
-                <file name="test_006_ConnPassingOpts.phpt" role="test" />
-                <file name="test_007_pConnPassingOpts.phpt" role="test" />
-                <file name="test_010_UpdateRowCount.phpt" role="test" />
-                <file name="test_011_DeleteRowCount.phpt" role="test" />
-                <file name="test_012_ScrollableCursorSelectRowCount01.phpt" role="test" />
-                <file name="test_013_ScrollableCursorSelectRowCount02.phpt" role="test" />
-                <file name="test_014_ScrollableCursorRetrieveNegativeRow.phpt" role="test" />
-                <file name="test_015_InsertDeleteRowCount_01.phpt" role="test" />
-                <file name="test_016_InsertDeleteRowCount_02.phpt" role="test" />
-                <file name="test_017_selectRowcountPrefetchSTMTOpt.phpt" role="test" />
-                <file name="test_018_selectRowcountPrefetchSetOpt.phpt" role="test" />
-                <file name="test_019_selectRowcountPrefetchPrepOpt.phpt" role="test" />
-                <file name="test_020_RollbackDelete.phpt" role="test" />
-                <file name="test_021_CommitDelete.phpt" role="test" />
-                <file name="test_022_RollbackInsert.phpt" role="test" />
-                <file name="test_023_ColumnPrivileges.phpt" role="test" />
-                <file name="test_023_V5V6_ColumnPrivileges.phpt" role="test" />
-                <file name="test_024_ForeignKeys.phpt" role="test" />
-                <file name="test_025_PrimaryKeys.phpt" role="test" />
-                <file name="test_026_BindParam.phpt" role="test" />
-                <file name="test_030_Result.phpt" role="test" />
-                <file name="test_031_ResultIndexPosition.phpt" role="test" />
-                <file name="test_032_ResultIndexName.phpt" role="test" />
-                <file name="test_033_ResultOutSequenceColumn.phpt" role="test" />
-                <file name="test_034_FetchRow.phpt" role="test" />
-                <file name="test_035_FetchRowMany_01.phpt" role="test" />
-                <file name="test_036_FetchRowMany_02.phpt" role="test" />
-                <file name="test_037_FetchRowIndexPos.phpt" role="test" />
-                <file name="test_038_FetchRowIndexPosNested_01.phpt" role="test" />
-                <file name="test_039_FetchRowIndexPosNested_02.phpt" role="test" />
-                <file name="test_039_V5V6_FetchRowIndexPosNested_02.phpt" role="test" />
-                <file name="test_03a_ResultNonExistCol.phpt" role="test" />
-                <file name="test_040_FetchArray.phpt" role="test" />
-                <file name="test_041_FetchArrayMany_01.phpt" role="test" />
-                <file name="test_041_V5V6_FetchArrayMany_01.phpt" role="test" />
-                <file name="test_042_FetchArrayMany_02.phpt" role="test" />
-                <file name="test_043_FetchArrayMany_03.phpt" role="test" />
-                <file name="test_044_FetchArrayMany_04.phpt" role="test" />
-                <file name="test_045_FetchArrayBinaryData.phpt" role="test" />
-                <file name="test_046_FetchArrayMany_05.phpt" role="test" />
-                <file name="test_047_FetchArrayMany_06.phpt" role="test" />
-                <file name="test_048_FetchArrayBinaryData.phpt" role="test" />
-                <file name="test_049_BindParamInsertStmtNULL.phpt" role="test" />
-                <file name="test_050_GetAutocommit.phpt" role="test" />
-                <file name="test_051_SetAutocommit.phpt" role="test" />
-                <file name="test_052_SetAutocommit_01.phpt" role="test" />
-                <file name="test_053_SetAutocommit_02.phpt" role="test" />
-                <file name="test_060_Tables_01.phpt" role="test" />
-                <file name="test_060_V5V6_Tables_01.phpt" role="test" />
-                <file name="test_061_Tables_02.phpt" role="test" />
-                <file name="test_061_V5_Tables_02.phpt" role="test" />
-                <file name="test_061_V6_Tables_02.phpt" role="test" />
-                <file name="test_062_Tables_03.phpt" role="test" />
-                <file name="test_062_V5_Tables_03.phpt" role="test" />
-                <file name="test_062_V6_Tables_03.phpt" role="test" />
-                <file name="test_063_Tables_04.phpt" role="test" />
-                <file name="test_064_Tables_05.phpt" role="test" />
-                <file name="test_064_V5_Tables_05.phpt" role="test" />
-                <file name="test_064_V6_Tables_05.phpt" role="test" />
-                <file name="test_065_FilterTableName.phpt" role="test" />
-                <file name="test_065_V5_FilterTableName.phpt" role="test" />
-                <file name="test_065_V6_FilterTableName.phpt" role="test" />
-                <file name="test_066_TableObjects.phpt" role="test" />
-                <file name="test_066_V5_TableObjects.phpt" role="test" />
-                <file name="test_066_V6_TableObjects.phpt" role="test" />
-                <file name="test_070_Close.phpt" role="test" />
-                <file name="test_071_CloseSuccess.phpt" role="test" />
-                <file name="test_080_ConnWrongDbAlias.phpt" role="test" />
-                <file name="test_080_V5V6_ConnWrongDbAlias.phpt" role="test" />
-                <file name="test_081_ConnWrongUser.phpt" role="test" />
-                <file name="test_082_ConnWrongPwd.phpt" role="test" />
-                <file name="test_090_ConnmsgWrongDbAlias.phpt" role="test" />
-                <file name="test_090_V5V6_ConnmsgWrongDbAlias.phpt" role="test" />
-                <file name="test_091_ConnmsgWrongUser.phpt" role="test" />
-                <file name="test_091_V5V6_ConnmsgWrongUser.phpt" role="test" />
-                <file name="test_092_ConnmsgWrongPwd.phpt" role="test" />
-                <file name="test_092_V5V6_ConnmsgWrongPwd.phpt" role="test" />
-                <file name="test_100_SelectDeleteInsertFieldCount.phpt" role="test" />
-                <file name="test_101_InsertDeleteFieldCount.phpt" role="test" />
-                <file name="test_102_NumFieldsSelect_01.phpt" role="test" />
-                <file name="test_103_NumFieldsSelect_02.phpt" role="test" />
-                <file name="test_110_FieldNum.phpt" role="test" />
-                <file name="test_111_FieldNumAddCol.phpt" role="test" />
-                <file name="test_112_FieldNumDiffCaseColNames.phpt" role="test" />
-                <file name="test_120_FieldName.phpt" role="test" />
-                <file name="test_121_FieldNameAddCol.phpt" role="test" />
-                <file name="test_122_FieldNameDiffCaseColNames.phpt" role="test" />
-                <file name="test_123_FieldNamePos_01.phpt" role="test" />
-                <file name="test_124_FieldNamePos_02.phpt" role="test" />
-                <file name="test_125_FieldNamePos_03.phpt" role="test" />
-                <file name="test_130_PrepExecuteSelectStmt.phpt" role="test" />
-                <file name="test_131_PrepareExecuteSelectStatementParams.phpt" role="test" />
-                <file name="test_131a_PrepExecuteDataTypeConversionsErrs.phpt" role="test" />
-                <file name="test_131a_V5V6_PrepExecuteDataTypeConversionsErrs.phpt" role="test" />
-                <file name="test_132_ExecuteStatementArrayMultipleParams.phpt" role="test" />
-                <file name="test_133_ExecuteLongInputParams.phpt" role="test" />
-                <file name="test_133_V5V6_ExecuteLongInputParams.phpt" role="test" />
-                <file name="test_140_BindParamSelectStmt.phpt" role="test" />
-                <file name="test_141_BindParamSelectStmtMultipleParams_01.phpt" role="test" />
-                <file name="test_142_BindParamSelectStmtMultipleParams_02.phpt" role="test" />
-                <file name="test_143_BindParamInsertStmtNULLParam.phpt" role="test" />
-                <file name="test_144_BindParamInsertStmtPARAM_FILE.phpt" role="test" />
-                <file name="test_145_BindRetrieveNULLEmptyString.phpt" role="test" />
-                <file name="test_146_CallSPINAndOUTParams.phpt" role="test" />
-                <file name="test_147_CallSPINAndOUTParamsMultipleTimes.phpt" role="test" />
-                <file name="test_148_CallSPDiffBindPattern_01.phpt" role="test" />
-                <file name="test_148_V5V6_CallSPDiffBindPattern_01.phpt" role="test" />
-                <file name="test_149_CallSPDiffBindPattern_02.phpt" role="test" />
-                <file name="test_149_V5V6_CallSPDiffBindPattern_02.phpt" role="test" />
-                <file name="test_150_FetchAssocSelect_01.phpt" role="test" />
-                <file name="test_151_FetchAssocSelect_02.phpt" role="test" />
-                <file name="test_152_FetchAssocSelect_03.phpt" role="test" />
-                <file name="test_153_FetchAssocSelect_04.phpt" role="test" />
-                <file name="test_154_AllFetches.phpt" role="test" />
-                <file name="test_155_FetchAssocSelect_06.phpt" role="test" />
-                <file name="test_156_FetchAssocNestedSelects_01.phpt" role="test" />
-                <file name="test_157_FetchAssocScrollableCursor_02.phpt" role="test" />
-                <file name="test_157a_FetchAssocWithoutScrollableCursorErr.phpt" role="test" />
-                <file name="test_157b_FetchAssocScrollableCursor_01.phpt" role="test" />
-                <file name="test_158_FetchAssocNestedSelects_02.phpt" role="test" />
-                <file name="test_159_FetchAssocSeveralRows_01.phpt" role="test" />
-                <file name="test_159a_FetchAssocSeveralRows_02.phpt" role="test" />
-                <file name="test_160_FetchBoth.phpt" role="test" />
-                <file name="test_160_V5V6_FetchBoth.phpt" role="test" />
-                <file name="test_161_FetchBothNestedSelects_01.phpt" role="test" />
-                <file name="test_161_V5V6_FetchBothNestedSelects_01.phpt" role="test" />
-                <file name="test_162_FetchBothNestedSelects_02.phpt" role="test" />
-                <file name="test_162_V5V6_FetchBothNestedSelects_02.phpt" role="test" />
-                <file name="test_163_FetchBothBinary.phpt" role="test" />
-                <file name="test_180_StmtErrMsg.phpt" role="test" />
-                <file name="test_180_V5V6_StmtErrMsg.phpt" role="test" />
-                <file name="test_190_ColumnsTable_01.phpt" role="test" />
-                <file name="test_191_ColumnsTable_02.phpt" role="test" />
-                <file name="test_191_V5_ColumnsTable_02.phpt" role="test" />
-                <file name="test_191_V6_ColumnsTable_02.phpt" role="test" />
-                <file name="test_192_ColumnsTable_03.phpt" role="test" />
-                <file name="test_192_V5V6_ColumnsTable_03.phpt" role="test" />
-                <file name="test_193_RetrieveCLOBColFwdOnly.phpt" role="test" />
-                <file name="test_194_RetrieveCLOBColScrollable.phpt" role="test" />
-                <file name="test_194_V5V6_RetrieveCLOBColScrollable.phpt" role="test" />
-                <file name="test_195_InsertRetrieveXMLData_01.phpt" role="test" />
-                <file name="test_196_InsertRetrieveXMLData_02.phpt" role="test" />
-                <file name="test_197_StatisticsIndexes.phpt" role="test" />
-                <file name="test_198_LobReadWriteFromMemory.phpt" role="test" />
-                <file name="test_198_V5V6_LobReadWriteFromMemory.phpt" role="test" />
-                <file name="test_200_MultipleRsltsetsUniformColDefs.phpt" role="test" />
-                <file name="test_201_MultipleRsltsetsDiffColDefs.phpt" role="test" />
-                <file name="test_201_V5V6_MultipleRsltsetsDiffColDefs.phpt" role="test" />
-                <file name="test_210_FieldDisplaySize_01.phpt" role="test" />
-                <file name="test_210_V6_FieldDisplaySize_01.phpt" role="test" />
-                <file name="test_211_FieldDisplaySize_02.phpt" role="test" />
-                <file name="test_211_V6_FieldDisplaySize_02.phpt" role="test" />
-                <file name="test_212_FieldDisplaySize_03.phpt" role="test" />
-                <file name="test_212_V6_FieldDisplaySize_03.phpt" role="test" />
-                <file name="test_213_FieldDisplaySize_04.phpt" role="test" />
-                <file name="test_213_V6_FieldDisplaySize_04.phpt" role="test" />
-                <file name="test_220_PersistentConn.phpt" role="test" />
-                <file name="test_221_100PersistentConns.phpt" role="test" />
-                <file name="test_230_FieldTypePos.phpt" role="test" />
-                <file name="test_231_FieldTypeName.phpt" role="test" />
-                <file name="test_232_FieldTypePosName.phpt" role="test" />
-                <file name="test_240_FieldWidthPosName_01.phpt" role="test" />
-                <file name="test_240_V5_FieldWidthPosName_01.phpt" role="test" />
-                <file name="test_240_V6_FieldWidthPosName_01.phpt" role="test" />
-                <file name="test_241_FieldWidthPosName_02.phpt" role="test" />
-                <file name="test_241_V5_FieldWidthPosName_02.phpt" role="test" />
-                <file name="test_250_FreeResult_01.phpt" role="test" />
-                <file name="test_251_FreeResult_02.phpt" role="test" />
-                <file name="test_252_FreeResult_03.phpt" role="test" />
-                <file name="test_260_FetchObject.phpt" role="test" />
-                <file name="test_260_V5V6_FetchObject.phpt" role="test" />
-                <file name="test_261_FetchObjectAccess.phpt" role="test" />
-                <file name="test_263_XML_OUTParamsInSPs.phpt" role="test" />
-                <file name="test_264_InsertRetrieveBIGINTTypeColumn.phpt" role="test" />
-                <file name="test_300_ServerInfo.phpt" role="test" />
-                <file name="test_300_V5V6_ServerInfo.phpt" role="test" />
-                <file name="test_310_ClientInfo.phpt" role="test" />
-                <file name="test_310_V5V6_ClientInfo.phpt" role="test" />
-                <file name="test_320_EscapeString.phpt" role="test" />
-                <file name="test_321_ResultFetchArraysLobsXMLTypes.phpt" role="test" />
-                <file name="test_1551_FetchAssocBinary.phpt" role="test" />
-                <file name="test_6528_ScopingProblemBindParam.phpt" role="test" />
-                <file name="test_6561_ReturnNULLValues.phpt" role="test" />
-                <file name="test_6572_SQLStringsContNULLChar.phpt" role="test" />
-                <file name="test_6755_ExtraNULLChar_ResultCLOBCol.phpt" role="test" />
-                <file name="test_6792_FieldTypeRetStrDatetimeTimestamp.phpt" role="test" />
-                <file name="test_6792_V5V6_FieldTypeRetStrDatetimeTimestamp.phpt" role="test" />
-                <file name="test_9173_ProcedurePersistentConn.phpt" role="test" />
-                <file name="test_9173_V5_ProcedurePersistentConn.phpt" role="test" />
-                <file name="test_9173_V6_ProcedurePersistentConn.phpt" role="test" />
-                <file name="test_9194_FetchBothCLOBColumns.phpt" role="test" />
-                <file name="test_10353_MemLeak.phpt" role="test" />
-                <file name="test_10931_LcaseTableName.phpt" role="test" />
-                <file name="test_10931_V5_LcaseTableName.phpt" role="test" />
-                <file name="test_10931_V6_LcaseTableName.phpt" role="test" />
-                <file name="test_clob_special_char.phpt" role="test" />
-                <file name="test_decfloat.phpt" role="test" />
-                <file name="test_last_insert_id.phpt" role="test" />
-                <file name="test_last_insert_id_V5V6.phpt" role="test" />
-                <file name="test_RealDataType.phpt" role="test" />
-                <file name="test_trusted_context_connect.phpt" role="test" />
-                <file name="test_trusted_context_pconnect.phpt" role="test" />
-            </dir>
-        </filelist>
-    </release>
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.8.0" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+http://pear.php.net/dtd/tasks-1.0.xsd
+http://pear.php.net/dtd/package-2.0
+http://pear.php.net/dtd/package-2.0.xsd">
+ <name>ibm_db2</name>
+ <channel>pecl.php.net</channel>
+ <summary>Extension for IBM DB2 Universal Database, IBM Cloudscape, and
+        Apache Derby</summary>
+ <description>This extension supports IBM DB2 Universal Database, IBM
+Cloudscape, and Apache Derby databases.
+ </description>
+ <lead>
+  <name>Ambrish Bhargava</name>
+  <user>ambrish</user>
+  <email>abhargav@in.ibm.com</email>
+  <active>yes</active>
+ </lead>
+ <lead>
+  <name>IBM OpenDev</name>
+  <user>kfbombar</user>
+  <email>opendev@us.ibm.com</email>
+  <active>yes</active>
+ </lead>
+ <date>2009-11-06</date>
+ <time>12:25:59</time>
+ <version>
+  <release>1.8.2</release>
+  <api>1.8.2</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license>Apache License 2.0</license>
+ <notes>
+Fixed 15601: Adding Real Datatype support.
+ </notes>
+ <contents>
+  <dir name="/">
+   <dir name="tests">
+    <file baseinstalldir="ibm_db2" name="connection.inc" role="test" />
+    <file baseinstalldir="ibm_db2" name="escape.dat" role="test" />
+    <file baseinstalldir="ibm_db2" name="pic1.jpg" role="test" />
+    <file baseinstalldir="ibm_db2" name="resume_000130.txt" role="test" />
+    <file baseinstalldir="ibm_db2" name="resume_000140.txt" role="test" />
+    <file baseinstalldir="ibm_db2" name="resume_000150.txt" role="test" />
+    <file baseinstalldir="ibm_db2" name="resume_000190.txt" role="test" />
+    <file baseinstalldir="ibm_db2" name="skipif.inc" role="test" />
+    <file baseinstalldir="ibm_db2" name="skipif.PASE" role="test" />
+    <file baseinstalldir="ibm_db2" name="skipif2.inc" role="test" />
+    <file baseinstalldir="ibm_db2" name="skipif3.inc" role="test" />
+    <file baseinstalldir="ibm_db2" name="skipifNotRowcountPrefetch.inc" role="test" />
+    <file baseinstalldir="ibm_db2" name="skipifNotTrustedContext.inc" role="test" />
+    <file baseinstalldir="ibm_db2" name="spook.png" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_001_ConnDb.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_002_ConnDbUncatalogedConn.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_03a_ResultNonExistCol.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_003_NumAffectedRows.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_004_ConnWrongUserPwd.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_005_ConnBadUserBadPwd.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_006_ConnPassingOpts.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_007_pConnPassingOpts.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_010_UpdateRowCount.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_011_DeleteRowCount.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_012_ScrollableCursorSelectRowCount01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_013_ScrollableCursorSelectRowCount02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_014_ScrollableCursorRetrieveNegativeRow.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_015_InsertDeleteRowCount_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_016_InsertDeleteRowCount_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_017_selectRowcountPrefetchSTMTOpt.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_018_selectRowcountPrefetchSetOpt.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_019_selectRowcountPrefetchPrepOpt.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_020_RollbackDelete.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_021_CommitDelete.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_022_RollbackInsert.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_023_ColumnPrivileges.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_023_V5V6_ColumnPrivileges.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_024_ForeignKeys.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_025_PrimaryKeys.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_026_BindParam.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_030_Result.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_031_ResultIndexPosition.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_032_ResultIndexName.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_033_ResultOutSequenceColumn.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_034_FetchRow.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_035_FetchRowMany_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_036_FetchRowMany_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_037_FetchRowIndexPos.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_038_FetchRowIndexPosNested_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_039_FetchRowIndexPosNested_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_039_V5V6_FetchRowIndexPosNested_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_040_FetchArray.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_041_FetchArrayMany_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_041_V5V6_FetchArrayMany_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_042_FetchArrayMany_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_043_FetchArrayMany_03.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_044_FetchArrayMany_04.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_045_FetchArrayBinaryData.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_046_FetchArrayMany_05.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_047_FetchArrayMany_06.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_048_FetchArrayBinaryData.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_049_BindParamInsertStmtNULL.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_050_GetAutocommit.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_051_SetAutocommit.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_052_SetAutocommit_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_053_SetAutocommit_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_060_Tables_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_060_V5V6_Tables_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_061_Tables_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_061_V5_Tables_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_061_V6_Tables_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_062_Tables_03.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_062_V5_Tables_03.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_062_V6_Tables_03.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_063_Tables_04.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_064_Tables_05.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_064_V5_Tables_05.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_064_V6_Tables_05.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_065_FilterTableName.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_065_V5_FilterTableName.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_065_V6_FilterTableName.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_066_TableObjects.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_066_V5_TableObjects.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_066_V6_TableObjects.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_070_Close.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_071_CloseSuccess.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_080_ConnWrongDbAlias.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_080_V5V6_ConnWrongDbAlias.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_081_ConnWrongUser.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_082_ConnWrongPwd.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_090_ConnmsgWrongDbAlias.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_090_V5V6_ConnmsgWrongDbAlias.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_091_ConnmsgWrongUser.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_091_V5V6_ConnmsgWrongUser.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_092_ConnmsgWrongPwd.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_092_V5V6_ConnmsgWrongPwd.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_100_SelectDeleteInsertFieldCount.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_101_InsertDeleteFieldCount.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_102_NumFieldsSelect_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_103_NumFieldsSelect_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_110_FieldNum.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_111_FieldNumAddCol.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_112_FieldNumDiffCaseColNames.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_120_FieldName.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_121_FieldNameAddCol.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_122_FieldNameDiffCaseColNames.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_123_FieldNamePos_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_124_FieldNamePos_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_125_FieldNamePos_03.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_130_PrepExecuteSelectStmt.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_131a_PrepExecuteDataTypeConversionsErrs.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_131a_V5V6_PrepExecuteDataTypeConversionsErrs.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_131_PrepareExecuteSelectStatementParams.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_132_ExecuteStatementArrayMultipleParams.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_133_ExecuteLongInputParams.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_133_V5V6_ExecuteLongInputParams.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_140_BindParamSelectStmt.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_141_BindParamSelectStmtMultipleParams_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_142_BindParamSelectStmtMultipleParams_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_143_BindParamInsertStmtNULLParam.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_144_BindParamInsertStmtPARAM_FILE.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_145_BindRetrieveNULLEmptyString.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_146_CallSPINAndOUTParams.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_147_CallSPINAndOUTParamsMultipleTimes.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_148_CallSPDiffBindPattern_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_148_V5V6_CallSPDiffBindPattern_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_149_CallSPDiffBindPattern_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_149_V5V6_CallSPDiffBindPattern_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_150_FetchAssocSelect_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_151_FetchAssocSelect_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_152_FetchAssocSelect_03.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_153_FetchAssocSelect_04.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_154_AllFetches.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_155_FetchAssocSelect_06.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_156_FetchAssocNestedSelects_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_157a_FetchAssocWithoutScrollableCursorErr.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_157b_FetchAssocScrollableCursor_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_157_FetchAssocScrollableCursor_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_158_FetchAssocNestedSelects_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_159a_FetchAssocSeveralRows_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_159_FetchAssocSeveralRows_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_160_FetchBoth.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_160_V5V6_FetchBoth.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_161_FetchBothNestedSelects_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_161_V5V6_FetchBothNestedSelects_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_162_FetchBothNestedSelects_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_162_V5V6_FetchBothNestedSelects_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_163_FetchBothBinary.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_180_StmtErrMsg.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_180_V5V6_StmtErrMsg.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_190_ColumnsTable_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_191_ColumnsTable_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_191_V5_ColumnsTable_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_191_V6_ColumnsTable_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_192_ColumnsTable_03.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_192_V5V6_ColumnsTable_03.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_193_RetrieveCLOBColFwdOnly.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_194_RetrieveCLOBColScrollable.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_194_V5V6_RetrieveCLOBColScrollable.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_195_InsertRetrieveXMLData_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_196_InsertRetrieveXMLData_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_197_StatisticsIndexes.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_198_LobReadWriteFromMemory.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_198_V5V6_LobReadWriteFromMemory.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_200_MultipleRsltsetsUniformColDefs.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_201_MultipleRsltsetsDiffColDefs.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_201_V5V6_MultipleRsltsetsDiffColDefs.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_210_FieldDisplaySize_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_210_V6_FieldDisplaySize_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_211_FieldDisplaySize_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_211_V6_FieldDisplaySize_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_212_FieldDisplaySize_03.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_212_V6_FieldDisplaySize_03.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_213_FieldDisplaySize_04.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_213_V6_FieldDisplaySize_04.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_220_PersistentConn.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_221_100PersistentConns.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_230_FieldTypePos.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_231_FieldTypeName.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_232_FieldTypePosName.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_240_FieldWidthPosName_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_240_V5_FieldWidthPosName_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_240_V6_FieldWidthPosName_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_241_FieldWidthPosName_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_241_V5_FieldWidthPosName_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_250_FreeResult_01.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_251_FreeResult_02.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_252_FreeResult_03.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_260_FetchObject.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_260_V5V6_FetchObject.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_261_FetchObjectAccess.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_263_XML_OUTParamsInSPs.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_264_InsertRetrieveBIGINTTypeColumn.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_300_ServerInfo.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_300_V5V6_ServerInfo.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_310_ClientInfo.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_310_V5V6_ClientInfo.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_320_EscapeString.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_321_ResultFetchArraysLobsXMLTypes.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_1551_FetchAssocBinary.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_6528_ScopingProblemBindParam.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_6561_ReturnNULLValues.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_6572_SQLStringsContNULLChar.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_6755_ExtraNULLChar_ResultCLOBCol.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_6792_FieldTypeRetStrDatetimeTimestamp.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_6792_V5V6_FieldTypeRetStrDatetimeTimestamp.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_9173_ProcedurePersistentConn.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_9173_V5_ProcedurePersistentConn.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_9173_V6_ProcedurePersistentConn.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_9194_FetchBothCLOBColumns.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_10353_MemLeak.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_10931_LcaseTableName.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_10931_V5_LcaseTableName.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_10931_V6_LcaseTableName.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_clob_special_char.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_decfloat.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_last_insert_id.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_last_insert_id_V5V6.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_RealDataType.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_trusted_context_connect.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_trusted_context_pconnect.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_000_PrepareDb.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="trusted_connection.inc" role="test" />
+   </dir> <!-- //tests -->
+   <file baseinstalldir="ibm_db2" name="config.m4" role="src" />
+   <file baseinstalldir="ibm_db2" name="config.w32" role="src" />
+   <file baseinstalldir="ibm_db2" name="ibm_db2.c" role="src" />
+   <file baseinstalldir="ibm_db2" name="ibm_db2.dsp" role="src" />
+   <file baseinstalldir="ibm_db2" name="php_ibm_db2.h" role="src" />
+   <file baseinstalldir="ibm_db2" name="TODO" role="doc" />
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>4.0.0</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0b1</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>ibm_db2</providesextension>
+ <extsrcrelease>
+  <configureoption name="with-IBM_DB2" prompt="DB2 Installation Directory?" />
+ </extsrcrelease>
 </package>
