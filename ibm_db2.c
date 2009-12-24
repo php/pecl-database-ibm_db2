@@ -1676,8 +1676,6 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 #endif
 			case SQL_WCHAR:
 			case SQL_WVARCHAR:
-			case SQL_GRAPHIC:
-			case SQL_VARGRAPHIC:
 #ifndef PASE /* i5/OS SQL_DBCLOB */
 			case SQL_DBCLOB:
 #endif /* not PASE */
@@ -1685,13 +1683,25 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 			case SQL_LONGVARCHAR:
 			case SQL_WLONGVARCHAR:
 			case SQL_LONGVARGRAPHIC:
-#else  /* i5/OS Until i5 DB2 PTF wide spread - SQL_C_CHAR works (replace orig i5 SqlGetData scheme) */
-			        target_type = SQL_C_CHAR; 
 #endif /* PASE */
+				target_type = SQL_C_CHAR;
 				in_length = stmt_res->column_info[i].size+1;
 				row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
 
-				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
+				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
+					target_type, row_data->str_val, in_length,
+					(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
+				if ( rc == SQL_ERROR ) {
+					_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				}
+				break;
+			case SQL_GRAPHIC:
+			case SQL_VARGRAPHIC:
+				target_type = SQL_C_CHAR;
+				in_length = (stmt_res->column_info[i].size + 1) * 2 + 1;
+				row_data->str_val = (SQLCHAR *) ecalloc (1, in_length);
+
+				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT) (i + 1),
 					target_type, row_data->str_val, in_length,
 					(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
 				if ( rc == SQL_ERROR ) {
@@ -1709,20 +1719,20 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 #endif /* PASE */
 			case SQL_VARBINARY:
 				if ( stmt_res->s_bin_mode == DB2_CONVERT ) {
-					in_length = 2*(stmt_res->column_info[i].size)+1;
+					in_length = 2 * (stmt_res->column_info[i].size) + 1;
 					row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
 
-					rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
+					rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
 						SQL_C_CHAR, row_data->str_val, in_length,
 						(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
 					if ( rc == SQL_ERROR ) {
 						_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
 					}
 				} else {
-					in_length = stmt_res->column_info[i].size+1;
+					in_length = stmt_res->column_info[i].size + 1;
 					row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
 
-					rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
+					rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
 						SQL_C_DEFAULT, row_data->str_val, in_length,
 						(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
 					if ( rc == SQL_ERROR ) {
@@ -1750,7 +1760,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 				break;
 
 			case SQL_SMALLINT:
-				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
+				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
 					SQL_C_DEFAULT, &row_data->s_val, sizeof(row_data->s_val),
 					(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
 				if ( rc == SQL_ERROR ) {
@@ -1759,7 +1769,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 				break;
 
 			case SQL_INTEGER:
-				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
+				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
 					SQL_C_DEFAULT, &row_data->i_val, sizeof(row_data->i_val),
 					(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
 				if ( rc == SQL_ERROR ) {
@@ -1768,7 +1778,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 				break;
 
 			case SQL_REAL:
-				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
+				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
 					SQL_C_FLOAT, &row_data->r_val, sizeof(row_data->r_val),
 					(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
 				if ( rc == SQL_ERROR ) {
@@ -1776,7 +1786,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 				}
 				break;
 			case SQL_FLOAT:
-				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
+				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
 					SQL_C_DEFAULT, &row_data->f_val, sizeof(row_data->f_val),
 					(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
 				if ( rc == SQL_ERROR ) {
@@ -1785,7 +1795,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 				break;
 
 			case SQL_DOUBLE:
-				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
+				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
 					SQL_C_DEFAULT, &row_data->d_val, sizeof(row_data->d_val),
 					(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
 				if ( rc == SQL_ERROR ) {
@@ -1798,7 +1808,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 				in_length = stmt_res->column_info[i].size +
 					stmt_res->column_info[i].scale + 2 + 1;
 				row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
-				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
+				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
 					SQL_C_CHAR, row_data->str_val, in_length,
 					(SQLINTEGER *)(&stmt_res->row_data[i].out_length));
 				if ( rc == SQL_ERROR ) {
@@ -1810,7 +1820,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 				stmt_res->row_data[i].out_length = 0;
 				stmt_res->column_info[i].loc_type = SQL_CLOB_LOCATOR;
 				stmt_res->column_info[i].loc_ind = 0;
-				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
+				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
 						stmt_res->column_info[i].loc_type, &stmt_res->column_info[i].lob_loc, 4,
 						&stmt_res->column_info[i].loc_ind);
 				if ( rc == SQL_ERROR ) {
@@ -1821,7 +1831,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 				stmt_res->row_data[i].out_length = 0;
 				stmt_res->column_info[i].loc_type = SQL_BLOB_LOCATOR;
 				stmt_res->column_info[i].loc_ind = 0;
-				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
+				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
 						stmt_res->column_info[i].loc_type, &stmt_res->column_info[i].lob_loc, 4,
 						&stmt_res->column_info[i].loc_ind);
 				if ( rc == SQL_ERROR ) {
@@ -1833,7 +1843,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 				stmt_res->row_data[i].out_length = 0;
 				stmt_res->column_info[i].loc_type = SQL_DBCLOB_LOCATOR;
 				stmt_res->column_info[i].loc_ind = 0;
-				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i+1),
+				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
 						stmt_res->column_info[i].loc_type, &stmt_res->column_info[i].lob_loc, 4,
 						&stmt_res->column_info[i].loc_ind);
 				if ( rc == SQL_ERROR ) {
@@ -2492,9 +2502,9 @@ PHP_FUNCTION(db2_bind_param)
 }
 /* }}} */
 
-/* {{{ static int _php_db2_close_helper( INTERNAL_FUNCTION_PARAMETERS )
+/* {{{ static void _php_db2_close_helper( INTERNAL_FUNCTION_PARAMETERS )
 */
-static int _php_db2_close_helper( INTERNAL_FUNCTION_PARAMETERS, int endpconnect )
+static void _php_db2_close_helper( INTERNAL_FUNCTION_PARAMETERS, int endpconnect )
 {
 	int argc = ZEND_NUM_ARGS();
 	int connection_id = -1;
@@ -2512,7 +2522,9 @@ static int _php_db2_close_helper( INTERNAL_FUNCTION_PARAMETERS, int endpconnect 
 			"Connection Resource", le_conn_struct, le_pconn_struct);
 
 #ifdef PASE /* db2_pclose - last ditch persistent close */
-                if (endpconnect) conn_res->flag_pconnect=0;
+		if (endpconnect) {
+			conn_res->flag_pconnect = 0;
+		}
 #endif /* PASE */
 
 		if ( conn_res->handle_active && !conn_res->flag_pconnect ) {
@@ -2559,7 +2571,7 @@ static int _php_db2_close_helper( INTERNAL_FUNCTION_PARAMETERS, int endpconnect 
 Closes a database connection */
 PHP_FUNCTION(db2_close)
 {
-	return _php_db2_close_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	_php_db2_close_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -2568,7 +2580,7 @@ PHP_FUNCTION(db2_close)
 Closes a database connection */
 PHP_FUNCTION(db2_pclose)
 {
-	return _php_db2_close_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	_php_db2_close_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 #endif /* PASE */
@@ -3963,12 +3975,16 @@ PHP_FUNCTION(db2_execute)
 			curr_ptr = curr_ptr->next;
 
 			/* Free Values */
-			if ( Z_TYPE_P(prev_ptr->value) == IS_STRING ) {
-				efree((prev_ptr->value)->value.str.val);
-			}
+			if (prev_ptr->value != NULL) {
+				if ( Z_TYPE_P(prev_ptr->value) == IS_STRING ) {
+					if((prev_ptr->value)->value.str.val != NULL || (prev_ptr->value)->value.str.len != 0) {
+						efree((prev_ptr->value)->value.str.val);
+					}
+				}
 
-			if( prev_ptr->param_type != DB2_PARAM_OUT && prev_ptr->param_type != DB2_PARAM_INOUT ){
-				efree(prev_ptr->value);
+				if( prev_ptr->param_type != DB2_PARAM_OUT && prev_ptr->param_type != DB2_PARAM_INOUT ){
+					efree(prev_ptr->value);
+				}
 			}
 			efree(prev_ptr);
 
@@ -6376,11 +6392,7 @@ PHP_FUNCTION(db2_last_insert_id)
 		}
 
 		/* Selecting last insert ID from current connection resource. */
-#ifdef PASE /* i5/OS no shortcut */
 		sql = "SELECT IDENTITY_VAL_LOCAL() FROM SYSIBM.SYSDUMMY1";
-#else
-		sql = "VALUES IDENTITY_VAL_LOCAL()";
-#endif
 		rc = SQLExecDirect(hstmt, (SQLCHAR *) sql, strlen(sql));
 		if ( rc == SQL_ERROR ) {
 			_php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);

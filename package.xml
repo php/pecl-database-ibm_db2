@@ -22,11 +22,11 @@ Cloudscape, and Apache Derby databases.
   <email>opendev@us.ibm.com</email>
   <active>yes</active>
  </lead>
- <date>2009-11-06</date>
+ <date>2009-12-24</date>
  <time>12:25:59</time>
  <version>
-  <release>1.8.2</release>
-  <api>1.8.2</api>
+  <release>1.8.3</release>
+  <api>1.8.3</api>
  </version>
  <stability>
   <release>stable</release>
@@ -34,7 +34,9 @@ Cloudscape, and Apache Derby databases.
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-Fixed 15601: Adding Real Datatype support.
+Fixed 14347: ibm_db2 1.6.6 fails to compile (still a problem w/ 1.8.2).
+Fixed 16257: db2_execute() Segfault on an empty string as a bind parameter. 
+Fixed: GRAPHIC, VARGRAPHIC Data type error.
  </notes>
  <contents>
   <dir name="/">
