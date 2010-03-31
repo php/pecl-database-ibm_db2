@@ -1,10 +1,10 @@
 <?php
 
-$database = 'testdb';
-$user = 'ambrish';
-$password = 'login123';
+$database = 'sample';
+$user = 'db2inst1';
+$password = 'password';
 $hostname = 'localhost';
-$port = 60036;
+$port = 60000;
 
 $db = $database;
 $username = $user;
