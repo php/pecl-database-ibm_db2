@@ -22,7 +22,7 @@
   $Id$
 */
 
-#define	PHP_IBM_DB2_VERSION	"1.8.3"
+#define	PHP_IBM_DB2_VERSION	"1.8.4"
 
 #ifndef PHP_IBM_DB2_H
 #define PHP_IBM_DB2_H
@@ -124,10 +124,15 @@ extern zend_module_entry ibm_db2_module_entry;
 
 /*** new set options */
 #ifdef PASE
+#define  SQL_BINARY_V6          -2
+#define  SQL_VARBINARY_V6       -3
+#define  SQL_C_BINARY_V6	SQL_BINARY_V6
 #define DB2_I5_FETCH_ON SQL_TRUE
 #define DB2_I5_FETCH_OFF SQL_FALSE
 #define DB2_I5_NAMING_ON  SQL_TRUE
 #define DB2_I5_NAMING_OFF SQL_FALSE
+#define DB2_I5_JOB_SORT_ON  SQL_TRUE
+#define DB2_I5_JOB_SORT_OFF SQL_FALSE
 #define DB2_I5_DBCS_ALLOC_ON  SQL_TRUE
 #define DB2_I5_DBCS_ALLOC_OFF SQL_FALSE
 #define DB2_I5_TXN_NO_COMMIT SQL_TXN_NO_COMMIT
@@ -263,11 +268,12 @@ ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 	char		__php_conn_err_state[SQL_SQLSTATE_SIZE + 1];
 	char		__php_stmt_err_msg[DB2_MAX_ERR_MSG_LEN];
 	char		__php_stmt_err_state[SQL_SQLSTATE_SIZE + 1];
-#ifdef PASE /* i5/OS ease of use turn off commit */
+#ifdef PASE /* i5/OS ease of use turn off/on */
 	long		i5_allow_commit;
 	long		i5_dbcs_alloc;
 	long		i5_all_pconnect;
 	long		i5_ignore_userid;
+	long		i5_job_sort; /* SQL_ATTR_JOB_SORT_SEQUENCE (new PTF) */
 #endif /* PASE */
 ZEND_END_MODULE_GLOBALS(ibm_db2)
 

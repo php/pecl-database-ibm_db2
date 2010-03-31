@@ -22,11 +22,11 @@ Cloudscape, and Apache Derby databases.
   <email>opendev@us.ibm.com</email>
   <active>yes</active>
  </lead>
- <date>2009-12-24</date>
- <time>12:25:59</time>
+ <date>2010-03-31</date>
+ <time>15:17:22</time>
  <version>
-  <release>1.8.3</release>
-  <api>1.8.3</api>
+  <release>1.8.4</release>
+  <api>1.8.4</api>
  </version>
  <stability>
   <release>stable</release>
@@ -34,9 +34,12 @@ Cloudscape, and Apache Derby databases.
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-Fixed 14347: ibm_db2 1.6.6 fails to compile (still a problem w/ 1.8.2).
-Fixed 16257: db2_execute() Segfault on an empty string as a bind parameter. 
-Fixed: GRAPHIC, VARGRAPHIC Data type error.
+Adding support for query time out.
+Fixing problem with DATE/TIME datatype.
+i5/OS Add new attribute DB2_I5_JOB_SORT_ON/OFF (php.ini ibm_db2.i5_job_sort).
+i5/OS Fix BIGINT string type to help with larger values.
+i5/OS Fix "early" terminate fetch loops due to CLOB/BLOB zero length.
+i5/OS Fix db2_pclose() to allow reset persistent connections.
  </notes>
  <contents>
   <dir name="/">
@@ -259,7 +262,9 @@ Fixed: GRAPHIC, VARGRAPHIC Data type error.
     <file baseinstalldir="ibm_db2" name="test_decfloat.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_last_insert_id.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_last_insert_id_V5V6.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_queryTimeout.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_RealDataType.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_timestamp.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_trusted_context_connect.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_trusted_context_pconnect.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_000_PrepareDb.phpt" role="test" />

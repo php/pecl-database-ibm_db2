@@ -1,10 +1,10 @@
 <?php
 
-$database = 'sample';
-$user = 'db2inst1';
-$password = 'password';
+$database = 'testdb';
+$user = 'ambrish';
+$password = 'login123';
 $hostname = 'localhost';
-$port = 60000;
+$port = 60036;
 
 $db = $database;
 $username = $user;
@@ -17,10 +17,10 @@ if (!$prepconn) die('skip');
 $server = db2_server_info($prepconn);
 if ($server->DBMS_NAME == "QSQ" || $server->DBMS_NAME == "AS") {
   if ($server->DBMS_VER > "06000") $rel = "V6";
-  else $rel = "V5";
+  else $rel = "/V5/";
   // PASE test_xxx_V5V6.phpt
-  if (eregi("V6|V5", $_SERVER["PHP_SELF"])) {
-    if (!eregi($rel, $_SERVER["PHP_SELF"])) {
+  if (preg_match("/V6|V5/", $_SERVER["PHP_SELF"])) {
+    if (!preg_match($rel, $_SERVER["PHP_SELF"])) {
       die('skip');
     }
   }
@@ -39,7 +39,7 @@ if ($server->DBMS_NAME == "QSQ" || $server->DBMS_NAME == "AS") {
   }
 }
 else {
-  if (eregi("V5|V6",$_SERVER["PHP_SELF"])) die('skip');
+  if (preg_match("/V5|V6/", $_SERVER["PHP_SELF"])) die('skip');
 }
 
 db2_close($prepconn);
