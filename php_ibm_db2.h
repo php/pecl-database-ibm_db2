@@ -22,7 +22,7 @@
   $Id$
 */
 
-#define	PHP_IBM_DB2_VERSION	"1.8.4"
+#define	PHP_IBM_DB2_VERSION	"1.9.0"
 
 #ifndef PHP_IBM_DB2_H
 #define PHP_IBM_DB2_H
@@ -194,6 +194,7 @@ extern zend_module_entry ibm_db2_module_entry;
 PHP_MINIT_FUNCTION(ibm_db2);
 PHP_MSHUTDOWN_FUNCTION(ibm_db2);
 PHP_MINFO_FUNCTION(ibm_db2);
+PHP_RSHUTDOWN_FUNCTION(ibm_db2);
 
 PHP_FUNCTION(db2_connect);
 PHP_FUNCTION(db2_commit);

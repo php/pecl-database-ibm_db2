@@ -22,6 +22,7 @@
   $Id$
 */
 
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -68,6 +69,8 @@ static int is_i5os_classic;             /* 1 == v5r4-; 0 == v6r1+; */
 #define SQL_ATTR_INFO_WRKSTNNAME     10104
 #define SQL_ATTR_INFO_APPLNAME       10105
 #define SQL_ATTR_INFO_ACCTSTR        10106
+#define SQL_ATTR_QUERY_TIMEOUT			SQL_QUERY_TIMEOUT
+#define SQL_IS_UINTEGER					0 
 #endif /* PASE */
 
 /* Defines a linked list structure for caching param data */
@@ -95,11 +98,11 @@ typedef struct _conn_handle_struct {
 	SQLHANDLE henv;
 	SQLHANDLE hdbc;
 	long auto_commit;
+	long is_auto_commit;
 	long c_bin_mode;
 	long c_case_mode;
 	long c_cursor_type;
 #ifdef PASE /* i5 override php.ini */
-	long c_i5_allow_commit;
 	long c_i5_dbcs_alloc;
 	long c_i5_sys_naming;
 	char * c_i5_pending_cmd;
@@ -108,6 +111,7 @@ typedef struct _conn_handle_struct {
 	SQLSMALLINT error_recno_tracker;
 	SQLSMALLINT errormsg_recno_tracker;
 	int flag_pconnect; /* Indicates that this connection is persistent */
+	int flag_transaction; /* Indicates that transaction is commited */
 } conn_handle;
 
 typedef union {
@@ -147,7 +151,6 @@ typedef struct _stmt_handle_struct {
 	long s_case_mode;
 	long s_rowcount;
 #ifdef PASE /* i5 override php.ini */
-	long s_i5_allow_commit;
 	long s_i5_dbcs_alloc;
 	long s_i5_sys_naming;
 #endif /* PASE */
@@ -164,7 +167,6 @@ typedef struct _stmt_handle_struct {
 	db2_result_set_info *column_info;
 	db2_row_type *row_data;
 } stmt_handle;
-
 
 /* equivalent functions on different platforms */
 #ifdef PHP_WIN32
@@ -252,7 +254,7 @@ zend_module_entry ibm_db2_module_entry = {
 	PHP_MINIT(ibm_db2),
 	PHP_MSHUTDOWN(ibm_db2),
 	NULL,		/* Replace with NULL if there's nothing to do at request start */
-	NULL,	/* Replace with NULL if there's nothing to do at request end */
+	PHP_RSHUTDOWN(ibm_db2),	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(ibm_db2),
 #if ZEND_MODULE_API_NO >= 20010901
 	PHP_IBM_DB2_VERSION, /* Replace with version number for your extension */
@@ -475,7 +477,6 @@ static stmt_handle *_db2_new_stmt_struct(conn_handle* conn_res)
 	stmt_res->cursor_type = conn_res->c_cursor_type;
 	stmt_res->s_case_mode = conn_res->c_case_mode;
 #ifdef PASE /* i5 override php.ini */
-	stmt_res->s_i5_allow_commit = conn_res->c_i5_allow_commit;
 	stmt_res->s_i5_dbcs_alloc   = conn_res->c_i5_dbcs_alloc;
 	stmt_res->s_i5_sys_naming   = conn_res->c_i5_sys_naming;
 #endif /* PASE */
@@ -629,6 +630,38 @@ PHP_MSHUTDOWN_FUNCTION(ibm_db2)
 		free(_php_db2_instance_name);
 		_php_db2_instance_name = NULL;
 	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ _php_ibm_db2_conn
+*/ 
+static int _php_ibm_db2_conn (zend_rsrc_list_entry *le TSRMLS_DC)
+{
+	conn_handle *conn_res;
+	int rc = 0;
+
+	conn_res = (conn_handle *) le->ptr;
+	if (conn_res->flag_transaction == 1) { 
+		conn_res->flag_transaction = 0;
+		if( conn_res->handle_active && conn_res->flag_pconnect ) {
+			if (conn_res->auto_commit == 0) {
+				rc = SQLEndTran(SQL_HANDLE_DBC, (SQLHDBC)conn_res->hdbc, SQL_ROLLBACK);
+				if ( rc == SQL_ERROR ) {
+					_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				}
+			}
+		}
+	}
+	return ZEND_HASH_APPLY_KEEP;
+} /* }}} */
+
+/* {{{ PHP_RSHUTDOWN_FUNCTION
+*/
+PHP_RSHUTDOWN_FUNCTION (ibm_db2) 
+{
+	zend_hash_apply(&EG(persistent_list), (apply_func_t) _php_ibm_db2_conn TSRMLS_CC);
 
 	return SUCCESS;
 }
@@ -1103,42 +1136,41 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 		}
 	} else if (!STRCASECMP(opt_key, "autocommit")) {
 		if (type == SQL_HANDLE_DBC ) {
-			if (((conn_handle *)handle)->auto_commit != option_num) {
-				switch (option_num) {
-					case DB2_AUTOCOMMIT_ON:
-						/* Setting AUTOCOMMIT again here. The user could modify
-						   this option, close the connection, and reopen it again
-						   with this option.
-						*/
-						((conn_handle*)handle)->auto_commit = 1;
-						pvParam = SQL_AUTOCOMMIT_ON;
+			((conn_handle*)handle)->is_auto_commit = 1;
+			switch (option_num) {
+				case DB2_AUTOCOMMIT_ON:
+					/* Setting AUTOCOMMIT again here. The user could modify
+					   this option, close the connection, and reopen it again
+					   with this option.
+					*/
+					((conn_handle*)handle)->auto_commit = 1;
+					pvParam = SQL_AUTOCOMMIT_ON;
 #ifdef PASE
-						rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&pvParam, SQL_NTS);
+					rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&pvParam, SQL_NTS);
 #else
-						rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)pvParam, SQL_NTS);
+					rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)pvParam, SQL_NTS);
 #endif
-						if ( rc == SQL_ERROR ) {
-							_php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
-						}
-						break;
+					if ( rc == SQL_ERROR ) {
+						_php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+					}
+					break;
 
-					case DB2_AUTOCOMMIT_OFF:
-						((conn_handle*)handle)->auto_commit = 0;
-						pvParam = SQL_AUTOCOMMIT_OFF;
+				case DB2_AUTOCOMMIT_OFF:
+					((conn_handle*)handle)->auto_commit = 0;
+					pvParam = SQL_AUTOCOMMIT_OFF;
 #ifdef PASE
-						rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&pvParam, SQL_NTS);
+					rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&pvParam, SQL_NTS);
 #else
-						rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)pvParam, SQL_NTS);
+					rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)pvParam, SQL_NTS);
 #endif
-						if ( rc == SQL_ERROR ) {
-							_php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
-						}
-						break;
+					if ( rc == SQL_ERROR ) {
+						_php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+					}
+					break;
 
-					default:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "AUTOCOMMIT connection attribute value must be one of DB2_AUTOCOMMIT_ON or DB2_AUTOCOMMIT_OFF");
-						break;
-				}
+				default:
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "AUTOCOMMIT connection attribute value must be one of DB2_AUTOCOMMIT_ON or DB2_AUTOCOMMIT_OFF");
+					break;
 			}
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "AUTOCOMMIT connection attribute can only be set on connection resources");
@@ -1336,7 +1368,6 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 			case DB2_I5_TXN_REPEATABLE_READ:
 			case DB2_I5_TXN_SERIALIZABLE:
 				/* override commit in php.ini */
-				((conn_handle*)handle)->c_i5_allow_commit = 1;
 				rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_COMMIT, (SQLPOINTER)&pvParam, SQL_NTS);
 				if ( rc == SQL_ERROR ) {
 					_php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -1344,7 +1375,6 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 				break;
 			case DB2_I5_TXN_NO_COMMIT:
 				/* override commit in php.ini */
-				((conn_handle*)handle)->c_i5_allow_commit = 0;
 				rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_COMMIT, (SQLPOINTER)&pvParam, SQL_NTS);
 				if ( rc == SQL_ERROR ) {
 					_php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -1950,7 +1980,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	long attr = SQL_TRUE;
 	char buffer11[11];
 	int conn_null = 0;
-	int conn_pclose=0;
+	int conn_was_pclose=0;
 #endif /* PASE */
 
 	conn_alive = 1;
@@ -1997,8 +2027,9 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 					_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
 					reused = 1;
 				} /* else will re-connect since connection is dead */
-#endif /* PASE */
+#else
 				reused = 1;
+#endif /* PASE */
 			}
 		} else {
 			/* Need to check for max pconnections? */
@@ -2009,10 +2040,10 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 		}
 		/* We need to set this early, in case we get an error below,
 			so we know how to free the connection */
-#ifdef PASE /* i5/OS pclose */
+#ifdef PASE /* i5/OS allow pclose (i5 administrator request) */
 		if (conn_res->flag_pconnect == 9) {
 			reused = 0;
-			conn_pclose = 1;
+			conn_was_pclose = 1;
 		}
 #endif /* PASE */
 		conn_res->flag_pconnect = isPersistent;
@@ -2025,8 +2056,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 			}
 #ifndef PASE /* i5/OS difference */
 			rc = SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_ODBC_VERSION, (void *)SQL_OV_ODBC3, 0);
-#else
-			/* enter server mode (connect QSQSRVR jobs) */
+#else /* i5/OS enter server mode early (connect QSQSRVR jobs) */
 			if (!(IBM_DB2_G(i5_ignore_userid)) && strstr(database, "=") == NULL) {
 				if (!is_i5_server_mode) {
 					attr = SQL_TRUE;
@@ -2048,21 +2078,6 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 			}
 		}
 
-		/* Set this after the connection handle has been allocated to avoid
-		unnecessary network flows. Initialize the structure to default values */
-		conn_res->auto_commit = SQL_AUTOCOMMIT_ON;
-#ifndef PASE
-		rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(conn_res->auto_commit), SQL_NTS);
-#else /* PASE */
-		rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(&conn_res->auto_commit), SQL_NTS);
-		conn_res->c_i5_allow_commit = IBM_DB2_G(i5_allow_commit);
-		conn_res->c_i5_dbcs_alloc = IBM_DB2_G(i5_dbcs_alloc);
-		if (IBM_DB2_G(i5_job_sort)) {
-			attr = 2; /* 2 = special value John Broich PTF */
-			rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, 10046, (SQLPOINTER)&attr, 0);
-		}
-#endif /* PASE */
-
 		conn_res->c_bin_mode = IBM_DB2_G(bin_mode);
 		conn_res->c_case_mode = DB2_CASE_NATURAL;
 		conn_res->c_cursor_type = DB2_FORWARD_ONLY;
@@ -2072,8 +2087,14 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 
 		/* handle not active as of yet */
 		conn_res->handle_active = 0;
-#ifdef PASE
-		conn_res->c_i5_pending_cmd=NULL;
+		conn_res->flag_transaction = 0;
+		
+#ifdef PASE /* i5/OS php.ini unique settings */
+		conn_res->c_i5_pending_cmd = NULL;
+		conn_res->c_i5_dbcs_alloc = IBM_DB2_G(i5_dbcs_alloc);
+		/* i5/OS OFF default and tests fail (LUW is ON default) */
+		conn_res->auto_commit = SQL_AUTOCOMMIT_ON;
+		rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(&conn_res->auto_commit), SQL_NTS);
 #endif /* PASE */
 		/* Set Options */
 		if ( options != NULL ) {
@@ -2082,15 +2103,6 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Options Array must have string indexes");
 			}
 		}
-#ifdef PASE
-		if (!conn_res->c_i5_allow_commit) {
-			if (!rc) {
-				SQLINTEGER nocommitpase = SQL_TXN_NO_COMMIT;
-				SQLSetConnectOption((SQLHDBC)conn_res->hdbc, SQL_ATTR_COMMIT, (SQLPOINTER)&nocommitpase);
-			}
-		}
-#endif /* PASE */
-
 		if (! reused) {
 			/* Connect */
 			/* If the string contains a =, use SQLDriverConnect */
@@ -2146,11 +2158,34 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 				is_i5os_classic = 0;
 			}
 			/* reused pclose, so zend_hash still good */
-			if (conn_pclose) {
+			if (conn_was_pclose) {
 				reused = 1;
 			}
 #endif /* PASE */
 		}
+		
+		/* Set this after the connection handle has been allocated to avoid
+		unnecessary network flows. Initialize the structure to default values */
+		if(conn_res->is_auto_commit) {
+#ifndef PASE /* i5/OS needs ptr to value */
+			rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(conn_res->auto_commit), SQL_NTS);
+#else /* PASE */
+			rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(&conn_res->auto_commit), SQL_NTS);
+#endif /* PASE */
+		}
+#ifdef PASE /* i5/OS php.ini unique override settings */
+		/* i5/OS 2 = special value John Broich PTF */
+		if (IBM_DB2_G(i5_job_sort)) {
+			attr = 2;
+			SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, 10046, (SQLPOINTER)&attr, 0);
+		}
+		/* i5/OS CRTLIB style schemas do not allow commit */
+		if (!IBM_DB2_G(i5_allow_commit)) {
+			SQLINTEGER nocommitpase = SQL_TXN_NO_COMMIT;
+			SQLSetConnectOption((SQLHDBC)conn_res->hdbc, SQL_ATTR_COMMIT, (SQLPOINTER)&nocommitpase);
+		}
+#endif /* PASE */
+		
 		conn_res->handle_active = 1;
 	} while (0);
 
@@ -2373,20 +2408,21 @@ PHP_FUNCTION(db2_autocommit)
 		/* If value in handle is different from value passed in */
 		if (argc == 2) {
 			autocommit = value;
-			if(autocommit != (conn_res->auto_commit)) {
 #ifndef PASE
-				rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)autocommit, SQL_IS_INTEGER);
+			rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)autocommit, SQL_IS_INTEGER);
 #else
-				rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&autocommit, SQL_IS_INTEGER);
+			rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&autocommit, SQL_IS_INTEGER);
 #endif
-				if ( rc == SQL_ERROR ) {
-					_php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
-				}
-				conn_res->auto_commit = autocommit;
+			if ( rc == SQL_ERROR ) {
+				_php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
 			}
 			RETURN_TRUE;
 		} else {
-			RETURN_LONG(conn_res->auto_commit);
+			rc = SQLGetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, &autocommit, 0, NULL);
+			if ( rc == SQL_ERROR ) {
+				_php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			}
+			RETURN_LONG(autocommit);
 		}
 	}
 }
@@ -2586,6 +2622,7 @@ static void _php_db2_close_helper( INTERNAL_FUNCTION_PARAMETERS, int endpconnect
 	zval *connection = NULL;
 	conn_handle *conn_res;
 	int rc;
+	int auto_commit = 0;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "r", &connection) == FAILURE) {
 		return;
@@ -2604,7 +2641,12 @@ static void _php_db2_close_helper( INTERNAL_FUNCTION_PARAMETERS, int endpconnect
 
 		if ( conn_res->handle_active && !conn_res->flag_pconnect ) {
 			/* Disconnect from DB. If stmt is allocated, it is freed automatically */
-			if (conn_res->auto_commit == 0) {
+			rc = SQLGetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, &auto_commit, 0, NULL);
+			if ( rc == SQL_ERROR ) {
+				_php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			}
+			
+			if (auto_commit == 0) {
 				rc = SQLEndTran(SQL_HANDLE_DBC, (SQLHDBC)conn_res->hdbc, SQL_ROLLBACK);
 				if ( rc == SQL_ERROR ) {
 					_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -3325,6 +3367,8 @@ PHP_FUNCTION(db2_commit)
 		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id,
 			"Connection Resource", le_conn_struct, le_pconn_struct);
 
+		conn_res->flag_transaction = 0;
+		
 		rc = SQLEndTran(SQL_HANDLE_DBC, conn_res->hdbc, SQL_COMMIT);
 
 		if ( rc == SQL_ERROR ) {
@@ -3409,6 +3453,10 @@ PHP_FUNCTION(db2_exec)
 	if (connection) {
 		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id,
 			"Connection Resource", le_conn_struct, le_pconn_struct);
+			
+		if(conn_res->auto_commit == 0) {
+			conn_res->flag_transaction = 1;
+		}
 
 		_php_db2_clear_stmt_err_cache(TSRMLS_C);
 
@@ -3486,10 +3534,13 @@ PHP_FUNCTION(db2_prepare)
 		&stmt_string_len, &options) == FAILURE) {
 		return;
 	}
-
 	if (connection) {
 		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id,
 			"Connection Resource", le_conn_struct, le_pconn_struct);
+			
+		if(conn_res->auto_commit == 0) {
+			conn_res->flag_transaction = 1;
+		}
 
 		_php_db2_clear_stmt_err_cache(TSRMLS_C);
 
@@ -3630,6 +3681,11 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 					if (nullterm) Z_STRVAL_PP(bind_data)[curr->param_size] = '\0';
 						Z_STRLEN_PP(bind_data) = curr->param_size;
 				}
+#ifdef PASE /* help out PHP script trunc trailing chars -- LUW too? */
+				else if (Z_STRLEN_PP(bind_data) > curr->param_size) {
+					Z_STRVAL_PP(bind_data)[curr->param_size] = '\0';
+				}
+#endif /* PASE */
 			}
 #ifdef PASE /* zero length valueType = SQL_C_CHAR bad for i5/OS SQLBindParameter */
 			else if (Z_STRLEN_PP(bind_data) == 0) {
@@ -3642,24 +3698,27 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 				Z_STRLEN_PP(bind_data) = curr->param_size;
 			}
 			/* i5/OS int not big enough (zero fill left justified signed number) */
+			/* i5/OS - new BIGINT string for large numbers (fix prev code error) */
 			if (curr->data_type == SQL_BIGINT) {
-				char *front,*back;
+				char *front,*back,*here;
+				int isNeg = 0;
 				front=Z_STRVAL_PP(bind_data);
-				back=Z_STRVAL_PP(bind_data)+Z_STRLEN_PP(bind_data)-1;
-				while (*front && front<=back) {
-					if (*front != '-' && *front != ' ') {
-						*back=*front;
-						back--;
-						if (front<back){
-							*front = '0';
-						}
+				here=back=Z_STRVAL_PP(bind_data)+Z_STRLEN_PP(bind_data)-1;
+				for (;here>=front;here--) {
+				    if (*here>=0x30 && *here<=0x39) {
+					  *back = *here;
+					  back--;
 					}
-					if (*front == ' ') {
-						*front = '0';
-					}
-					front++;
+					if (*here == '-') isNeg = 1;
+				}
+				for (;back>=front;back--) {
+					*back = '0';
+				}
+				if (isNeg==1) {
+					*front = '-';
 				}
 			}
+			/* i5/OS - new BIGINT string for large numbers (fix prev code error) */
 #endif /* PASE */
 			break;
 		case SQL_TYPE_DATE:
@@ -3827,7 +3886,6 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 					curr->bind_indicator = (curr->value)->value.str.len;
 					paramValuePtr = (SQLPOINTER)((curr->value)->value.str.val);
 			}
-
 			rc = SQLBindParameter(stmt_res->hstmt, curr->param_num,
 					curr->param_type, valueType, curr->data_type, curr->param_size,
 					curr->scale, paramValuePtr, Z_STRLEN_P(curr->value)+1, &(curr->bind_indicator));
@@ -3877,6 +3935,12 @@ static int _php_db2_execute_helper(stmt_handle *stmt_res, zval **data, int bind_
 	/* TODO: Enhance this part to check for stmt_res->file_param */
 	/* If this flag is set, then use SQLBindParam, else use SQLExtendedBind */
 	if ( bind_cmp_list ) {
+#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3
+		/* ADC - PHP changed general behavior 5.3+ */
+		if (!EG(active_symbol_table)) {
+    		zend_rebuild_symbol_table(TSRMLS_C);
+		}
+#endif
 		/* Bind the complete list sequentially */
 		/* Used when no parameters array is passed in */
 		curr = stmt_res->head_cache_list;
@@ -4091,7 +4155,7 @@ PHP_FUNCTION(db2_execute)
 		_php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
 		RETVAL_FALSE;
 	}
-#ifdef PASE /* i5 warnings ignored -- but maybe only serious errors desired (probably LUW too) */	
+#ifdef PASE /* i5/OS warnings should make it to error log (probably LUW too) */	
 	if ( rc == SQL_SUCCESS_WITH_INFO ) {
 		_php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, SQL_ERROR, 1, NULL, -1, 1 TSRMLS_CC);
 	}
@@ -4099,7 +4163,19 @@ PHP_FUNCTION(db2_execute)
 	if ( rc == SQL_NEED_DATA ) {
 		while ( (rc = (SQLParamData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER *)&valuePtr))) == SQL_NEED_DATA ) {
 			/* passing data value for a parameter */
+#ifndef PASE /* changed SQLPut len+1 (add null term) */	
 			rc = SQLPutData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER)(((zvalue_value*)valuePtr)->str.val), ((zvalue_value*)valuePtr)->str.len);
+#else
+			/* i5/OS db2_pconnect() ...
+			 * changed SQLPut len+1 (add null term) 
+			 * because of earlier bind
+			 * SQLBindParameter(..., Z_STRLEN_P(curr->value)+1, ...)
+			 * will avoid bad reuse of SP buffer DB2 SP side (server side optimization)
+			 * call 1: SQLPut big value+1 (establish reusable buffer DB2 SP side)
+			 * call 2: SQLPut smaller value+1 (left over junk at +1 DB2 SP side)
+			 */
+			rc = SQLPutData((SQLHSTMT)stmt_res->hstmt, (SQLPOINTER)(((zvalue_value*)valuePtr)->str.val), ((zvalue_value*)valuePtr)->str.len+1);
+#endif /* PASE */
 			if ( rc == SQL_ERROR ) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sending data failed");
 				_php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -4142,15 +4218,28 @@ PHP_FUNCTION(db2_execute)
 		stmt_res->head_cache_list = NULL;
 		stmt_res->num_params = 0;
 	} else {
+#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3
+		/* ADC - PHP changed general behavior 5.3+ */
+		if (!EG(active_symbol_table)) {
+    		zend_rebuild_symbol_table(TSRMLS_C);
+		}
+#endif
 		/* Bind the IN/OUT Params back into the active symbol table */
 		tmp_curr = stmt_res->head_cache_list;
 		while (tmp_curr != NULL) {
 			switch(tmp_curr->param_type) {
 				case DB2_PARAM_OUT:
 				case DB2_PARAM_INOUT:
-					if( Z_TYPE_P( tmp_curr->value ) == IS_STRING &&
-						(tmp_curr->bind_indicator != SQL_NULL_DATA &&
-						 tmp_curr->bind_indicator != SQL_NO_TOTAL )) {
+#ifdef PASE /* i5/OS SQL_NO_TOTAL didn't quite work (i DB2 bug?) */
+					if( Z_TYPE_P( tmp_curr->value ) == IS_STRING
+					&& tmp_curr->bind_indicator != SQL_NULL_DATA
+					&& tmp_curr->bind_indicator == SQL_NO_TOTAL) {
+						tmp_curr->bind_indicator = Z_STRLEN_P(tmp_curr->value);
+					}
+#endif /* missing endif */
+					if( Z_TYPE_P( tmp_curr->value ) == IS_STRING 
+					&& tmp_curr->bind_indicator != SQL_NULL_DATA
+					&& tmp_curr->bind_indicator != SQL_NO_TOTAL) {
 						/*
 							if the length of the string out parameter is returned
 							then correct the length of the corresponding php variable
@@ -4159,10 +4248,10 @@ PHP_FUNCTION(db2_execute)
 							tmp_curr->bind_indicator = Z_STRLEN_P(tmp_curr->value);
 						}
 						tmp_curr->value->value.str.val[tmp_curr->bind_indicator] = 0;
-#ifdef PASE /* i5/OS both INOUT and OUT */
+#ifdef PASE /* i5/OS both INOUT and OUT (trim) */
 						if (tmp_curr->param_type == DB2_PARAM_INOUT || tmp_curr->param_type == DB2_PARAM_OUT) {
 							int ib = tmp_curr->bind_indicator-1;
-							for (;ib && Z_STRVAL_P(tmp_curr->value)[ib] == 0x20 || Z_STRVAL_P(tmp_curr->value)[ib] == 0x40; ib--){
+							for (;ib && Z_STRVAL_P(tmp_curr->value)[ib] == 0x20 || Z_STRVAL_P(tmp_curr->value)[ib] == 0x40 || Z_STRVAL_P(tmp_curr->value)[ib] == 0x00; ib--){
 								Z_STRVAL_P(tmp_curr->value)[ib] = '\0';
 							}
 						}
@@ -4369,7 +4458,6 @@ PHP_FUNCTION(db2_next_result)
 		new_stmt_res->cursor_type = stmt_res->cursor_type;
 		new_stmt_res->s_case_mode = stmt_res->s_case_mode;
 #ifdef PASE /* i5 override php.ini */
-		new_stmt_res->s_i5_allow_commit = stmt_res->s_i5_allow_commit;
 		new_stmt_res->s_i5_dbcs_alloc   = stmt_res->s_i5_dbcs_alloc;
 #endif /* PASE */
 		new_stmt_res->head_cache_list = NULL;
@@ -4804,6 +4892,8 @@ PHP_FUNCTION(db2_rollback)
 	if (connection) {
 		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id,
 			"Connection Resource", le_conn_struct, le_pconn_struct);
+			
+		conn_res->flag_transaction = 0;
 
 		rc = SQLEndTran(SQL_HANDLE_DBC, conn_res->hdbc, SQL_ROLLBACK);
 

@@ -22,11 +22,11 @@ Cloudscape, and Apache Derby databases.
   <email>opendev@us.ibm.com</email>
   <active>yes</active>
  </lead>
- <date>2010-03-31</date>
+ <date>2010-09-07</date>
  <time>15:17:22</time>
  <version>
-  <release>1.8.4</release>
-  <api>1.8.4</api>
+  <release>1.9.0</release>
+  <api>1.9.0</api>
  </version>
  <stability>
   <release>stable</release>
@@ -34,12 +34,10 @@ Cloudscape, and Apache Derby databases.
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-Adding support for query time out.
-Fixing problem with DATE/TIME datatype.
-i5/OS Add new attribute DB2_I5_JOB_SORT_ON/OFF (php.ini ibm_db2.i5_job_sort).
-i5/OS Fix BIGINT string type to help with larger values.
-i5/OS Fix "early" terminate fetch loops due to CLOB/BLOB zero length.
-i5/OS Fix db2_pclose() to allow reset persistent connections.
+Fix for BIGINT fix for i5.
+Fix for autocommit issue (CLI setting is now handled).
+Fix for db2_pconnect connection reset issue.
+Fix for connection rollback in db2_pconnect at the end of request.
  </notes>
  <contents>
   <dir name="/">
