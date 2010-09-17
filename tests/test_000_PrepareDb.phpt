@@ -36,7 +36,7 @@ if ($conn) {
     }
 
     //Drop the anime_cat view, in case it exists
-    $drop = 'DROP TABLE ANIME_CAT';
+    $drop = 'DROP VIEW ANIME_CAT';
     $res = @db2_exec($conn, $drop);
 
     //Create the anime_cat view
