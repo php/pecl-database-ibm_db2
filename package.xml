@@ -22,11 +22,11 @@ Cloudscape, and Apache Derby databases.
   <email>opendev@us.ibm.com</email>
   <active>yes</active>
  </lead>
- <date>2010-09-07</date>
+ <date>2010-11-09</date>
  <time>15:17:22</time>
  <version>
-  <release>1.9.0</release>
-  <api>1.9.0</api>
+  <release>1.9.1</release>
+  <api>1.9.1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -34,10 +34,7 @@ Cloudscape, and Apache Derby databases.
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-Fix for BIGINT fix for i5.
-Fix for autocommit issue (CLI setting is now handled).
-Fix for db2_pconnect connection reset issue.
-Fix for connection rollback in db2_pconnect at the end of request.
+Fix for db2_statistics (Failing with pconnect).
  </notes>
  <contents>
   <dir name="/">

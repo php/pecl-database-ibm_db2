@@ -22,7 +22,7 @@
   $Id$
 */
 
-#define	PHP_IBM_DB2_VERSION	"1.9.0"
+#define	PHP_IBM_DB2_VERSION	"1.9.1"
 
 #ifndef PHP_IBM_DB2_H
 #define PHP_IBM_DB2_H
