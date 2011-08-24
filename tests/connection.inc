@@ -5,6 +5,7 @@ $user = 'db2inst1';
 $password = 'password';
 $hostname = 'localhost';
 $port = 60000;
+$url = 'no url';
 
 $db = $database;
 $username = $user;
