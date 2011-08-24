@@ -29,6 +29,11 @@ Type:    TABLE
 Remarks: 
 
 Schema:  %s
+Name:    ANIMAL_PICS
+Type:    TABLE
+Remarks: 
+
+Schema:  %s
 Name:    ANIME_CAT
 Type:    VIEW
 Remarks: 

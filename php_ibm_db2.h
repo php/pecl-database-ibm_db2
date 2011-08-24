@@ -16,13 +16,14 @@
   | permissions and limitations under the License.                       |
   +----------------------------------------------------------------------+
   | Authors: Sushant Koduru, Lynh Nguyen, Kanchana Padmanabhan,          |
-  |          Dan Scott, Helmut Tessarek, Ambrish Bhargava                |
+  |          Dan Scott, Helmut Tessarek, Ambrish Bhargava,               |
+  |          Rahul Priyadarshi                                           |
   +----------------------------------------------------------------------+
 
   $Id$
 */
 
-#define	PHP_IBM_DB2_VERSION	"1.9.1"
+#define	PHP_IBM_DB2_VERSION	"1.9.2"
 
 #ifndef PHP_IBM_DB2_H
 #define PHP_IBM_DB2_H
@@ -224,6 +225,7 @@ PHP_FUNCTION(db2_commit);
 PHP_FUNCTION(db2_exec);
 PHP_FUNCTION(db2_prepare);
 PHP_FUNCTION(db2_execute);
+PHP_FUNCTION(db2_execute_many);
 PHP_FUNCTION(db2_conn_errormsg);
 PHP_FUNCTION(db2_stmt_errormsg);
 PHP_FUNCTION(db2_conn_error);

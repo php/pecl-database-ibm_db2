@@ -16,7 +16,8 @@
   +----------------------------------------------------------------------+
   | Authors: Sushant Koduru, Lynh Nguyen, Kanchana Padmanabhan,          |
   |          Dan Scott, Helmut Tessarek, Kellen Bombardier,              |
-  |          Tony Cairns, Krishna Raman, Ambrish Bhargava                |
+  |          Tony Cairns, Krishna Raman, Ambrish Bhargava,               |
+  |          Rahul Priyadarshi, Praveen Devarao,                         |
   +----------------------------------------------------------------------+
 
   $Id$
@@ -71,6 +72,12 @@ static int is_i5os_classic;             /* 1 == v5r4-; 0 == v6r1+; */
 #define SQL_ATTR_QUERY_TIMEOUT			SQL_QUERY_TIMEOUT
 #define SQL_IS_UINTEGER					0 
 #endif /* PASE */
+
+/* Defines a linked list structure for error messages */
+typedef struct _error_msg_node {
+	char err_msg[DB2_MAX_ERR_MSG_LEN];
+	struct _error_msg_node *next;
+} error_msg_node;
 
 /* Defines a linked list structure for caching param data */
 typedef struct _param_cache_node {
@@ -164,6 +171,7 @@ typedef struct _stmt_handle_struct {
 	int num_columns;
 	db2_result_set_info *column_info;
 	db2_row_type *row_data;
+	char *exec_many_err_msg;
 } stmt_handle;
 
 
@@ -205,6 +213,7 @@ function_entry ibm_db2_functions[] = {
 	PHP_FE(db2_exec,	NULL)
 	PHP_FE(db2_prepare,	NULL)
 	PHP_FE(db2_execute,	NULL)
+	PHP_FE(db2_execute_many,	NULL)
 	PHP_FE(db2_stmt_errormsg,	NULL)
 	PHP_FE(db2_conn_errormsg,	NULL)
 	PHP_FE(db2_conn_error,	NULL)
@@ -358,6 +367,10 @@ static void _php_db2_free_conn_struct(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	conn_handle *handle = (conn_handle*) rsrc->ptr;
 	/* Disconnect from DB. If stmt is allocated, it is freed automatically*/
 	if ( handle->handle_active ) {
+		if ( handle->flag_transaction == 1 && handle->auto_commit == 0 ) {
+			handle->flag_transaction = 0;
+			rc = SQLEndTran(SQL_HANDLE_DBC, (SQLHDBC)handle->hdbc, SQL_ROLLBACK);
+		}
 		rc = SQLDisconnect((SQLHDBC)handle->hdbc);
 		rc = SQLFreeHandle(SQL_HANDLE_DBC, handle->hdbc);
 		rc = SQLFreeHandle(SQL_HANDLE_ENV, handle->henv);
@@ -493,6 +506,8 @@ static stmt_handle *_db2_new_stmt_struct(conn_handle* conn_res)
 	stmt_res->errormsg_recno_tracker = 1;
 
 	stmt_res->row_data = NULL;
+
+	stmt_res->exec_many_err_msg = NULL;
 
 	return stmt_res;
 }
@@ -642,14 +657,12 @@ static int _php_ibm_db2_conn (zend_rsrc_list_entry *le TSRMLS_DC)
 	int rc = 0;
 
 	conn_res = (conn_handle *) le->ptr;
-	if (conn_res->flag_transaction == 1) { 
-		conn_res->flag_transaction = 0;
-		if( conn_res->handle_active && conn_res->flag_pconnect ) {
-			if (conn_res->auto_commit == 0) {
-				rc = SQLEndTran(SQL_HANDLE_DBC, (SQLHDBC)conn_res->hdbc, SQL_ROLLBACK);
-				if ( rc == SQL_ERROR ) {
-					_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
-				}
+	if ( conn_res->handle_active ) {
+		if ( conn_res->flag_transaction == 1 && conn_res->auto_commit == 0 ) {
+			conn_res->flag_transaction = 0;
+			rc = SQLEndTran(SQL_HANDLE_DBC, (SQLHDBC)conn_res->hdbc, SQL_ROLLBACK);
+			if ( rc == SQL_ERROR ) {
+				_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
 			}
 		}
 	}
@@ -1137,11 +1150,9 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 		if (type == SQL_HANDLE_DBC ) {
 			switch (option_num) {
 				case DB2_AUTOCOMMIT_ON:
-					/* Setting AUTOCOMMIT again here. The user could modify
-					   this option, close the connection, and reopen it again
-					   with this option.
-					*/
-					((conn_handle*)handle)->auto_commit = 1;
+					/* Setting AUTOCOMMIT again here. The user could modify this option, close the connection, and reopen it again 
+					 * with this option.
+					 */
 					pvParam = SQL_AUTOCOMMIT_ON;
 #ifdef PASE
 					rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&pvParam, SQL_NTS);
@@ -1150,11 +1161,14 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 #endif
 					if ( rc == SQL_ERROR ) {
 						_php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+					} else {
+						/*Set the local flag to requested autocommit value*/
+						((conn_handle*)handle)->auto_commit = 1;
+						((conn_handle*)handle)->flag_transaction = 0;/* Setting to ON commits any open transaction*/
 					}
 					break;
 
 				case DB2_AUTOCOMMIT_OFF:
-					((conn_handle*)handle)->auto_commit = 0;
 					pvParam = SQL_AUTOCOMMIT_OFF;
 #ifdef PASE
 					rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)&pvParam, SQL_NTS);
@@ -1163,6 +1177,8 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 #endif
 					if ( rc == SQL_ERROR ) {
 						_php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+					} else {
+						((conn_handle*)handle)->auto_commit = 0;
 					}
 					break;
 
@@ -1954,6 +1970,15 @@ static void _php_db2_clear_stmt_err_cache(TSRMLS_D)
 }
 /* }}} */
 
+/* {{{ static void _php_db2_clear_exec_many_err_cache (TSRMLS_D)
+ */
+static void _php_db2_clear_exec_many_err_cache( stmt_handle *stmt )
+{
+	efree(stmt->exec_many_err_msg);
+	stmt->exec_many_err_msg = NULL;
+}
+/* }}} */
+
 /* {{{ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, resource )
 */
 static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **pconn_res, int isPersistent )
@@ -2145,6 +2170,19 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 				SQLFreeHandle(SQL_HANDLE_ENV, conn_res->henv);
 				break;
 			}
+
+			/* Get the AUTOCOMMIT state from the CLI driver as cli driver could have changed autocommit status based on it's
+			* precedence  */
+			rc = SQLGetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT,(SQLPOINTER)(&conn_res->auto_commit), 0, NULL);
+
+			if ( rc == SQL_ERROR ) {
+				_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				SQLDisconnect((SQLHDBC)conn_res->hdbc);
+				SQLFreeHandle( SQL_HANDLE_DBC, conn_res->hdbc );
+				SQLFreeHandle(SQL_HANDLE_ENV, conn_res->henv);
+				break;
+			}
+
 #ifdef CLI_DBC_SERVER_TYPE_DB2LUW
 #ifdef SQL_ATTR_DECFLOAT_ROUNDING_MODE
 			/**
@@ -2408,6 +2446,16 @@ PHP_FUNCTION(db2_autocommit)
 #endif
 			if ( rc == SQL_ERROR ) {
 				_php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				RETURN_FALSE;
+			} else {
+				/*Set the local flag to requested autocommit value*/
+				conn_res->auto_commit = autocommit;
+
+				/* If autocommit is requested to be turned ON and there is a transaction in progress, the trasaction is committed.
+				* Hence set flag_transaction  to 0 indicating no transaction is in progress*/
+				if ( autocommit == SQL_AUTOCOMMIT_ON ) {
+					conn_res->flag_transaction = 0;
+				}
 			}
 			RETURN_TRUE;
 		} else {
@@ -2526,6 +2574,7 @@ PHP_FUNCTION(db2_bind_param)
 
 	if (stmt) {
 		ZEND_FETCH_RESOURCE2(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct, le_pconn_struct);
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 
 		/* Check for Param options */
 		switch (argc) {
@@ -3444,9 +3493,7 @@ PHP_FUNCTION(db2_exec)
 		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id,
 			"Connection Resource", le_conn_struct, le_pconn_struct);
 			
-		if(conn_res->auto_commit == 0) {
-			conn_res->flag_transaction = 1;
-		}
+		conn_res->flag_transaction = 1;
 
 		_php_db2_clear_stmt_err_cache(TSRMLS_C);
 
@@ -3497,6 +3544,7 @@ PHP_FUNCTION(db2_free_result)
 
 	if (stmt) {
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 		if ( stmt_res->hstmt ) {
             /* Free any cursors that might have been allocated in a previous call to SQLExecute */
             SQLFreeStmt((SQLHSTMT)stmt_res->hstmt, SQL_CLOSE);
@@ -3529,9 +3577,7 @@ PHP_FUNCTION(db2_prepare)
 		ZEND_FETCH_RESOURCE2(conn_res, conn_handle*, &connection, connection_id,
 			"Connection Resource", le_conn_struct, le_pconn_struct);
 			
-		if(conn_res->auto_commit == 0) {
-			conn_res->flag_transaction = 1;
-		}
+		conn_res->flag_transaction = 1;
 
 		_php_db2_clear_stmt_err_cache(TSRMLS_C);
 
@@ -3977,7 +4023,7 @@ static int _php_db2_execute_helper(stmt_handle *stmt_res, zval **data, int bind_
 					(SQLSMALLINT*)&data_type, &precision, (SQLSMALLINT*)&scale,
 					(SQLSMALLINT*)&nullable);
 				if ( rc == SQL_ERROR ) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Describe Param Failed");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Describe Param %d Failed2", param_no);
 					_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
 					return rc;
 				}
@@ -4050,6 +4096,7 @@ PHP_FUNCTION(db2_execute)
 	}
 
 	ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+	_php_db2_clear_exec_many_err_cache(stmt_res);
 
 	/* Free any cursors that might have been allocated in a previous call to SQLExecute */
 	SQLFreeStmt((SQLHSTMT)stmt_res->hstmt, SQL_CLOSE);
@@ -4326,10 +4373,12 @@ PHP_FUNCTION(db2_stmt_errormsg)
 	}
 
 	if (stmt) {
-		return_str = (char*)ecalloc(1, DB2_MAX_ERR_MSG_LEN);
-
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+		if ( stmt_res->exec_many_err_msg != NULL ) {
+			RETURN_STRING(stmt_res->exec_many_err_msg, 1);
+		}
 
+		return_str = (char*)ecalloc(1, DB2_MAX_ERR_MSG_LEN);
 		_php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, -1, 0, return_str, DB2_ERRMSG, stmt_res->errormsg_recno_tracker TSRMLS_CC);
 		if(stmt_res->errormsg_recno_tracker - stmt_res->error_recno_tracker >= 1)
 			stmt_res->error_recno_tracker = stmt_res->errormsg_recno_tracker;
@@ -4427,6 +4476,7 @@ PHP_FUNCTION(db2_next_result)
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
 
 		_php_db2_clear_stmt_err_cache(TSRMLS_C);
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 
 		/* alloc handle and return only if it errors */
 		rc = SQLAllocHandle(SQL_HANDLE_STMT, stmt_res->hdbc, &new_hstmt);
@@ -4486,6 +4536,7 @@ PHP_FUNCTION(db2_num_fields)
 
 	if (stmt) {
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 
 		rc = SQLNumResultCols((SQLHSTMT)stmt_res->hstmt, &indx);
 		if ( rc == SQL_ERROR ) {
@@ -4515,7 +4566,7 @@ PHP_FUNCTION(db2_num_rows)
 
 	if (stmt) {
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
-
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 
 		rc = SQLRowCount((SQLHSTMT)stmt_res->hstmt, &count);
 		if ( rc == SQL_ERROR ) {
@@ -4577,6 +4628,7 @@ PHP_FUNCTION(db2_field_name)
 
 	if ( stmt ) {
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 	}
 	if ( Z_TYPE_P(column)==IS_LONG ) {
 		col = Z_LVAL_P(column);
@@ -4611,6 +4663,7 @@ PHP_FUNCTION(db2_field_display_size)
 
 	if ( stmt ) {
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 	}
 	if ( Z_TYPE_P(column)==IS_LONG ) {
 		col = Z_LVAL_P(column);
@@ -4649,6 +4702,7 @@ PHP_FUNCTION(db2_field_num)
 
 	if ( stmt ) {
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 	}
 	if ( Z_TYPE_P(column)==IS_LONG ) {
 		col = Z_LVAL_P(column);
@@ -4681,6 +4735,7 @@ PHP_FUNCTION(db2_field_precision)
 
 	if ( stmt ) {
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 	}
 	if ( Z_TYPE_P(column)==IS_LONG ) {
 		col = Z_LVAL_P(column);
@@ -4714,6 +4769,7 @@ PHP_FUNCTION(db2_field_scale)
 
 	if ( stmt ) {
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 	}
 	if ( Z_TYPE_P(column)==IS_LONG ) {
 		col = Z_LVAL_P(column);
@@ -4747,6 +4803,7 @@ PHP_FUNCTION(db2_field_type)
 
 	if (stmt) {
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 	}
 	if ( Z_TYPE_P(column)==IS_LONG ) {
 		col = Z_LVAL_P(column);
@@ -4823,6 +4880,7 @@ PHP_FUNCTION(db2_field_width)
 
 	if ( stmt ) {
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 	}
 	if ( Z_TYPE_P(column)==IS_LONG ) {
 		col = Z_LVAL_P(column);
@@ -4858,6 +4916,7 @@ PHP_FUNCTION(db2_cursor_type)
 
 	if (stmt) {
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 	}
 #ifdef PASE
 	RETURN_LONG(stmt_res->cursor_type);
@@ -5037,6 +5096,7 @@ PHP_FUNCTION(db2_result)
 
 	if (stmt) {
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 
 		if(Z_TYPE_P(column) == IS_STRING) {
 			col_num = _php_db2_get_column_by_name(stmt_res, Z_STRVAL_P(column), -1 TSRMLS_CC);
@@ -5750,6 +5810,7 @@ PHP_FUNCTION(db2_fetch_row)
 
 	if (stmt ) {
 		ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+		_php_db2_clear_exec_many_err_cache(stmt_res);
 	}
 
     /* get column header info*/
@@ -6499,6 +6560,7 @@ PHP_FUNCTION(db2_lob_read)
 
 	/* Get the statement handle */
 	ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+	_php_db2_clear_exec_many_err_cache(stmt_res);
 
 	/* Get the data in the amount of length */
 #ifdef PASE /* PASE */
@@ -6685,6 +6747,237 @@ PHP_FUNCTION(db2_last_insert_id)
 			RETURN_NULL();
 		}
 	}
+}
+/* }}} */
+
+/* {{{  static int _ibm_db_chaining_flag(stmt_handle *stmt_res, SQLINTEGER flag, error_msg_node *error_list, int client_err_cnt TSRMLS_DC)
+ */
+static int _ibm_db_chaining_flag( stmt_handle *stmt_res, SQLINTEGER flag, error_msg_node *error_list, int client_err_cnt TSRMLS_DC ) {
+	int rc;
+	rc = SQLSetStmtAttr((SQLHSTMT)stmt_res->hstmt, flag, (SQLPOINTER)SQL_TRUE, SQL_IS_INTEGER);
+	if ( flag == SQL_ATTR_CHAINING_BEGIN ) {
+		if ( rc  == SQL_ERROR ) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Chaining begin failed");
+		}
+	} else {
+		if ( (rc != SQL_SUCCESS) || (client_err_cnt != 0) ) {
+			int errNo = 0;
+			SQLINTEGER server_err_cnt = 0;
+			error_msg_node *tmp_err_node = NULL;
+			char *err_msg = NULL;
+			long tmp_locator = 0;
+
+			if ( rc != SQL_SUCCESS ) {
+				SQLGetDiagField(SQL_HANDLE_STMT, (SQLHSTMT)stmt_res->hstmt, 0, SQL_DIAG_NUMBER, (SQLPOINTER) &server_err_cnt, SQL_IS_POINTER, NULL);
+			}
+			err_msg = (char*)ecalloc((client_err_cnt + server_err_cnt), (DB2_MAX_ERR_MSG_LEN + strlen(" ERROR i:  ")));
+			err_msg[0] = '\0';
+			while ( error_list != NULL ) {
+				errNo++;
+				tmp_locator += sprintf((err_msg+tmp_locator), "ERROR %d: %s\n", errNo, error_list->err_msg);
+				tmp_err_node = error_list;
+				error_list = error_list->next;
+				efree(tmp_err_node);
+			}
+			for ( errNo = client_err_cnt + 1; errNo <= (client_err_cnt + server_err_cnt); errNo++ ) {
+				_php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, SQL_ERROR, 1, NULL, -1, (errNo - client_err_cnt) TSRMLS_CC);
+				tmp_locator += sprintf(err_msg + tmp_locator, "ERROR %d: %s\n", errNo, IBM_DB2_G(__php_stmt_err_msg));
+			}
+			err_msg[tmp_locator] = '\0';
+			stmt_res->exec_many_err_msg = err_msg;
+		}
+	}
+	return rc;
+}
+/* }}} */
+
+/* {{{ static void _build_client_err_list( error_msg_node *head_error_list, char *err_msg )
+ */
+static void _build_client_err_list( error_msg_node *head_error_list, char *err_msg ) {
+	error_msg_node *tmp_err = NULL, *prv_err = NULL;
+	error_msg_node *curr_err = head_error_list->next;
+	tmp_err = (error_msg_node*)ecalloc(1, sizeof(error_msg_node));
+	strcpy(tmp_err->err_msg, err_msg);
+	tmp_err->next = NULL;
+	while ( curr_err != NULL ) {
+		prv_err = curr_err;
+		curr_err = curr_err->next;
+	}
+
+	if ( head_error_list->next == NULL ){
+		head_error_list->next = tmp_err;
+	} else {
+		prv_err->next = tmp_err;
+	}
+}
+/* }}} */
+
+/* {{{ proto int db2_execute_many(resources stmt [, array params])
+   execute a prepared statement */
+PHP_FUNCTION( db2_execute_many )
+{
+	int argc = ZEND_NUM_ARGS();
+	int stmt_id = -1;
+	zval *stmt = NULL;
+	zval *params = NULL;
+	stmt_handle *stmt_res = NULL;
+	char error[DB2_MAX_ERR_MSG_LEN];
+	error_msg_node *head_error_list = NULL;
+
+	int rc;
+	int i = 0;
+	SQLSMALLINT numOpts = 0;
+	int numOfRows = 0;
+	int numOfParam = 0;
+	SQLINTEGER row_cnt = 0;
+	int chaining_start = 0;
+	int err_count = 0;
+
+	SQLSMALLINT *data_type;
+	SQLUINTEGER precision;
+	SQLSMALLINT scale;
+	SQLSMALLINT nullable;
+	SQLSMALLINT *array_data_type;
+	
+	/* These are used to loop over the param cache*/
+	param_node *tmp_curr, *prev_ptr, *curr_ptr;
+	zval **data;
+
+	if ( zend_parse_parameters(argc TSRMLS_CC, "ra", &stmt, &params) == FAILURE ) {
+		return;
+	}
+
+	if ( !stmt ) {
+		return;	
+	}
+
+	ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+
+	/* Free any cursor that might have been allocated in a previous call to SQLExecute */
+	SQLFreeStmt((SQLHSTMT)stmt_res->hstmt, SQL_CLOSE);
+	stmt_res->head_cache_list = NULL;
+	stmt_res->current_node = NULL;
+
+	rc = SQLNumParams((SQLHSTMT)stmt_res->hstmt, (SQLSMALLINT*)&numOpts);
+	data_type = (SQLSMALLINT*)ecalloc(numOpts, sizeof(SQLSMALLINT));
+	array_data_type = (SQLSMALLINT*)ecalloc(numOpts, sizeof(SQLSMALLINT));
+	if ( numOpts != 0 ) {
+		for ( i = 0; i < numOpts; i++ ) {
+			rc = SQLDescribeParam((SQLHSTMT)stmt_res->hstmt, i + 1, (SQLSMALLINT*)(data_type + i), &precision, (SQLSMALLINT*)&scale, (SQLSMALLINT*)&nullable);
+			if ( rc == SQL_ERROR ) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Describe Param %d Failed", i + 1);
+				_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				RETURN_FALSE;
+			}
+			_php_db2_build_list( stmt_res, i + 1, data_type[i], precision, scale, nullable );
+		}
+	}
+
+	/* Execute SQL for all set of parameters */
+	numOfRows = zend_hash_num_elements(Z_ARRVAL_P(params));
+	zend_hash_internal_pointer_reset(Z_ARRVAL_P(params));
+	head_error_list = (error_msg_node*)ecalloc(1, sizeof(error_msg_node));
+	head_error_list->next = NULL;
+	if ( numOfRows != 0 ) {
+		for ( i = 0; i < numOfRows; i++ ) {
+			param_node *curr = NULL;
+			zval **params_array = NULL;
+			error[0] = '\0';
+			rc = zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&params_array);
+			if ( rc != SUCCESS ) {
+				sprintf(error, "Value parameters array %d is not correct", i + 1);
+				_build_client_err_list(head_error_list, error);
+				err_count++;
+				zend_hash_move_forward(Z_ARRVAL_P(params));
+				continue;
+			}
+			
+			numOfParam = zend_hash_num_elements(Z_ARRVAL_PP(params_array));
+			if ( numOpts < numOfParam ) {
+				/* More number of arguments passed in */
+				sprintf(error, "Value parameters array %d has more number of parameters", i + 1);
+				_build_client_err_list(head_error_list, error);
+				err_count++;
+				zend_hash_move_forward(Z_ARRVAL_P(params));
+				continue;	
+			} else if ( numOpts > numOfParam ) {
+				/* Less number of arguments passed in */
+				sprintf(error, "Value parameters array %d has less number of parameteres", i + 1);
+				_build_client_err_list(head_error_list, error);
+				err_count++;
+				zend_hash_move_forward(Z_ARRVAL_P(params));
+				continue;
+			}
+
+			/* Bind values parameters */
+			curr = stmt_res->head_cache_list;
+			zend_hash_internal_pointer_reset(Z_ARRVAL_PP(params_array));
+			while ( curr != NULL ) {
+				zend_hash_get_current_data(Z_ARRVAL_PP(params_array), (void**)&data); 
+				if ( data == NULL ) {
+					sprintf(error, "NULL value passed in value parameters %d", i + 1);
+					_build_client_err_list(head_error_list, error);
+					err_count++;
+					break;
+				}
+				
+				if ( chaining_start ) {
+					if ( array_data_type[curr->param_num -1] != Z_TYPE_PP(data) ) {
+						sprintf(error, "Value parameters array %d is not homogeneous with privious parameters array", i + 1);
+						_build_client_err_list(head_error_list, error);
+						err_count++;
+						break;
+					}
+				} else {
+					array_data_type[curr->param_num -1] = Z_TYPE_PP(data);
+				}
+
+				curr->data_type = data_type[curr->param_num -1];
+				rc = _php_db2_bind_data(stmt_res, curr, data TSRMLS_CC);
+				if ( rc == SQL_ERROR ) {
+					sprintf(error, "Binding Error1 : %s", IBM_DB2_G(__php_stmt_err_msg));
+					_build_client_err_list(head_error_list, error);
+					err_count++;
+					break;
+				}
+				zend_hash_move_forward(Z_ARRVAL_PP(params_array));
+				curr = curr->next;
+			}
+			
+	 		if ( !chaining_start && (error[0] == '\0' ) ) {
+				/* Set statement attribute SQL_ATTR_CHAINING_BEGIN */
+				rc = _ibm_db_chaining_flag(stmt_res, SQL_ATTR_CHAINING_BEGIN, NULL, 0 TSRMLS_CC);
+				chaining_start = 1;
+				if ( rc != SQL_SUCCESS ) {
+					RETURN_FALSE;
+				}
+			}
+
+			if ( error[0] == '\0' ) {
+				rc = SQLExecute((SQLHSTMT)stmt_res->hstmt);
+			}
+			zend_hash_move_forward(Z_ARRVAL_P(params));
+		}
+	}
+
+	/* Set statement attribute SQL_ATTR_CHAINING_END */
+	rc = SQL_ERROR;
+	if ( chaining_start ) {
+		rc = _ibm_db_chaining_flag(stmt_res, SQL_ATTR_CHAINING_END, head_error_list->next, err_count TSRMLS_CC);
+	}
+
+	if ( rc != SQL_SUCCESS || err_count != 0 ) {
+		RETURN_FALSE;
+	}
+
+	rc = SQLRowCount((SQLHSTMT)stmt_res->hstmt, &row_cnt);
+
+	if ( (rc == SQL_ERROR) && (stmt_res != NULL) ) {
+		_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLRowCount failed");
+		RETURN_FALSE;
+	}
+	RETURN_LONG(row_cnt);
 }
 /* }}} */
 

@@ -22,11 +22,11 @@ Cloudscape, and Apache Derby databases.
   <email>opendev@us.ibm.com</email>
   <active>yes</active>
  </lead>
- <date>2010-11-08</date>
- <time>15:17:22</time>
+ <date>2011-08-23</date>
+ <time>15:00:00</time>
  <version>
-  <release>1.9.1</release>
-  <api>1.9.1</api>
+  <release>1.9.2</release>
+  <api>1.9.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -34,12 +34,15 @@ Cloudscape, and Apache Derby databases.
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-Fix for db2_statistics (Failing with pconnect).
+Added execute_many() API to execute batch.
+Fixed: Connection hanging issue.
+Fixed: Defect #20281 (Improve error reporting)
  </notes>
  <contents>
   <dir name="/">
    <dir name="tests">
     <file baseinstalldir="ibm_db2" name="connection.inc" role="test" />
+    <file baseinstalldir="ibm_db2" name="rollbackhandler.inc" role="test" />
     <file baseinstalldir="ibm_db2" name="escape.dat" role="test" />
     <file baseinstalldir="ibm_db2" name="pic1.jpg" role="test" />
     <file baseinstalldir="ibm_db2" name="resume_000130.txt" role="test" />
@@ -265,6 +268,10 @@ Fix for db2_statistics (Failing with pconnect).
     <file baseinstalldir="ibm_db2" name="test_trusted_context_pconnect.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_000_PrepareDb.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="trusted_connection.inc" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_graphic_data_type.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_check_rollback.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_connect_deallocator.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_execute_many.phpt" role="test" />
    </dir> <!-- //tests -->
    <file baseinstalldir="ibm_db2" name="config.m4" role="src" />
    <file baseinstalldir="ibm_db2" name="config.w32" role="src" />
