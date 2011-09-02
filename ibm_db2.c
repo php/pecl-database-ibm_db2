@@ -655,6 +655,11 @@ static int _php_ibm_db2_conn (zend_rsrc_list_entry *le TSRMLS_DC)
 {
 	conn_handle *conn_res;
 	int rc = 0;
+	
+	/* Fix: #24013 */
+	if (le->type != le_pconn_struct) {
+		return ZEND_HASH_APPLY_KEEP;
+	}
 
 	conn_res = (conn_handle *) le->ptr;
 	if ( conn_res->handle_active ) {
