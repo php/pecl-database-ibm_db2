@@ -108,6 +108,7 @@ typedef struct _conn_handle_struct {
 	long c_case_mode;
 	long c_cursor_type;
 #ifdef PASE /* i5 override php.ini */
+	long c_i5_allow_commit;
 	long c_i5_dbcs_alloc;
 	long c_i5_sys_naming;
 	char * c_i5_pending_cmd;
@@ -184,7 +185,7 @@ typedef struct _stmt_handle_struct {
 
 /* {{{ Every user visible function must have an entry in ibm_db2_functions[].
 */
-function_entry ibm_db2_functions[] = {
+zend_function_entry ibm_db2_functions[] = {
 	PHP_FE(db2_connect,	NULL)
 	PHP_FE(db2_commit,	NULL)
 	PHP_FE(db2_pconnect,	NULL)
@@ -1561,7 +1562,6 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_fetch_only (DB2_I5_FETCH_ON, DB2_I5_FETCH_OFF)");
 		}
 #endif /* PASE */
-#ifndef PASE  /* i5/OS not support yet */
 	} else if (!STRCASECMP(opt_key, "userid")) {
 		rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_INFO_USERID, (SQLPOINTER)option_str, SQL_NTS);
 		if ( rc == SQL_ERROR ) {
@@ -1582,6 +1582,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 		if ( rc == SQL_ERROR ) {
 			_php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
 		}
+#ifndef PASE  /* i5/OS not support yet */
 	} else if (!STRCASECMP(opt_key, "deferred_prepare")) {
 		switch (option_num) {
 			case DB2_DEFERRED_PREPARE_ON:
@@ -1979,8 +1980,10 @@ static void _php_db2_clear_stmt_err_cache(TSRMLS_D)
  */
 static void _php_db2_clear_exec_many_err_cache( stmt_handle *stmt )
 {
-	efree(stmt->exec_many_err_msg);
-	stmt->exec_many_err_msg = NULL;
+	if ( stmt->exec_many_err_msg != NULL ) {
+		efree(stmt->exec_many_err_msg);
+		stmt->exec_many_err_msg = NULL;
+	}
 }
 /* }}} */
 
@@ -2002,7 +2005,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	int reused = 0;
 	int hKeyLen = 0;
 	char *hKey = NULL;
-	list_entry newEntry;
+	zend_rsrc_list_entry newEntry;
 	char server[2048];
 #ifdef PASE /* i5/OS incompatible v6 change */
 	long attr = SQL_TRUE;
@@ -2040,7 +2043,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	do {
 		/* Check if we already have a connection for this userID & database combination */
 		if (isPersistent) {
-			list_entry *entry;
+			zend_rsrc_list_entry *entry;
 			hKeyLen = strlen(database) + strlen(uid) + strlen(password) + 9;
 			hKey = (char *) ecalloc(1, hKeyLen);
 
@@ -2231,7 +2234,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 			memset(&newEntry, 0, sizeof(newEntry));
 			Z_TYPE(newEntry) = le_pconn_struct;
 			newEntry.ptr = conn_res;
-			if (zend_hash_update(&EG(persistent_list), hKey, hKeyLen, (void *) &newEntry, sizeof(list_entry), NULL)==FAILURE) {
+			if (zend_hash_update(&EG(persistent_list), hKey, hKeyLen, (void *) &newEntry, sizeof(zend_rsrc_list_entry), NULL)==FAILURE) {
 				rc = SQL_ERROR;
 				/* TBD: What error to return?, for now just generic SQL_ERROR */
 			}
@@ -3720,7 +3723,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 					if (curr->param_type == DB2_PARAM_INOUT)
 #endif
 						memset(Z_STRVAL_PP(bind_data)+origlen,0x20, curr->param_size-origlen);
-					if (nullterm) Z_STRVAL_PP(bind_data)[curr->param_size] = '\0';
+					if (nullterm) Z_STRVAL_PP(bind_data)[origlen] = '\0';
 						Z_STRLEN_PP(bind_data) = curr->param_size;
 				}
 #ifdef PASE /* help out PHP script trunc trailing chars -- LUW too? */
@@ -3910,7 +3913,8 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 #endif /* PASE */
 					paramValuePtr = (SQLPOINTER)((curr->value)->value.str.val);
 					break;
-#ifdef PASE /* i5/OS should be SQL_NTS to avoid extra spaces */
+/*Not only PASE this applies to LUW too*/
+/*#ifdef PASE /* i5/OS should be SQL_NTS to avoid extra spaces */
 				case SQL_VARCHAR:
 					valueType = SQL_C_CHAR;
 					curr->bind_indicator = SQL_NTS;
@@ -3921,7 +3925,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 					curr->bind_indicator = SQL_NTS; /* 20 */
 					paramValuePtr = (SQLPOINTER)((curr->value)->value.str.val);
 					break;
-#endif /* PASE */
+/*#endif /* PASE */
 				/* This option should handle most other types such as DATE, VARCHAR etc */
 				default:
 					valueType = SQL_C_CHAR;
@@ -4310,6 +4314,13 @@ PHP_FUNCTION(db2_execute)
 						Z_STRLEN_P(tmp_curr->value) = strlen(Z_STRVAL_P(tmp_curr->value));
 
 					}
+					else if (Z_TYPE_P( tmp_curr->value ) == IS_STRING
+						&& tmp_curr->bind_indicator == SQL_NULL_DATA) {
+						if((tmp_curr->value)->value.str.val != NULL || (tmp_curr->value)->value.str.len != 0) {
+							efree((tmp_curr->value)->value.str.val);
+						}
+						Z_TYPE_P(tmp_curr->value) = IS_NULL;
+					}
 					else if (Z_TYPE_P(tmp_curr->value) == IS_LONG || Z_TYPE_P(tmp_curr->value) == IS_BOOL) {
 						/* bind in the value of long_value instead */
 						tmp_curr->value->value.lval = (long)tmp_curr->long_value;
@@ -4489,6 +4500,15 @@ PHP_FUNCTION(db2_next_result)
 			_php_db2_check_sql_errors(stmt_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
 			RETURN_FALSE;
 		}
+#ifdef PASEFORGETIT /* John Broich try SQLMoreResults (did not work though) */
+		rc = SQLMoreResults((SQLHSTMT)stmt_res->hstmt);
+		if( rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
+			return_value = stmt;
+		} else {
+			_php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+			RETURN_FALSE;
+		}
+#else /* LUW */
 		rc = SQLNextResult((SQLHSTMT)stmt_res->hstmt, (SQLHSTMT)new_hstmt);
 		if( rc != SQL_SUCCESS ) {
 			if(rc < SQL_SUCCESS) {
@@ -4518,6 +4538,7 @@ PHP_FUNCTION(db2_next_result)
 		new_stmt_res->hdbc = stmt_res->hdbc;
 
 		ZEND_REGISTER_RESOURCE(return_value, new_stmt_res, le_stmt_struct);
+#endif /* PASE */
 	} else {
 		RETURN_FALSE;
 	}
@@ -6758,6 +6779,9 @@ PHP_FUNCTION(db2_last_insert_id)
 /* {{{  static int _ibm_db_chaining_flag(stmt_handle *stmt_res, SQLINTEGER flag, error_msg_node *error_list, int client_err_cnt TSRMLS_DC)
  */
 static int _ibm_db_chaining_flag( stmt_handle *stmt_res, SQLINTEGER flag, error_msg_node *error_list, int client_err_cnt TSRMLS_DC ) {
+#ifdef PASE /* i5/OS unsupported */
+	return SQL_ERROR;
+#else /* LUW */
 	int rc;
 	rc = SQLSetStmtAttr((SQLHSTMT)stmt_res->hstmt, flag, (SQLPOINTER)SQL_TRUE, SQL_IS_INTEGER);
 	if ( flag == SQL_ATTR_CHAINING_BEGIN ) {
@@ -6793,6 +6817,7 @@ static int _ibm_db_chaining_flag( stmt_handle *stmt_res, SQLINTEGER flag, error_
 		}
 	}
 	return rc;
+#endif /* i5/OS unsupported */
 }
 /* }}} */
 
@@ -6821,6 +6846,9 @@ static void _build_client_err_list( error_msg_node *head_error_list, char *err_m
    execute a prepared statement */
 PHP_FUNCTION( db2_execute_many )
 {
+#ifdef PASE /* i5/OS unsupported */
+	RETURN_FALSE;
+#else /* LUW */
 	int argc = ZEND_NUM_ARGS();
 	int stmt_id = -1;
 	zval *stmt = NULL;
@@ -6983,6 +7011,7 @@ PHP_FUNCTION( db2_execute_many )
 		RETURN_FALSE;
 	}
 	RETURN_LONG(row_cnt);
+#endif /* i5/OS unsupported */
 }
 /* }}} */
 
