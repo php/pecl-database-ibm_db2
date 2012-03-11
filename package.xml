@@ -11,6 +11,12 @@ http://pear.php.net/dtd/package-2.0.xsd">
 Cloudscape, and Apache Derby databases.
  </description>
  <lead>
+  <name>Rahul Priyadarshi</name>
+  <user>rahulpriyadarshi</user>
+  <email>rahul.priyadarshi@in.ibm.com</email>
+  <active>yes</active>
+ </lead>
+ <lead>
   <name>Ambrish Bhargava</name>
   <user>ambrish</user>
   <email>abhargav@in.ibm.com</email>
@@ -22,11 +28,11 @@ Cloudscape, and Apache Derby databases.
   <email>opendev@us.ibm.com</email>
   <active>yes</active>
  </lead>
- <date>2011-08-23</date>
- <time>15:00:00</time>
+ <date>2012-03-12</date>
+ <time>12:10:00</time>
  <version>
-  <release>1.9.2</release>
-  <api>1.9.2</api>
+  <release>1.9.3</release>
+  <api>1.9.3</api>
  </version>
  <stability>
   <release>stable</release>
@@ -34,9 +40,10 @@ Cloudscape, and Apache Derby databases.
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-Added execute_many() API to execute batch.
-Fixed: Connection hanging issue.
-Fixed: Defect #20281 (Improve error reporting)
+  Fixed: Garbage value for VARCHAR type OUT variable of stored-procedure
+  Fixed: Compilation error with php-5.4.x
+  i5/OS: Remove compile errors during IBM i compiles due to chaining support
+  i5/OS: Allow use of V6+ (SQL_ATTR_INFO_ACCTSTR, SQL_ATTR_INFO_APPLNAME, SQL_ATTR_INFO_PROGRAMID, SQL_ATTR_INFO_USERID, SQL_ATTR_INFO_WRKSTNNAME connection attributes)
  </notes>
  <contents>
   <dir name="/">
