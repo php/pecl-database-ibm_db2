@@ -13,7 +13,7 @@ IBM-DB2: Call a stored procedure with IN and OUT parameters multiple times
                            LANGUAGE SQL
                            BEGIN
                              SET p4 = p1 + p2;
-                             SET p5 = '01/24/1982';
+                             SET p5 = '24.01.1982';
                            END" );
 
     db2_commit( $prepconn );
