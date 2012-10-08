@@ -17,22 +17,16 @@ Cloudscape, and Apache Derby databases.
   <active>yes</active>
  </lead>
  <lead>
-  <name>Ambrish Bhargava</name>
-  <user>ambrish</user>
-  <email>abhargav@in.ibm.com</email>
-  <active>yes</active>
- </lead>
- <lead>
   <name>IBM OpenDev</name>
   <user>kfbombar</user>
   <email>opendev@us.ibm.com</email>
   <active>yes</active>
  </lead>
- <date>2012-03-12</date>
- <time>12:10:00</time>
+ <date>2012-08-10</date>
+ <time>12:50:00</time>
  <version>
-  <release>1.9.3</release>
-  <api>1.9.3</api>
+  <release>1.9.4</release>
+  <api>1.9.4</api>
  </version>
  <stability>
   <release>stable</release>
@@ -40,10 +34,11 @@ Cloudscape, and Apache Derby databases.
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-  Fixed: Garbage value for VARCHAR type OUT variable of stored-procedure
-  Fixed: Compilation error with php-5.4.x
-  i5/OS: Remove compile errors during IBM i compiles due to chaining support
-  i5/OS: Allow use of V6+ (SQL_ATTR_INFO_ACCTSTR, SQL_ATTR_INFO_APPLNAME, SQL_ATTR_INFO_PROGRAMID, SQL_ATTR_INFO_USERID, SQL_ATTR_INFO_WRKSTNNAME connection attributes)
+  Fixed: DB2 PHP driver does not work as expected with values in BIGINT column
+  Added: test case test_bigint.phpt for BIGINT datatype
+  Fixed: Persistent connections takes up to 1 hour to reconnect on db2 TSA HA failover
+  FIxed: Fixed: Allow trial license to connect ZOS/i5
+  Added a environment variable IBM_DB_HOME to make the installation process easy and config script will automatically detect the architecure for which PHP is built and accordingly use the libraries under lib32/lib64.
  </notes>
  <contents>
   <dir name="/">
@@ -279,6 +274,7 @@ Cloudscape, and Apache Derby databases.
     <file baseinstalldir="ibm_db2" name="test_check_rollback.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_connect_deallocator.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_execute_many.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_bigint.phpt" role="test" />
    </dir> <!-- //tests -->
    <file baseinstalldir="ibm_db2" name="config.m4" role="src" />
    <file baseinstalldir="ibm_db2" name="config.w32" role="src" />

@@ -1711,7 +1711,6 @@ static int _php_db2_get_result_set_info(stmt_handle *stmt_res TSRMLS_DC)
 		} else {
 			stmt_res->column_info[i].name = (SQLCHAR *)estrdup(tmp_name);
 		}
-#ifdef PASE /* i5/OS size changes for "common" converts */
 		switch (stmt_res->column_info[i].type) {
 		        /* BIGINT 9223372036854775807  (2^63-1) string convert */
 			case SQL_BIGINT: 
@@ -1720,7 +1719,6 @@ static int _php_db2_get_result_set_info(stmt_handle *stmt_res TSRMLS_DC)
 			default:
 			    break;
 		}
-#endif /* PASE */
 #ifdef PASE /* i5/OS DBCS may have up to 6 times growth in column alloc size on convert */
 		if (stmt_res->s_i5_dbcs_alloc) {
 		    switch (stmt_res->column_info[i].type) {
@@ -2065,7 +2063,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 		} else {
 			/* Need to check for max pconnections? */
 		}
-		if (*pconn_res == NULL) {
+		if ((*pconn_res == NULL) || (reused == 0)) {
 			conn_res = *pconn_res =
 				(conn_handle *) (isPersistent ?  pecalloc(1, sizeof(conn_handle), 1) : ecalloc(1, sizeof(conn_handle)));
 		}
@@ -2172,7 +2170,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 						(SQLCHAR *)password, (SQLSMALLINT)password_len );
 			}
 
-			if ( rc != SQL_SUCCESS ) {
+			if ( rc == SQL_ERROR ) {
 				_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
 				SQLFreeHandle( SQL_HANDLE_DBC, conn_res->hdbc );
 				SQLFreeHandle(SQL_HANDLE_ENV, conn_res->henv);
@@ -2613,12 +2611,10 @@ PHP_FUNCTION(db2_bind_param)
 						sql_precision = (SQLUINTEGER)precision;
 					}
 				}
-#ifdef PASE /* i5/OS BIGINT to string too small */
 				else if((sql_data_type == SQL_BIGINT) && ((param_type == DB2_PARAM_OUT) || (param_type == DB2_PARAM_INOUT))) 
 				{
 					sql_precision = 20;
 				}
-#endif
 				/* Add to cache */
 				_php_db2_add_param_cache( stmt_res, (SQLUSMALLINT)param_no, varname, varname_len, param_type, sql_data_type, sql_precision, sql_scale, sql_nullable );
 				break;
@@ -2638,12 +2634,10 @@ PHP_FUNCTION(db2_bind_param)
 						sql_precision = 1048576;
 					}
 				}
-#ifdef PASE /* i5/OS BIGINT to string too small */
 				else if((sql_data_type == SQL_BIGINT) && ((param_type == DB2_PARAM_OUT) || (param_type == DB2_PARAM_INOUT))) 
 				{
 					sql_precision = 20;
 				}
-#endif
 				_php_db2_add_param_cache( stmt_res, (SQLUSMALLINT)param_no, varname, varname_len, param_type, sql_data_type, sql_precision, sql_scale, sql_nullable );
 				break;
 
@@ -3660,9 +3654,6 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 	MAKE_STD_ZVAL(curr->value);
 
 	switch ( curr->data_type ) {
-#ifndef PASE /* i5/OS int not big enough */
-		case SQL_BIGINT:
-#endif
 		case SQL_SMALLINT:
 		case SQL_INTEGER:
 		case SQL_REAL:
@@ -3670,9 +3661,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 		case SQL_DOUBLE:
 			break;
 
-#ifdef PASE /* i5/OS int not big enough */
 		case SQL_BIGINT:
-#endif
 		case SQL_CHAR:
 		case SQL_VARCHAR:
 		case SQL_WCHAR:
