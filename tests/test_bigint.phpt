@@ -68,7 +68,8 @@ if ($conn) {
           print "\n";
         }
     }
-}  
+}
+
 ?>
 
 --EXPECT--
