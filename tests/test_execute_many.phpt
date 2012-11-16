@@ -48,7 +48,8 @@ if ($conn) {
                 array(50, 'Hanes'), 
                 array(55, ), 
                 array('60', 'invalid row'), 
-                array( 65, 'Quigley') );
+                array( 65, 'Quigley'),
+                array( 70, NULL));
                 
     $effected_rows = db2_execute_many($stmt_insert, $params);
     
@@ -74,4 +75,4 @@ int(40)
 string(6) "OBrien"
 ERROR 1: Value parameters array 2 has less number of parameteres
 ERROR 2: Value parameters array 3 is not homogeneous with privious parameters array
-Number of effected rows are: 2
+Number of effected rows are: 3
