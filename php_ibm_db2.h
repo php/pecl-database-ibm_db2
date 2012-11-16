@@ -36,6 +36,11 @@ extern zend_module_entry ibm_db2_module_entry;
 #include <stdlib.h>
 #include <sqlcli1.h>
 
+/* Needed for backward compatibility (IS_INTERNED not defined prior to PHP-5.4) */
+#ifndef IS_INTERNED
+#define IS_INTERNED(s) (0)
+#endif
+
 /* needed for backward compatibility (SQL_XML not defined prior to DB2 v9) */
 #ifndef SQL_XML
 #define SQL_XML -370
