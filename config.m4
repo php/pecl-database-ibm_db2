@@ -20,7 +20,7 @@ dnl [  --enable-IBM_DB2           Enable IBM_DB2 support])
 if test "$PHP_IBM_DB2" != "no"; then
   dnl # checking php 32/64 bit php
   AC_MSG_CHECKING(PHP)
-  if test `php -r 'echo PHP_INT_SIZE;'` == 8; then
+  if test `php -r 'echo PHP_INT_SIZE;'` = 8; then
     machine_bits=64
     libDir=lib64
     AC_MSG_RESULT(Detected 64-bit PHP)

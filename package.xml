@@ -22,11 +22,11 @@ Cloudscape, and Apache Derby databases.
   <email>opendev@us.ibm.com</email>
   <active>yes</active>
  </lead>
- <date>2012-08-10</date>
- <time>12:50:00</time>
+ <date>2012-11-16</date>
+ <time>12:02:00</time>
  <version>
-  <release>1.9.4</release>
-  <api>1.9.4</api>
+  <release>1.9.5</release>
+  <api>1.9.5</api>
  </version>
  <stability>
   <release>stable</release>
@@ -34,11 +34,8 @@ Cloudscape, and Apache Derby databases.
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-  Fixed: DB2 PHP driver does not work as expected with values in BIGINT column
-  Added: test case test_bigint.phpt for BIGINT datatype
-  Fixed: Persistent connections takes up to 1 hour to reconnect on db2 TSA HA failover
-  FIxed: Fixed: Allow trial license to connect ZOS/i5
-  Added a environment variable IBM_DB_HOME to make the installation process easy and config script will automatically detect the architecure for which PHP is built and accordingly use the libraries under lib32/lib64.
+  Fixed: Segfault due to INTERNED strings in PHP-5.4.x
+  Enhanced: execute_many API to accept NULL mixed with other values.
  </notes>
  <contents>
   <dir name="/">
