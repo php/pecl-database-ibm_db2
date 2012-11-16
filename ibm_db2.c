@@ -49,6 +49,7 @@ static void _php_db2_assign_options( void* handle, int type, char* opt_key, zval
 static int _php_db2_parse_options( zval* options, int type, void* handle TSRMLS_DC );
 static void _php_db2_clear_conn_err_cache(TSRMLS_D);
 static void _php_db2_clear_stmt_err_cache(TSRMLS_D);
+static void _php_db2_clear_exec_many_err_cache(void* handle);
 static void _php_db2_set_decfloat_rounding_mode_client(void* handle TSRMLS_DC);
 static char * _php_db2_instance_name;
 static int is_ios, is_zos;		/* 1 == TRUE; 0 == FALSE; */
@@ -402,6 +403,7 @@ static void _php_db2_free_result_struct(stmt_handle* handle)
 	param_node *curr_ptr = NULL, *prev_ptr = NULL;
 
 	if ( handle != NULL ) {
+		_php_db2_clear_exec_many_err_cache(handle);
 		/* Free param cache list */
 		curr_ptr = handle->head_cache_list;
 		prev_ptr = handle->head_cache_list;
@@ -1976,11 +1978,11 @@ static void _php_db2_clear_stmt_err_cache(TSRMLS_D)
 
 /* {{{ static void _php_db2_clear_exec_many_err_cache (TSRMLS_D)
  */
-static void _php_db2_clear_exec_many_err_cache( stmt_handle *stmt )
+static void _php_db2_clear_exec_many_err_cache( void *stmt )
 {
-	if ( stmt->exec_many_err_msg != NULL ) {
-		efree(stmt->exec_many_err_msg);
-		stmt->exec_many_err_msg = NULL;
+	if ( ((stmt_handle*)stmt)->exec_many_err_msg != NULL ) {
+		efree(((stmt_handle*)stmt)->exec_many_err_msg);
+		((stmt_handle*)stmt)->exec_many_err_msg = NULL;
 	}
 }
 /* }}} */
@@ -3703,6 +3705,9 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 			}
 			if (curr->param_type == DB2_PARAM_OUT || curr->param_type == DB2_PARAM_INOUT) {
 				int origlen = Z_STRLEN_PP(bind_data);
+				if (IS_INTERNED((*bind_data)->value.str.val)) {
+					Z_STRVAL_PP(bind_data) = estrndup(Z_STRVAL_PP(bind_data), origlen);
+				}
 				if (Z_STRLEN_PP(bind_data) < curr->param_size+nullterm) {
 					Z_STRVAL_PP(bind_data) = erealloc(Z_STRVAL_PP(bind_data), curr->param_size+nullterm);
 					if (Z_STRVAL_PP(bind_data) == NULL ) {
@@ -3712,8 +3717,11 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 					if (curr->param_type == DB2_PARAM_INOUT)
 #endif
 						memset(Z_STRVAL_PP(bind_data)+origlen,0x20, curr->param_size-origlen);
-					if (nullterm) Z_STRVAL_PP(bind_data)[origlen] = '\0';
-						Z_STRLEN_PP(bind_data) = curr->param_size;
+					if (nullterm) {
+						Z_STRVAL_PP(bind_data)[origlen] = '\0';
+						Z_STRVAL_PP(bind_data)[curr->param_size] = '\0';
+					}
+					Z_STRLEN_PP(bind_data) = curr->param_size;
 				}
 #ifdef PASE /* help out PHP script trunc trailing chars -- LUW too? */
 				else if (Z_STRLEN_PP(bind_data) > curr->param_size) {
@@ -3723,6 +3731,9 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 			}
 #ifdef PASE /* zero length valueType = SQL_C_CHAR bad for i5/OS SQLBindParameter */
 			else if (Z_STRLEN_PP(bind_data) == 0) {
+				if (IS_INTERNED((*bind_data)->value.str.val)) {
+					Z_STRVAL_PP(bind_data) = estrndup(Z_STRVAL_PP(bind_data), Z_STRLEN_PP(bind_data));
+				}
 				Z_TYPE_PP(bind_data) = IS_STRING;
 				Z_STRVAL_PP(bind_data) = erealloc(Z_STRVAL_PP(bind_data), curr->param_size+nullterm);
 				memset(Z_STRVAL_PP(bind_data), 0x20, curr->param_size+nullterm);
@@ -3761,6 +3772,9 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 		case SQL_TYPE_TIMESTAMP:
 			if (curr->param_type == DB2_PARAM_OUT || curr->param_type == DB2_PARAM_INOUT) {
 				int origlen = Z_STRLEN_PP(bind_data);
+				if (IS_INTERNED((*bind_data)->value.str.val)) {
+					Z_STRVAL_PP(bind_data) = estrndup(Z_STRVAL_PP(bind_data), Z_STRLEN_PP(bind_data));
+				}
 				if (Z_STRLEN_PP(bind_data) < curr->param_size + 1) {
 					Z_STRVAL_PP(bind_data) = erealloc(Z_STRVAL_PP(bind_data), curr->param_size + 1);
 					if (Z_STRVAL_PP(bind_data) == NULL ) {
@@ -3774,6 +3788,9 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 			}
 #ifdef PASE /* zero length valueType = SQL_C_CHAR bad for i5/OS SQLBindParameter */
 			else if (Z_STRLEN_PP(bind_data) == 0) {
+				if (IS_INTERNED((*bind_data)->value.str.val)) {
+					Z_STRVAL_PP(bind_data) = estrndup(Z_STRVAL_PP(bind_data), Z_STRLEN_PP(bind_data));
+				}
 				Z_STRVAL_PP(bind_data) = erealloc(Z_STRVAL_PP(bind_data), curr->param_size + 1);
 				memset(Z_STRVAL_PP(bind_data), 0x20, curr->param_size + 1);
 				Z_STRVAL_PP(bind_data)[curr->param_size] = '\0';
@@ -3789,7 +3806,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 
 	/* copy data over from bind_data */
 	*(curr->value) = **bind_data;
-    zval_copy_ctor(curr->value);
+	zval_copy_ctor(curr->value);
 	INIT_PZVAL(curr->value);
 
 	/* Have to use SQLBindFileToParam if PARAM is type DB2_PARAM_FILE */
@@ -3932,9 +3949,10 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 
 		case IS_NULL:
 			Z_LVAL_P(curr->value) = SQL_NULL_DATA;
+			Z_TYPE_P(curr->value) = IS_NULL;
 			rc = SQLBindParameter(stmt_res->hstmt, curr->param_num,
 					curr->param_type, SQL_C_DEFAULT, curr->data_type, curr->param_size,
-					curr->scale, &(curr->value), 0, &((curr->value)->value.lval));
+					curr->scale, &(curr->value), 0, (SQLLEN *)&((curr->value)->value.lval));
 			if ( rc == SQL_ERROR ) {
 				_php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
 			}
@@ -4053,6 +4071,41 @@ static int _php_db2_execute_helper(stmt_handle *stmt_res, zval **data, int bind_
 		}
 	}
 	return rc;
+}
+/* }}} */
+
+/* {{{ static void _free_param_cache_list(stmt_handle *stmt_res)
+ */
+static void _free_param_cache_list(stmt_handle *stmt_res) {
+	param_node *prev_ptr = NULL, *curr_ptr = NULL;
+
+	curr_ptr = stmt_res->head_cache_list;
+	prev_ptr = stmt_res->head_cache_list;
+	/* Free param cache list */
+	while (curr_ptr != NULL) {
+		curr_ptr = curr_ptr->next;
+
+		/* Free Values */
+		if (prev_ptr->value != NULL) {
+			if ( Z_TYPE_P(prev_ptr->value) == IS_STRING ) {
+				if((prev_ptr->value)->value.str.val != NULL || (prev_ptr->value)->value.str.len != 0) {
+					if (!IS_INTERNED((prev_ptr->value)->value.str.val)) {
+						efree((prev_ptr->value)->value.str.val);
+					}
+				}
+			}
+
+			if( prev_ptr->param_type != DB2_PARAM_OUT && prev_ptr->param_type != DB2_PARAM_INOUT ){
+				efree(prev_ptr->value);
+			}
+		}
+		efree(prev_ptr);
+
+		prev_ptr = curr_ptr;
+	}
+
+	stmt_res->head_cache_list = NULL;
+	stmt_res->num_params = 0;
 }
 /* }}} */
 
@@ -4229,31 +4282,7 @@ PHP_FUNCTION(db2_execute)
 	/* cleanup dynamic bindings if present */
 	if ( bind_params == 1 ) {
 		/* Free param cache list */
-		curr_ptr = stmt_res->head_cache_list;
-		prev_ptr = stmt_res->head_cache_list;
-
-		while (curr_ptr != NULL) {
-			curr_ptr = curr_ptr->next;
-
-			/* Free Values */
-			if (prev_ptr->value != NULL) {
-				if ( Z_TYPE_P(prev_ptr->value) == IS_STRING ) {
-					if((prev_ptr->value)->value.str.val != NULL || (prev_ptr->value)->value.str.len != 0) {
-						efree((prev_ptr->value)->value.str.val);
-					}
-				}
-
-				if( prev_ptr->param_type != DB2_PARAM_OUT && prev_ptr->param_type != DB2_PARAM_INOUT ){
-					efree(prev_ptr->value);
-				}
-			}
-			efree(prev_ptr);
-
-			prev_ptr = curr_ptr;
-		}
-
-		stmt_res->head_cache_list = NULL;
-		stmt_res->num_params = 0;
+		_free_param_cache_list(stmt_res);
 	} else {
 #if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3
 		/* ADC - PHP changed general behavior 5.3+ */
@@ -6847,7 +6876,7 @@ PHP_FUNCTION( db2_execute_many )
 	error_msg_node *head_error_list = NULL;
 
 	int rc;
-	int i = 0;
+	int i = 0, j = 0;
 	SQLSMALLINT numOpts = 0;
 	int numOfRows = 0;
 	int numOfParam = 0;
@@ -6874,6 +6903,7 @@ PHP_FUNCTION( db2_execute_many )
 	}
 
 	ZEND_FETCH_RESOURCE(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
+	_php_db2_clear_exec_many_err_cache(stmt_res);
 
 	/* Free any cursor that might have been allocated in a previous call to SQLExecute */
 	SQLFreeStmt((SQLHSTMT)stmt_res->hstmt, SQL_CLOSE);
@@ -6883,12 +6913,17 @@ PHP_FUNCTION( db2_execute_many )
 	rc = SQLNumParams((SQLHSTMT)stmt_res->hstmt, (SQLSMALLINT*)&numOpts);
 	data_type = (SQLSMALLINT*)ecalloc(numOpts, sizeof(SQLSMALLINT));
 	array_data_type = (SQLSMALLINT*)ecalloc(numOpts, sizeof(SQLSMALLINT));
+	for ( i = 0; i < numOpts; i++) {
+		array_data_type[i] = -1;
+	}
 	if ( numOpts != 0 ) {
 		for ( i = 0; i < numOpts; i++ ) {
 			rc = SQLDescribeParam((SQLHSTMT)stmt_res->hstmt, i + 1, (SQLSMALLINT*)(data_type + i), &precision, (SQLSMALLINT*)&scale, (SQLSMALLINT*)&nullable);
 			if ( rc == SQL_ERROR ) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Describe Param %d Failed", i + 1);
 				_php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				efree(array_data_type);
+				efree(data_type);
 				RETURN_FALSE;
 			}
 			_php_db2_build_list( stmt_res, i + 1, data_type[i], precision, scale, nullable );
@@ -6900,7 +6935,7 @@ PHP_FUNCTION( db2_execute_many )
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(params));
 	head_error_list = (error_msg_node*)ecalloc(1, sizeof(error_msg_node));
 	head_error_list->next = NULL;
-	if ( numOfRows != 0 ) {
+	if ( numOfRows > 0 ) {
 		for ( i = 0; i < numOfRows; i++ ) {
 			param_node *curr = NULL;
 			zval **params_array = NULL;
@@ -6944,18 +6979,88 @@ PHP_FUNCTION( db2_execute_many )
 				}
 				
 				if ( chaining_start ) {
-					if ( array_data_type[curr->param_num -1] != Z_TYPE_PP(data) ) {
+					if ( ( Z_TYPE_PP(data) != IS_NULL ) && ( array_data_type[curr->param_num -1] != Z_TYPE_PP(data) ) ) {
 						sprintf(error, "Value parameters array %d is not homogeneous with privious parameters array", i + 1);
 						_build_client_err_list(head_error_list, error);
 						err_count++;
 						break;
 					}
 				} else {
-					array_data_type[curr->param_num -1] = Z_TYPE_PP(data);
+					if ( Z_TYPE_PP(data) != IS_NULL ) {
+						array_data_type[curr->param_num -1] = Z_TYPE_PP(data);
+						j++;
+					} else {
+						int tmp_j = 0;
+						zend_hash_move_forward(Z_ARRVAL_P(params));
+						while ( zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&params_array) == SUCCESS ) {
+							zend_hash_internal_pointer_reset(Z_ARRVAL_PP(params_array));
+							for ( tmp_j = 0; tmp_j <= j; tmp_j++ ) {
+								zend_hash_move_forward(Z_ARRVAL_PP(params_array));
+							}
+							zend_hash_get_current_data(Z_ARRVAL_PP(params_array), (void**)&data);
+							if ( ( data != NULL ) && ( Z_TYPE_PP(data) != IS_NULL ) ) {
+								array_data_type[curr->param_num -1] = Z_TYPE_PP(data);
+								j++;
+								break;
+							} else {
+								zend_hash_move_forward(Z_ARRVAL_P(params));
+								continue;
+							}
+						}
+						if ( array_data_type[curr->param_num -1] == -1 ) {
+							array_data_type[curr->param_num -1] = IS_NULL;
+						}
+						zend_hash_internal_pointer_reset(Z_ARRVAL_P(params));
+						zend_hash_get_current_data(Z_ARRVAL_P(params), (void **)&params_array);
+						zend_hash_internal_pointer_reset(Z_ARRVAL_PP(params_array));
+						for ( tmp_j = 0; tmp_j < j; tmp_j++ ) {
+							zend_hash_move_forward(Z_ARRVAL_PP(params_array));
+						}
+						zend_hash_get_current_data(Z_ARRVAL_PP(params_array), (void**)&data);
+					}
 				}
 
 				curr->data_type = data_type[curr->param_num -1];
-				rc = _php_db2_bind_data(stmt_res, curr, data TSRMLS_CC);
+				if ( Z_TYPE_PP(data) != IS_NULL ) {
+					rc = _php_db2_bind_data(stmt_res, curr, data TSRMLS_CC);
+				} else {
+					SQLSMALLINT valueType = 0;
+					switch ( array_data_type[curr->param_num -1] ) {
+						case IS_BOOL:
+						case IS_LONG:
+							if ( curr->data_type == SQL_BIGINT ) {
+								valueType = SQL_C_CHAR;
+							} else {
+								valueType = SQL_C_LONG;
+							}
+							break;
+						case IS_DOUBLE:
+							valueType = SQL_C_DOUBLE;
+							break;
+						case IS_STRING:
+							switch ( curr->data_type ) {
+								case SQL_BLOB:
+								case SQL_BINARY:
+								case SQL_LONGVARBINARY:
+								case SQL_VARBINARY:
+								case SQL_XML:
+									valueType = SQL_C_BINARY;
+									break;
+								case SQL_CLOB:
+								case SQL_DBCLOB:
+								case SQL_VARCHAR:
+								case SQL_BIGINT:
+								default:
+									valueType = SQL_C_CHAR;
+							}
+							break;
+						case IS_NULL:
+							valueType = SQL_C_DEFAULT;
+					}
+					Z_LVAL_P(curr->value) = SQL_NULL_DATA;
+					Z_TYPE_P(curr->value) = IS_NULL;
+					rc = SQLBindParameter(stmt_res->hstmt, curr->param_num, curr->param_type, valueType, curr->data_type, curr->param_size, curr->scale, &(curr->value), 0, (SQLLEN *)&((curr->value)->value.lval));
+				}
 				if ( rc == SQL_ERROR ) {
 					sprintf(error, "Binding Error1 : %s", IBM_DB2_G(__php_stmt_err_msg));
 					_build_client_err_list(head_error_list, error);
@@ -6965,12 +7070,20 @@ PHP_FUNCTION( db2_execute_many )
 				zend_hash_move_forward(Z_ARRVAL_PP(params_array));
 				curr = curr->next;
 			}
-			
 	 		if ( !chaining_start && (error[0] == '\0' ) ) {
 				/* Set statement attribute SQL_ATTR_CHAINING_BEGIN */
 				rc = _ibm_db_chaining_flag(stmt_res, SQL_ATTR_CHAINING_BEGIN, NULL, 0 TSRMLS_CC);
 				chaining_start = 1;
 				if ( rc != SQL_SUCCESS ) {
+					error_msg_node *tmp_err_node;
+					while ( head_error_list != NULL ) {
+						tmp_err_node = head_error_list;
+						head_error_list = head_error_list->next;
+						efree(tmp_err_node);
+					}
+					_free_param_cache_list(stmt_res);
+					efree(array_data_type);
+					efree(data_type);
 					RETURN_FALSE;
 				}
 			}
@@ -6980,12 +7093,18 @@ PHP_FUNCTION( db2_execute_many )
 			}
 			zend_hash_move_forward(Z_ARRVAL_P(params));
 		}
+	} else {
+		RETURN_LONG(0);
 	}
+	_free_param_cache_list(stmt_res);
+	efree(array_data_type);
+	efree(data_type);
 
 	/* Set statement attribute SQL_ATTR_CHAINING_END */
 	rc = SQL_ERROR;
 	if ( chaining_start ) {
 		rc = _ibm_db_chaining_flag(stmt_res, SQL_ATTR_CHAINING_END, head_error_list->next, err_count TSRMLS_CC);
+		efree(head_error_list);
 	}
 
 	if ( rc != SQL_SUCCESS || err_count != 0 ) {
