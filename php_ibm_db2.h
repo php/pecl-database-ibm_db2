@@ -1,7 +1,7 @@
 /*
 
   +----------------------------------------------------------------------+
-  | Copyright IBM Corporation 2005-2008                                  |
+  | Copyright IBM Corporation 2005-2014                                  |
   +----------------------------------------------------------------------+
   |                                                                      |
   | Licensed under the Apache License, Version 2.0 (the "License"); you  |
@@ -23,7 +23,7 @@
   $Id$
 */
 
-#define	PHP_IBM_DB2_VERSION	"1.9.5"
+#define	PHP_IBM_DB2_VERSION	"1.9.6"
 
 #ifndef PHP_IBM_DB2_H
 #define PHP_IBM_DB2_H
@@ -39,6 +39,11 @@ extern zend_module_entry ibm_db2_module_entry;
 /* Needed for backward compatibility (IS_INTERNED not defined prior to PHP-5.4) */
 #ifndef IS_INTERNED
 #define IS_INTERNED(s) (0)
+#endif
+
+/* Needed for backward compatibility (SQL_ATTR_DBC_SYS_NAMING not defined prior to DB2 10.1.0.2) */
+#ifndef SQL_ATTR_DBC_SYS_NAMING
+#define SQL_ATTR_DBC_SYS_NAMING 3017
 #endif
 
 /* needed for backward compatibility (SQL_XML not defined prior to DB2 v9) */
@@ -129,14 +134,14 @@ extern zend_module_entry ibm_db2_module_entry;
 #endif
 
 /*** new set options */
+#define DB2_I5_NAMING_ON  SQL_TRUE
+#define DB2_I5_NAMING_OFF SQL_FALSE
 #ifdef PASE
 #define  SQL_BINARY_V6          -2
 #define  SQL_VARBINARY_V6       -3
 #define  SQL_C_BINARY_V6	SQL_BINARY_V6
 #define DB2_I5_FETCH_ON SQL_TRUE
 #define DB2_I5_FETCH_OFF SQL_FALSE
-#define DB2_I5_NAMING_ON  SQL_TRUE
-#define DB2_I5_NAMING_OFF SQL_FALSE
 #define DB2_I5_JOB_SORT_ON  SQL_TRUE
 #define DB2_I5_JOB_SORT_OFF SQL_FALSE
 #define DB2_I5_DBCS_ALLOC_ON  SQL_TRUE

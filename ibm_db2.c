@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright IBM Corporation 2005-2008                                  |
+  | Copyright IBM Corporation 2005-2014                                  |
   +----------------------------------------------------------------------+
   |                                                                      |
   | Licensed under the Apache License, Version 2.0 (the "License"); you  |
@@ -119,6 +119,7 @@ typedef struct _conn_handle_struct {
 	SQLSMALLINT errormsg_recno_tracker;
 	int flag_pconnect; /* Indicates that this connection is persistent */
 	int flag_transaction; /* Indicates that transaction is commited */
+	int expansion_factor; /* Maximum expected expansion factor for the length of mixed character data when converted to the application code page from datavase code page */
 } conn_handle;
 
 typedef union {
@@ -174,6 +175,8 @@ typedef struct _stmt_handle_struct {
 	db2_result_set_info *column_info;
 	db2_row_type *row_data;
 	char *exec_many_err_msg;
+	int expansion_factor;			/* maximum expected expansion factor for the length of mixed character data */
+						/* when converted to the application code page from the database code page*/
 } stmt_handle;
 
 
@@ -496,6 +499,8 @@ static stmt_handle *_db2_new_stmt_struct(conn_handle* conn_res)
 	stmt_res->s_i5_sys_naming   = conn_res->c_i5_sys_naming;
 #endif /* PASE */
 
+	stmt_res->expansion_factor = conn_res->expansion_factor;
+
 	stmt_res->head_cache_list = NULL;
 	stmt_res->current_node = NULL;
 
@@ -543,12 +548,12 @@ PHP_MINIT_FUNCTION(ibm_db2)
 #endif
 
 	ZEND_INIT_MODULE_GLOBALS(ibm_db2, php_ibm_db2_init_globals, NULL);
+	REGISTER_LONG_CONSTANT("DB2_I5_NAMING_ON",  SQL_TRUE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DB2_I5_NAMING_OFF", SQL_FALSE, CONST_CS | CONST_PERSISTENT);
 
 #ifdef PASE /* i5OS db2_setoptions */
 	REGISTER_LONG_CONSTANT("DB2_I5_FETCH_ON", SQL_TRUE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DB2_I5_FETCH_OFF", SQL_FALSE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DB2_I5_NAMING_ON",  SQL_TRUE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DB2_I5_NAMING_OFF", SQL_FALSE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DB2_I5_JOB_SORT_ON",  SQL_TRUE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DB2_I5_JOB_SORT_OFF", SQL_FALSE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DB2_I5_DBCS_ALLOC_ON",  SQL_TRUE, CONST_CS | CONST_PERSISTENT);
@@ -682,7 +687,8 @@ static int _php_ibm_db2_conn (zend_rsrc_list_entry *le TSRMLS_DC)
 PHP_RSHUTDOWN_FUNCTION (ibm_db2) 
 {
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) _php_ibm_db2_conn TSRMLS_CC);
-
+	_php_db2_clear_conn_err_cache(TSRMLS_C);
+	_php_db2_clear_stmt_err_cache(TSRMLS_C);
 	return SUCCESS;
 }
 /* }}} */
@@ -1277,6 +1283,28 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 			default:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "DB2_ATTR_CASE attribute can only be set on connection or statement resources");
 		}
+	} else if (!STRCASECMP(opt_key, "i5_naming")) {
+		   /* i5_naming - SQL_ATTR_DBC_SYS_NAMING
+		      DB2_I5_NAMING_ON value turns on DB2 UDB CLI iSeries system naming mode. Files are qualified using the slash (/) delimiter. Unqualified files are resolved using the library list for the job..
+		      DB2_I5_NAMING_OFF value turns off DB2 UDB CLI default naming mode, which is SQL naming. Files are qualified using the period (.) delimiter. Unqualified files are resolved using either the default library or the current user ID.
+		    */
+		pvParam = option_num;
+		switch (option_num) {
+			case DB2_I5_NAMING_ON:
+			case DB2_I5_NAMING_OFF:
+#ifdef PASE
+				((conn_handle*)handle)->c_i5_sys_naming = option_num;
+				rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_DBC_SYS_NAMING, (SQLPOINTER)&pvParam, SQL_NTS);
+#else
+				rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_DBC_SYS_NAMING, (SQLPOINTER)pvParam, SQL_NTS);
+#endif
+				if ( rc == SQL_ERROR ) {
+					_php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				}
+				break;
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_naming attribute must be DB2_I5_NAMING_ON or DB2_I5_NAMING_OFF)");
+		}
 #ifdef PASE  /* i5/OS new set options */
 	} else if (!STRCASECMP(opt_key, "i5_lib")) {
           /* i5_lib - SQL_ATTR_DBC_DEFAULT_LIB
@@ -1320,24 +1348,6 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_libl missing library list");
 	    }
-	} else if (!STRCASECMP(opt_key, "i5_naming")) {
-		/* i5_naming - SQL_ATTR_DBC_SYS_NAMING
-		DB2_I5_NAMING_ON value turns on DB2 UDB CLI iSeries system naming mode. Files are qualified using the slash (/) delimiter. Unqualified files are resolved using the library list for the job..
-		DB2_I5_NAMING_OFF value turns off DB2 UDB CLI default naming mode, which is SQL naming. Files are qualified using the period (.) delimiter. Unqualified files are resolved using either the default library or the current user ID.
-		*/
-	    pvParam = option_num;
-	    switch (option_num) {
-			case DB2_I5_NAMING_ON:
-			case DB2_I5_NAMING_OFF:
-				((conn_handle*)handle)->c_i5_sys_naming = option_num;
-				rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_DBC_SYS_NAMING, (SQLPOINTER)&pvParam, SQL_NTS);
-				if ( rc == SQL_ERROR ) {
-					_php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
-				}
-				break;
-			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_naming (DB2_I5_NAMING_ON, DB2_I5_NAMING_OFF)");
-		}
 	} else if (!STRCASECMP(opt_key, "i5_job_sort")) {
 		/* i5_job_sort - SQL_ATTR_JOB_SORT_SEQUENCE (conn is hidden 10046)
 		DB2_I5_JOB_SORT_ON value turns on DB2 UDB CLI job sort mode. 
@@ -1777,7 +1787,12 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res TSRMLS_DC)
 			case SQL_LONGVARGRAPHIC:
 #endif /* PASE */
 				target_type = SQL_C_CHAR;
-				in_length = stmt_res->column_info[i].size+1;
+				/* Multiply the size by expansion factor to handle cases where client and server code page are different*/
+				if (stmt_res->expansion_factor > 1 ){
+					in_length = stmt_res->column_info[i].size * stmt_res->expansion_factor + 1;
+				} else {
+					in_length = stmt_res->column_info[i].size+1;
+				}
 				row_data->str_val = (SQLCHAR *)ecalloc(1, in_length);
 
 				rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
@@ -2013,6 +2028,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 	int conn_null = 0;
 	int conn_was_pclose=0;
 #endif /* PASE */
+	struct sqlca sqlca;
 
 	conn_alive = 1;
 
@@ -2177,6 +2193,20 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 				SQLFreeHandle( SQL_HANDLE_DBC, conn_res->hdbc );
 				SQLFreeHandle(SQL_HANDLE_ENV, conn_res->henv);
 				break;
+			}
+
+			/* Get maximum expected expansion factor for the length of mixed character data when converted to the */
+			/* application code page from the database code page*/
+			rc = SQLGetSQLCA((SQLHENV) conn_res->henv, (SQLHDBC) conn_res->hdbc, SQL_NULL_HSTMT, &sqlca);
+
+			if ( rc == SQL_ERROR ) {
+				_php_db2_check_sql_errors(conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
+				SQLDisconnect((SQLHDBC)conn_res->hdbc);
+				SQLFreeHandle( SQL_HANDLE_DBC, conn_res->hdbc );
+				SQLFreeHandle(SQL_HANDLE_ENV, conn_res->henv);
+				break;
+			} else {
+				conn_res->expansion_factor = sqlca.sqlerrd[1];	
 			}
 
 			/* Get the AUTOCOMMIT state from the CLI driver as cli driver could have changed autocommit status based on it's
@@ -3649,6 +3679,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 	SQLSMALLINT valueType;
 	SQLPOINTER  paramValuePtr;
 	int nullterm = 0;
+	int origlen = -1;
 
 	/* Clean old zval value and create a new one */
 	if( curr->value != 0 && curr->param_type != DB2_PARAM_OUT && curr->param_type != DB2_PARAM_INOUT )
@@ -3704,7 +3735,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 				convert_to_string(*bind_data);
 			}
 			if (curr->param_type == DB2_PARAM_OUT || curr->param_type == DB2_PARAM_INOUT) {
-				int origlen = Z_STRLEN_PP(bind_data);
+				origlen = Z_STRLEN_PP(bind_data);
 				if (IS_INTERNED((*bind_data)->value.str.val)) {
 					Z_STRVAL_PP(bind_data) = estrndup(Z_STRVAL_PP(bind_data), origlen);
 				}
@@ -3856,7 +3887,11 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 				case SQL_CLOB:
 				case SQL_DBCLOB:
 					if (curr->param_type == DB2_PARAM_OUT || curr->param_type == DB2_PARAM_INOUT) {
-						curr->bind_indicator = (curr->value)->value.str.len;
+						if (origlen != -1) {
+							 curr->bind_indicator = origlen;
+						} else {
+							curr->bind_indicator = (curr->value)->value.str.len;
+						}
 						valueType = SQL_C_CHAR;
 						paramValuePtr = (SQLPOINTER)((curr->value)->value.str.val);
 					} else {
@@ -3869,7 +3904,11 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 
 				case SQL_BLOB:
 					if (curr->param_type == DB2_PARAM_OUT || curr->param_type == DB2_PARAM_INOUT) {
-						curr->bind_indicator = (curr->value)->value.str.len;
+						if (origlen != -1) {
+							curr->bind_indicator = origlen;
+						} else {
+							curr->bind_indicator = (curr->value)->value.str.len;
+						}
 #ifdef PASE /* i5/OS V6R1 incompatible change */
 						if (is_i5os_classic){
 							valueType = SQL_C_BINARY;
@@ -3907,7 +3946,11 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 				case SQL_VARBINARY:
 				case SQL_XML:
 					/* account for bin_mode settings as well */
-					curr->bind_indicator = (curr->value)->value.str.len;
+					if (origlen != -1) {
+						curr->bind_indicator = origlen;
+					} else {	
+						curr->bind_indicator = (curr->value)->value.str.len;
+					}
 #ifdef PASE /* i5/OS V6R1 incompatible change */
 					if (is_i5os_classic){
 						valueType = SQL_C_BINARY;
@@ -6589,7 +6632,8 @@ PHP_FUNCTION(db2_lob_read)
 	zval *stmt = NULL;
 	stmt_handle *stmt_res;
 	int rc, i = 0;
-	SQLINTEGER out_length, length=BUFSIZ, colnum = 1;
+	SQLINTEGER out_length;
+   	long length=BUFSIZ, colnum = 1;
 	void *out_ptr = NULL;
 
 	/* Parse out the parameters */
