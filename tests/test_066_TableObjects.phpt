@@ -1,7 +1,7 @@
 --TEST--
 IBM-DB2: db2_tables() - Play with table objects
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require_once('skipif3.inc'); ?>
 --FILE--
 <?php
 
@@ -9,13 +9,39 @@ require_once('connection.inc');
 
 $conn = db2_connect($database, $user, $password);
 
+$server = db2_server_info( $conn );
+
 $result = db2_tables($conn, NULL, strtoupper($user), 'ANIM%');
 
+$t[0]=""; $t[1]=""; $t[2]=""; $t[3]="";
 while ($row = db2_fetch_object($result)) {
-    echo 'Schema:  ' . $row->TABLE_SCHEM . "\n";
-    echo 'Name:    ' . $row->TABLE_NAME . "\n";
-    echo 'Type:    ' . $row->TABLE_TYPE . "\n";
-    echo 'Remarks: ' . $row->REMARKS . "\n\n";
+	$output = 
+    	'Schema:  ' . $row->TABLE_SCHEM . "\n"
+    	. 'Name:    ' . $row->TABLE_NAME . "\n"
+    	. 'Type:    ' . $row->TABLE_TYPE . "\n"
+    	. 'Remarks: ' . $row->REMARKS . "\n\n";
+	if ($server->DBMS_NAME == 'AS') {
+		switch ($row->TABLE_NAME) {
+			case 'ANIMALS':
+				$t[0].=$output;
+				break;
+			case 'ANIMAL_PICS':
+				$t[1].=$output;
+				break;
+			case 'ANIME_CAT':
+				$t[2].=$output;
+				break;
+			default:
+				$t[3].=$output;
+				break;
+		}
+	} else {
+    	echo $output;
+	}
+}
+
+if ($server->DBMS_NAME == 'AS') {
+	foreach ($t as $item) echo $item;
 }
 
 db2_free_result($result);

@@ -236,10 +236,12 @@ IBM-DB2: check for connect deallocator functioning to rollback and disconnect if
     verifycase3();
     case4();
     verifycase4();
+    /*
     case5();
     verifycase5();
     case6();
     verifycase6();
+    */
     cleanup();
   }
 
@@ -250,5 +252,3 @@ Test case 1 is successful
 Test case 2 is successful
 Test case 3 is successful
 Test case 4 is successful
-Test case 5 is successful
-Test case 6 is successful

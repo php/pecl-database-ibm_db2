@@ -23,7 +23,7 @@
   $Id$
 */
 
-#define	PHP_IBM_DB2_VERSION	"1.9.6"
+#define	PHP_IBM_DB2_VERSION	"1.9.7"
 
 #ifndef PHP_IBM_DB2_H
 #define PHP_IBM_DB2_H
@@ -118,12 +118,58 @@ extern zend_module_entry ibm_db2_module_entry;
 #define APPLNAME_LEN 32
 #define WRKSTNNAME_LEN 18
 
+/* 1.9.7 - LUW DB2 Connect 10.5 missing SQL_UTF8_CHAR, set to fake/unused ordinal */
+#ifndef SQL_UTF8_CHAR
+#define SQL_UTF8_CHAR -334
+#endif
+
 #ifdef PASE
+/* IBM i generically changed  (remove ifdef PASE) */
 #define SQL_IS_INTEGER 0
+#define SQL_IS_UINTEGER	0 
 #define SQL_BEST_ROWID 0
 #define SQLLEN long
 #define SQLFLOAT double
+#define SQLUINTEGER SQLINTEGER
+#define SQLUSMALLINT SQLSMALLINT
+/* IBM i long is same ordinal, set to fake/unused ordinal (remove ifdef PASE) */
+#undef SQL_LONGVARCHAR
+#define SQL_LONGVARCHAR -334 
+#undef SQL_LONGVARGRAPHIC
+#define SQL_LONGVARGRAPHIC -335
+#undef SQL_LONGVARBINARY
+#define SQL_LONGVARBINARY -336
+#undef SQL_WLONGVARCHAR
+#define SQL_WLONGVARCHAR -337
+/* IBM i support V6R1+, ignore V5R4- (remove ifdef PASE) */
+#undef SQL_BINARY
+#define  SQL_BINARY          -2
+#undef SQL_VARBINARY
+#define  SQL_VARBINARY       -3
+#undef SQL_C_BINARY
+#define  SQL_C_BINARY	SQL_BINARY
+/* IBM i mv from ibm_db2.c to php_ibm_db2.h  (correct) */
+#define SQL_ATTR_INFO_USERID         10103
+#define SQL_ATTR_INFO_WRKSTNNAME     10104
+#define SQL_ATTR_INFO_APPLNAME       10105
+#define SQL_ATTR_INFO_ACCTSTR        10106
+#define SQL_ATTR_QUERY_TIMEOUT		SQL_QUERY_TIMEOUT
+/* orig  - IBM i SQL_ATTR_JOB_SORT_SEQUENCE (customer request DB2 PTF) */
+#define SQL_ATTR_CONN_SORT_SEQUENCE  10046
+#define SQL_HEX_SORT_SEQUENCE 0                   
+#define SQL_JOB_SORT_SEQUENCE 1                   
+#define SQL_JOBRUN_SORT_SEQUENCE 2
+/* 1.9.7 - IBM i consultant request switch subsystem QSQSRVR job (customer workload issues) */                 
+#ifndef SQL_ATTR_SERVERMODE_SUBSYSTEM
+#define SQL_ATTR_SERVERMODE_SUBSYSTEM 10204
 #endif
+/* 1.9.7 - IBM i monitor switch user profile applications (customer security issue) */
+#define DB2_IBM_I_PROFILE_UID_MAX 10
+
+/* 1.9.7 - IBM i force UTF-8 CCSID (DBCS customer issue) */
+extern int SQLOverrideCCSID400(int newCCSID);
+
+#endif /* PASE */
 
 #ifndef PASE
 #define DB2_SCROLLABLE SQL_CURSOR_KEYSET_DRIVEN
@@ -131,43 +177,94 @@ extern zend_module_entry ibm_db2_module_entry;
 #else
 #define DB2_SCROLLABLE SQL_CURSOR_DYNAMIC
 #define DB2_FORWARD_ONLY SQL_CURSOR_FORWARD_ONLY
+#define SQL_SCROLL_FORWARD_ONLY SQL_CURSOR_FORWARD_ONLY
 #endif
 
-/*** new set options */
+/* 1.9.7 - IBM i + LUW 10.5 system naming on (*libl)/file.mbr */
 #define DB2_I5_NAMING_ON  SQL_TRUE
 #define DB2_I5_NAMING_OFF SQL_FALSE
+
+/* 1.9.7 - IBM i + LUW 10.5 new IBM i attributes */
+#ifndef SQL_ATTR_DECIMAL_SEP
+#define SQL_ATTR_DATE_FMT                          3025
+#define SQL_ATTR_DATE_SEP                          3026 
+#define SQL_ATTR_TIME_FMT                          3027
+#define SQL_ATTR_TIME_SEP                          3028
+#define SQL_ATTR_DECIMAL_SEP                       3029
+#endif
+
+/* 1.9.7 - LUW to IBM i need isolation mode *NONE (required non journal CRTLIB) */
+#ifndef SQL_TXN_NO_COMMIT
+#define SQL_TXN_NO_COMMIT SQL_TXN_NOCOMMIT
+#endif
+#define DB2_I5_TXN_NO_COMMIT SQL_TXN_NO_COMMIT
+#define DB2_I5_TXN_READ_UNCOMMITTED SQL_TXN_READ_UNCOMMITTED
+#define DB2_I5_TXN_READ_COMMITTED SQL_TXN_READ_COMMITTED
+#define DB2_I5_TXN_REPEATABLE_READ SQL_TXN_REPEATABLE_READ
+#define DB2_I5_TXN_SERIALIZABLE SQL_TXN_SERIALIZABLE
+
+/* 1.9.7 - PASE change to LUW IBMi style (reserve non-IBMi other for LUW) */
 #ifdef PASE
-#define  SQL_BINARY_V6          -2
-#define  SQL_VARBINARY_V6       -3
-#define  SQL_C_BINARY_V6	SQL_BINARY_V6
+#define SQL_IBMi_FMT_ISO SQL_FMT_ISO
+#define SQL_IBMi_FMT_USA SQL_FMT_USA
+#define SQL_IBMi_FMT_EUR SQL_FMT_EUR
+#define SQL_IBMi_FMT_JIS SQL_FMT_JIS
+#define SQL_IBMi_FMT_MDY SQL_FMT_MDY
+#define SQL_IBMi_FMT_DMY SQL_FMT_DMY
+#define SQL_IBMi_FMT_YMD SQL_FMT_YMD
+#define SQL_IBMi_FMT_JUL SQL_FMT_JUL
+#define SQL_IBMi_FMT_HMS SQL_FMT_HMS
+#define SQL_IBMi_FMT_JOB SQL_FMT_JOB
+#endif /* PASE */
+
+/* 1.9.7 - LUW to IBM i needed for backward compatibility (not defined prior to DB2 10.5) */
+#ifndef SQL_IBMi_FMT_ISO
+#define SQL_IBMi_FMT_ISO                  1
+#define SQL_IBMi_FMT_USA                  2
+#define SQL_IBMi_FMT_EUR                  3
+#define SQL_IBMi_FMT_JIS                  4
+#define SQL_IBMi_FMT_MDY                  5
+#define SQL_IBMi_FMT_DMY                  6
+#define SQL_IBMi_FMT_YMD                  7
+#define SQL_IBMi_FMT_JUL                  8
+#define SQL_IBMi_FMT_HMS                  9
+#define SQL_IBMi_FMT_JOB                  10
+#define SQL_SEP_SLASH                     1
+#define SQL_SEP_DASH                      2
+#define SQL_SEP_PERIOD                    3
+#define SQL_SEP_COMMA                     4
+#define SQL_SEP_BLANK                     5
+#define SQL_SEP_COLON                     6
+#define SQL_SEP_JOB                       7
+#endif
+
+/* 1.9.7 - LUW to IBM i new option attributes using IBMi_ (not defined prior to DB2 10.5) */
+#define DB2_I5_FMT_ISO SQL_IBMi_FMT_ISO
+#define DB2_I5_FMT_USA SQL_IBMi_FMT_USA
+#define DB2_I5_FMT_EUR SQL_IBMi_FMT_EUR
+#define DB2_I5_FMT_JIS SQL_IBMi_FMT_JIS
+#define DB2_I5_FMT_MDY SQL_IBMi_FMT_MDY
+#define DB2_I5_FMT_DMY SQL_IBMi_FMT_DMY
+#define DB2_I5_FMT_YMD SQL_IBMi_FMT_YMD
+#define DB2_I5_FMT_JUL SQL_IBMi_FMT_JUL
+#define DB2_I5_FMT_JOB SQL_IBMi_FMT_JOB
+#define DB2_I5_FMT_HMS SQL_IBMi_FMT_HMS
+/* 1.9.7 - LUW to IBM i new option attributes match (not defined prior to DB2 10.5) */
+#define DB2_I5_SEP_SLASH SQL_SEP_SLASH
+#define DB2_I5_SEP_DASH SQL_SEP_DASH
+#define DB2_I5_SEP_PERIOD SQL_SEP_PERIOD
+#define DB2_I5_SEP_COMMA SQL_SEP_COMMA
+#define DB2_I5_SEP_BLANK SQL_SEP_BLANK
+#define DB2_I5_SEP_COLON SQL_SEP_COLON
+#define DB2_I5_SEP_JOB SQL_SEP_JOB
+
+#ifdef PASE
 #define DB2_I5_FETCH_ON SQL_TRUE
 #define DB2_I5_FETCH_OFF SQL_FALSE
 #define DB2_I5_JOB_SORT_ON  SQL_TRUE
 #define DB2_I5_JOB_SORT_OFF SQL_FALSE
 #define DB2_I5_DBCS_ALLOC_ON  SQL_TRUE
 #define DB2_I5_DBCS_ALLOC_OFF SQL_FALSE
-#define DB2_I5_TXN_NO_COMMIT SQL_TXN_NO_COMMIT
-#define DB2_I5_TXN_READ_UNCOMMITTED SQL_TXN_READ_UNCOMMITTED
-#define DB2_I5_TXN_READ_COMMITTED SQL_TXN_READ_COMMITTED
-#define DB2_I5_TXN_REPEATABLE_READ SQL_TXN_REPEATABLE_READ
-#define DB2_I5_TXN_SERIALIZABLE SQL_TXN_SERIALIZABLE
-#define DB2_I5_FMT_ISO SQL_FMT_ISO
-#define DB2_I5_FMT_USA SQL_FMT_USA
-#define DB2_I5_FMT_EUR SQL_FMT_EUR
-#define DB2_I5_FMT_JIS SQL_FMT_JIS
-#define DB2_I5_FMT_DMY SQL_FMT_DMY
-#define DB2_I5_FMT_MDY SQL_FMT_MDY
-#define DB2_I5_FMT_YMD SQL_FMT_YMD
-#define DB2_I5_FMT_JUL SQL_FMT_JUL
-#define DB2_I5_FMT_JOB SQL_FMT_JOB
-#define DB2_I5_FMT_HMS SQL_FMT_HMS
-#define DB2_I5_SEP_SLASH SQL_SEP_SLASH
-#define DB2_I5_SEP_DASH SQL_SEP_DASH
-#define DB2_I5_SEP_PERIOD SQL_SEP_PERIOD
-#define DB2_I5_SEP_COMMA SQL_SEP_COMMA
-#define DB2_I5_SEP_BLANK SQL_SEP_BLANK
-#define DB2_I5_SEP_JOB SQL_SEP_JOB
-#define DB2_I5_SEP_COLON SQL_SEP_COLON
 #define DB2_FIRST_IO SQL_FIRST_IO
 #define DB2_ALL_IO SQL_ALL_IO
 #endif
@@ -235,7 +332,9 @@ PHP_FUNCTION(db2_commit);
 PHP_FUNCTION(db2_exec);
 PHP_FUNCTION(db2_prepare);
 PHP_FUNCTION(db2_execute);
+#ifndef PASE /* i5/OS unsupported */
 PHP_FUNCTION(db2_execute_many);
+#endif /* PASE */
 PHP_FUNCTION(db2_conn_errormsg);
 PHP_FUNCTION(db2_stmt_errormsg);
 PHP_FUNCTION(db2_conn_error);
@@ -281,12 +380,20 @@ ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 	char		__php_conn_err_state[SQL_SQLSTATE_SIZE + 1];
 	char		__php_stmt_err_msg[DB2_MAX_ERR_MSG_LEN];
 	char		__php_stmt_err_state[SQL_SQLSTATE_SIZE + 1];
-#ifdef PASE /* i5/OS ease of use turn off/on */
-	long		i5_allow_commit;
-	long		i5_dbcs_alloc;
-	long		i5_all_pconnect;
-	long		i5_ignore_userid;
-	long		i5_job_sort; /* SQL_ATTR_JOB_SORT_SEQUENCE (new PTF) */
+	long		i5_allow_commit;	/* orig  - IBM i legacy CRTLIB containers fail under commit control (isolation *NONE) */
+	long		i5_sys_naming;		/* 1.9.7 - IBM i + LUW DB2 Connect 10.5 system naming (customer *LIBL issues) */
+#ifdef PASE /* IBM i ibm_db2.ini options */
+	long		i5_dbcs_alloc;		/* orig  - IBM i 6x space for CCSID<>UTF-8 convert  (DBCS customer issue) */
+	long		i5_all_pconnect;	/* orig  - IBM i force all connect to pconnect (operator issue) */
+	long		i5_ignore_userid;	/* orig  - IBM i ignore user id enables no-QSQSRVR job (custom site request) */
+	long		i5_job_sort;		/* orig  - IBM i SQL_ATTR_JOB_SORT_SEQUENCE (customer request DB2 PTF) */
+	long		i5_override_ccsid;	/* 1.9.7 - IBM i force UTF-8 CCSID (DBCS customer issue) */
+	long		i5_blank_userid;	/* 1.9.7 - IBM i security restrict blank db,uid,pwd (unless customer allow flag) */
+	long		i5_log_verbose;		/* 1.9.7 - IBM i consultant request log additional information into php.log */
+	long		i5_max_pconnect;	/* 1.9.7 - IBM i count max usage connection recycle (customer issue months live connection) */
+	long		i5_check_pconnect;	/* 1.9.7 - IBM i remote persistent connection or long lived local (customer issue dead connection) */
+	char		*i5_servermode_subsystem; /* 1.9.7 - IBM i consultant request switch subsystem QSQSRVR job (customer workload issues) */
+	long		i5_guard_profile;	/* 1.9.7 - IBM i monitor switch user profile applications (customer security issue) */
 #endif /* PASE */
 ZEND_END_MODULE_GLOBALS(ibm_db2)
 

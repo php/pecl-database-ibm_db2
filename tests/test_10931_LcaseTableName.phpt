@@ -2,7 +2,7 @@
 IBM-DB2: PECL bug 10931 -- no result for db2_columns with lowercase table name
 --SKIPIF--
 <?php
-  require_once('skipif.inc');
+  require_once('skipif3.inc');
 ?>
 --FILE--
 <?php

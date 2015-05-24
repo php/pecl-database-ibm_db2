@@ -1,15 +1,22 @@
 --TEST--
 IBM-DB2: db2_statistics(): testing indexes
 --SKIPIF--
-<?php require_once('skipif3.inc'); ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+/*
+Bug CLI, requires lib argument to SQLStatistics, but only on 1208 amd 1200 path.
+*/
+putenv("IBM_DB_I5_TEST=1");
+putenv("IBM_DB_i5_override_ccsid=819");
 
 require_once('connection.inc');
+
 
 $conn = db2_connect($db,$username,$password);
 
 if ($conn) {
+	$rc = @db2_exec($conn, "DROP TABLE index1");
 	$rc = @db2_exec($conn, "DROP TABLE index_test");
 	$rc = db2_exec($conn, "CREATE TABLE index_test (id INTEGER, data VARCHAR(50))");
 	$rc = db2_exec($conn, "CREATE INDEX index1 ON index_test (id)");
@@ -62,4 +69,5 @@ INDEX2
 DATA
 Test non-existent table:
 Empty
+
 

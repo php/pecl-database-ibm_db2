@@ -1,7 +1,7 @@
 --TEST--
 IBM-DB2: db2_field_width() - by position and name
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require_once('skipif3.inc'); ?>
 --FILE--
 <?php
 

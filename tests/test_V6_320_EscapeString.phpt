@@ -1,7 +1,7 @@
 --TEST--
 IBM-DB2: db2_escape_string function 
 --SKIPIF--
-<?php require_once('skipif3.inc'); ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 require_once('connection.inc');
@@ -37,24 +37,17 @@ if ($conn) {
         db2_execute($stmt, $currow);
 
         $result = db2_fetch_array($stmt);
-        $escapedFromDb = $result[0];        
+        $escapedFromDb = $result[0];
 
-        fwrite($new, "\n");
-       	fwrite($new, "Original:                 " . $string);
-       	fwrite($new, "\n");
-       	fwrite($new, "db2_escape_string:        " . $escapedFromDb);
-       	fwrite($new, "\n");
-
+		$strhex = bin2hex($string);       
+		$db2hex = bin2hex($escapedFromDb);
+		if ($strhex == $db2hex) echo "$count...good.\n";
+		else {
+			 echo "$count...bad\n";
+			 echo "org...$strhex\n";
+			 echo "db2...$db2hex\n";
+		}      
         $count++;
-	}
-
-	$file0 = file_get_contents("escape.dat");
-	$file1 = file_get_contents("escape_out.dat");
-
-	if(strcmp($file0, $file1) == 0) {
-		echo "The files are the same...good.\n";
-	} else {
-		echo "The files are not the same...bad.\n";
 	}
 	
 	$name = "o'grady";
@@ -76,7 +69,13 @@ if ($conn) {
 }
 ?>
 --EXPECT--
-The files are the same...good.
+0...good.
+1...good.
+2...good.
+3...good.
+4...good.
+5...good.
+6...good.
 array(1) {
   [0]=>
   string(7) "o'grady"

@@ -1,7 +1,7 @@
 --TEST--
 IBM-DB2: Testing Graphic Datatype.
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require_once('skipif3.inc'); ?>
 --FILE--
 <?php
 

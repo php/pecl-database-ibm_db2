@@ -1,49 +1,67 @@
-test_002_ConnDbUncatalogedConn.phpt|PASE|V5|V6|test specific protocol not valid|
-test_023_ColumnPrivileges.phpt|PASE|V5|V6|i5 column priv (bug?) vs LUW column priv|
-test_039_FetchRowIndexPosNested_02.phpt|PASE|V5|V6|i5 .10 vs LUW 0.10|
-test_041_FetchArrayMany_01.phpt|PASE|V5|V6|i5 .10 vs LUW 0.10|
-test_053_SetAutocommit_02.phpt|PASE|V5|V6|i5 no support (V6R1?) vs LUW client attributes|
-test_060_Tables_01.phpt|PASE|V5|V6|i5 BASE TABLE + journal tables vs LUW TABLE|
-test_061_Tables_02.phpt|PASE|V5|V6|i5 BASE TABLE + journal tables vs LUW TABLE|
-test_062_Tables_03.phpt|PASE|V5|V6|i5 BASE TABLE + journal tables vs LUW TABLE|
-test_064_Tables_05.phpt|PASE|V5|V6|i5 BASE TABLE + journal tables vs LUW TABLE|
-test_065_FilterTableName.phpt|PASE|V5|V6|i5 BASE TABLE + journal tables vs LUW TABLE|
-test_066_TableObjects.phpt|PASE|V5|V6|i5 BASE TABLE + journal tables vs LUW TABLE|
-test_080_ConnWrongDbAlias.phpt|PASE|V5|V6|i5 SQLSTATE=42705 vs LUW SQLSTATE=800xxx|
-test_090_ConnmsgWrongDbAlias.phpt|PASE|V5|V6|i5 different error msg vs LUW|
-test_091_ConnmsgWrongUser.phpt|PASE|V5|V6|i5 different error msg vs LUW|
-test_092_ConnmsgWrongPwd.phpt|PASE|V5|V6|i5 different error msg vs LUW|
-test_102_NumFieldsSelect_01.phpt|PASE|V5|V6|i5 no support vs LUW SQL VALUES(1)|
-test_131a_PrepExecuteDataTypeConversionsErrs.phpt|PASE|V5|V6|i5 db2_num_rows error vs LUW -1|
-test_133_ExecuteLongInputParams.phpt|PASE|V5|V6|i5 different error msg vs LUW|
-test_149_CallSPDiffBindPattern_02.phpt|PASE|V5|V6|i5 varchar len 10 vs LUW data len|
-test_160_FetchBoth.phpt|PASE|V5|V6|i5 .50 vs LUW 0.50|
-test_161_FetchBothNestedSelects_01.phpt|PASE|V5|V6|i5 .50 vs LUW 0.50|
-test_162_FetchBothNestedSelects_02.phpt|PASE|V5|V6|i5 .50 vs LUW 0.50|
-test_180_StmtErrMsg.phpt|PASE|V5|V6|i5 different error msg vs LUW|
-test_191_ColumnsTable_02.phpt|PASE|V5|V6|i5 IS_NULLABLE (na v5r4) and need schema (v6r1)|
-test_192_ColumnsTable_03.phpt|PASE|V5|i5 IS_NULLABLE (na v5r4)|
-test_194_RetrieveCLOBColScrollable.phpt|PASE|V5|V6|i5 data ok vs LUW error (LUW bug)|
-test_195_InsertRetrieveXMLData_01.phpt|PASE|V5|V6|i5 no XML VIPER vs LUW XML VIPER|
-test_196_InsertRetrieveXMLData_02.phpt|PASE|V5|V6|i5 no XML VIPER vs LUW XML VIPER|
-test_198_LobReadWriteFromMemory.phpt|PASE|V5|V6|i5 blob data ASCII vs LUW blob data hex|
-test_201_MultipleRsltsetsDiffColDefs.phpt|PASE|V5|V6|i5 .20 vs LUW 0.20|
-test_210_FieldDisplaySize_01.phpt|PASE|V6|i5 display size (v5r4 match LUW) vs LUW display size|
-test_211_FieldDisplaySize_02.phpt|PASE|V6|i5 display size (v5r4 match LUW) vs LUW display size|
-test_212_FieldDisplaySize_03.phpt|PASE|V6|i5 display size (v5r4 match LUW) vs LUW display size|
-test_213_FieldDisplaySize_04.phpt|PASE|V6|i5 display size (v5r4 match LUW) vs LUW display size|
-test_240_FieldWidthPosName_01.phpt|PASE|V5|V6|i5 field widths (bug?) vs LUW field widths|
-test_241_FieldWidthPosName_02.phpt|PASE|V5|V6|i5 field widths (bug?) vs LUW field widths|
-test_260_FetchObject.phpt|PASE|V5|V6|stdClass)#2 vs LUW stdClass)#1 (bug?)|
-test_263_XML_OUTParamsInSPs.phpt|PASE|V5|V6|i5 no XML VIPER vs LUW XML VIPER|
-test_300_ServerInfo.phpt|PASE|V5|V6|i5 server info (V6R1?) vs LUW server info|
-test_310_ClientInfo.phpt|PASE|V5|V6|i5 client info (V6R1?) vs LUW client info|
-test_321_ResultFetchArraysLobsXMLTypes.phpt|PASE|V5|V6|i5 no XML VIPER vs LUW XML VIPER|
-test_6792_FieldTypeRetStrDatetimeTimestamp.phpt|PASE|V5|V6|i5 time seperator vs LUW time seperator|
-test_9173_ProcedurePersistentConn.phpt|PASE|V5|V6|i5 store proc info vs LUW store proc info|
-test_10931_LcaseTableName.phpt|PASE|V5|V6|i5 default schema is DB2 not TEST|
-test_clob_special_char.phpt|PASE|V5|V6|insert:3030802e expect:3030802e actual:30301a2e |
-test_trusted_context_connect.phpt|PASE|V5|V6|i5 no trust?|
-test_trusted_context_pconnect.phpt|PASE|V5|V6|i5 no trust?|
-test_10353.phpt|PASE|V5|V6|i5 PHP no compiled debug mode|
-test_last_insert_id.phpt|PASE|V5|V6|i5 sql IDENTITY_VAL_LOCAL()|
+<?php
+$PASE_ALT_TEST = <<< SKIPPASE
+test_V6_002_ConnDbUncatalogedConn.phpt
+test_V6_023_ColumnPrivileges.phpt
+test_V6_039_FetchRowIndexPosNested_02.phpt
+test_V6_041_FetchArrayMany_01.phpt
+test_V6_053_SetAutocommit_02.phpt
+test_V6_060_Tables_01.phpt
+test_V6_061_Tables_02.phpt
+test_V6_062_Tables_03.phpt
+test_V6_064_Tables_05.phpt
+test_V6_065_FilterTableName.phpt
+test_V6_066_TableObjects.phpt
+test_V6_080_ConnWrongDbAlias.phpt
+test_V6_090_ConnmsgWrongDbAlias.phpt
+test_V6_091_ConnmsgWrongUser.phpt
+test_V6_092_ConnmsgWrongPwd.phpt
+test_V6_102_NumFieldsSelect_01.phpt
+test_V6_10353_MemLeak.phpt
+test_V6_10353.phpt
+test_V6_10931_LcaseTableName.phpt
+test_V6_131a_PrepExecuteDataTypeConversionsErrs.phpt
+test_V6_133_ExecuteLongInputParams.phpt
+test_V6_148_CallSPDiffBindPattern_01.phpt
+test_V6_149_CallSPDiffBindPattern_02.phpt
+test_V6_160_FetchBoth.phpt
+test_V6_161_FetchBothNestedSelects_01.phpt
+test_V6_162_FetchBothNestedSelects_02.phpt
+test_V6_180_StmtErrMsg.phpt
+test_V6_191_ColumnsTable_02.phpt
+test_V6_192_ColumnsTable_03.phpt
+test_V6_194_RetrieveCLOBColScrollable.phpt
+test_V6_195_InsertRetrieveXMLData_01.phpt
+test_V6_196_InsertRetrieveXMLData_02.phpt
+test_V6_197_StatisticsIndexes.phpt
+test_V6_198_LobReadWriteFromMemory.phpt
+test_V6_201_MultipleRsltsetsDiffColDefs.phpt
+test_V6_240_FieldWidthPosName_01.phpt
+test_V6_241_FieldWidthPosName_02.phpt
+test_V6_260_FetchObject.phpt
+test_V6_263_XML_OUTParamsInSPs.phpt
+test_V6_300_ServerInfo.phpt
+test_V6_310_ClientInfo.phpt
+test_V6_320_EscapeString.phpt
+test_V6_321_ResultFetchArraysLobsXMLTypes.phpt
+test_V6_6792_FieldTypeRetStrDatetimeTimestamp.phpt
+test_V6_9173_ProcedurePersistentConn.phpt
+test_V6_bigint.phpt
+test_V6_clob_special_char.phpt
+test_V6_connect_deallocator.phpt
+test_V6_execute_many.phpt
+test_V6_graphic_data_type.phpt
+test_V6_ini_i5_allow_commit.phpt
+test_V6_ini_i5_all_pconnect.phpt
+test_V6_ini_i5_blank_userid.phpt
+test_V6_ini_i5_check_pconnect.phpt
+test_V6_ini_i5_guard_profile.phpt
+test_V6_ini_i5_ignore_userid.phpt
+test_V6_ini_i5_max_pconnect.phpt
+test_V6_ini_i5_servermode_subsystem.phpt
+test_V6_ini_i5_sys_naming.phpt
+test_V6_last_insert_id.phpt
+test_V6_timestamp.phpt
+test_V6_trusted_context_connect.phpt
+test_V6_trusted_context_pconnect.phpt
+SKIPPASE;
+?>

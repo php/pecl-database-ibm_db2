@@ -1,7 +1,7 @@
 --TEST--
 IBM-DB2: db2_conn_error() - wrong database alias
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require_once('skipif3.inc'); ?>
 --FILE--
 <?php
 

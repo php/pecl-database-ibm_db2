@@ -1,5 +1,7 @@
 --TEST--
 IBM-DB2: Call a stored procedure in a different binding pattern
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	require_once('connection.inc');

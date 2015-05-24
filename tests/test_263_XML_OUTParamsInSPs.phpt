@@ -1,7 +1,7 @@
 --TEST--
 IBM-DB2: Test for XML OUT parameters in stored procedures. 
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require_once('skipif3.inc'); ?>
 --FILE--
 <?php
 
