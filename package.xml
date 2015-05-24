@@ -207,7 +207,6 @@ Cloudscape, and Apache Derby databases.
     <file baseinstalldir="ibm_db2" name="test_6561_ReturnNULLValues.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_6572_SQLStringsContNULLChar.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_6755_ExtraNULLChar_ResultCLOBCol.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_6792_V5V6_FieldTypeRetStrDatetimeTimestamp.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_9173_ProcedurePersistentConn.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_9194_FetchBothCLOBColumns.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_10353_MemLeak.phpt" role="test" />
@@ -216,7 +215,6 @@ Cloudscape, and Apache Derby databases.
     <file baseinstalldir="ibm_db2" name="test_decfloat.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_graphic_data_type.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_last_insert_id.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_last_insert_id_V5V6.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_queryTimeout.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_RealDataType.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_timestamp.phpt" role="test" />
@@ -296,7 +294,7 @@ Cloudscape, and Apache Derby databases.
     <file baseinstalldir="ibm_db2" name="test_V6_trusted_context_pconnect.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_x001_IBMi_LUW_DB2_I5_NAMING_ON.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_x002_IBMi_LUW_DB2_I5_TXN_NO_COMMIT.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="tests\test_x010_IBMi_LUW_DB2_I5_FMT.phpt" role="test" />
+    <file baseinstalldir="ibm_db2" name="test_x010_IBMi_LUW_DB2_I5_FMT.phpt" role="test" />
 
    </dir> <!-- //tests -->
    <file baseinstalldir="ibm_db2" name="config.m4" role="src" />
@@ -305,6 +303,7 @@ Cloudscape, and Apache Derby databases.
    <file baseinstalldir="ibm_db2" name="ibm_db2.dsp" role="src" />
    <file baseinstalldir="ibm_db2" name="php_ibm_db2.h" role="src" />
    <file baseinstalldir="ibm_db2" name="TODO" role="doc" />
+   <file baseinstalldir="ibm_db2" name="LICENSE" role="doc" />
   </dir> <!-- / -->
  </contents>
  <dependencies>
