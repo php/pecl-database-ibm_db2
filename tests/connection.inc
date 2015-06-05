@@ -14,6 +14,9 @@ $username = $user;
 
 // IBM i (PASE)
 $myos = PHP_OS;
+if (strpos('x'.$myos,'AIX') > 0) {
+  $myos = `uname`;
+}
 if (strpos($myos,'400') > 0) {
   if (strpos($_SERVER["PHP_SELF"],"V6") === false) {
     require_once('skipif.PASE');
