@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.8.0" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
-http://pear.php.net/dtd/tasks-1.0.xsd
-http://pear.php.net/dtd/package-2.0
-http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.10.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>ibm_db2</name>
  <channel>pecl.php.net</channel>
  <summary>Extension for IBM DB2 Universal Database, IBM Cloudscape, and
         Apache Derby</summary>
  <description>This extension supports IBM DB2 Universal Database, IBM
-Cloudscape, and Apache Derby databases.
- </description>
+Cloudscape, and Apache Derby databases.</description>
  <lead>
-  <name>Rahul Priyadarshi</name>
-  <user>rahulpriyadarshi</user>
-  <email>rahul.priyadarshi@in.ibm.com</email>
+  <name>Venkatesh Babu K.S</name>
+  <user>vnkbabu</user>
+  <email>venkkbab@in.ibm.com</email>
   <active>yes</active>
  </lead>
  <lead>
@@ -22,11 +18,11 @@ Cloudscape, and Apache Derby databases.
   <email>opendev@us.ibm.com</email>
   <active>yes</active>
  </lead>
- <date>2015-05-24</date>
- <time>22:24:00</time>
+ <date>2016-04-28</date>
+ <time>11:31:11</time>
  <version>
-  <release>1.9.7</release>
-  <api>1.9.7</api>
+  <release>1.9.9</release>
+  <api>1.9.9</api>
  </version>
  <stability>
   <release>stable</release>
@@ -34,277 +30,272 @@ Cloudscape, and Apache Derby databases.
  </stability>
  <license>Apache License 2.0</license>
  <notes>
- Enhanced: Code refactoring to enhance maintainability of code
- Removed: IBM i V5R4 is no longer supported
- Removed: unsupported test cases of V5 removed
+Enhanced: Added PHP 7 support and fixed linking error.
  </notes>
  <contents>
   <dir name="/">
-   <dir name="tests">
-    <file baseinstalldir="ibm_db2" name="connection.inc" role="test" />
-    <file baseinstalldir="ibm_db2" name="rollbackhandler.inc" role="test" />
-    <file baseinstalldir="ibm_db2" name="escape.dat" role="test" />
-    <file baseinstalldir="ibm_db2" name="pic1.jpg" role="test" />
-    <file baseinstalldir="ibm_db2" name="resume_000130.txt" role="test" />
-    <file baseinstalldir="ibm_db2" name="resume_000140.txt" role="test" />
-    <file baseinstalldir="ibm_db2" name="resume_000150.txt" role="test" />
-    <file baseinstalldir="ibm_db2" name="resume_000190.txt" role="test" />
-    <file baseinstalldir="ibm_db2" name="skipif.inc" role="test" />
-    <file baseinstalldir="ibm_db2" name="skipif.PASE" role="test" />
-    <file baseinstalldir="ibm_db2" name="skipif2.inc" role="test" />
-    <file baseinstalldir="ibm_db2" name="skipif3.inc" role="test" />
-    <file baseinstalldir="ibm_db2" name="skipifNotRowcountPrefetch.inc" role="test" />
-    <file baseinstalldir="ibm_db2" name="skipifNotTrustedContext.inc" role="test" />
-    <file baseinstalldir="ibm_db2" name="spook.png" role="test" />
-    <file baseinstalldir="ibm_db2" name="xmlservice.inc" role="test" />
-    <file baseinstalldir="ibm_db2" name="skipifNot10_5.inc" role="test" />
-    <file baseinstalldir="ibm_db2" name="skipifTBD.inc" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_001_ConnDb.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_002_ConnDbUncatalogedConn.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_03a_ResultNonExistCol.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_003_NumAffectedRows.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_004_ConnWrongUserPwd.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_005_ConnBadUserBadPwd.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_006_ConnPassingOpts.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_007_pConnPassingOpts.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_010_UpdateRowCount.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_011_DeleteRowCount.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_012_ScrollableCursorSelectRowCount01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_013_ScrollableCursorSelectRowCount02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_014_ScrollableCursorRetrieveNegativeRow.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_015_InsertDeleteRowCount_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_016_InsertDeleteRowCount_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_017_selectRowcountPrefetchSTMTOpt.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_018_selectRowcountPrefetchSetOpt.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_019_selectRowcountPrefetchPrepOpt.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_020_RollbackDelete.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_021_CommitDelete.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_022_RollbackInsert.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_023_ColumnPrivileges.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_024_ForeignKeys.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_025_PrimaryKeys.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_026_BindParam.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_030_Result.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_031_ResultIndexPosition.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_032_ResultIndexName.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_033_ResultOutSequenceColumn.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_034_FetchRow.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_035_FetchRowMany_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_036_FetchRowMany_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_037_FetchRowIndexPos.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_038_FetchRowIndexPosNested_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_039_FetchRowIndexPosNested_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_040_FetchArray.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_041_FetchArrayMany_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_042_FetchArrayMany_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_043_FetchArrayMany_03.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_044_FetchArrayMany_04.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_045_FetchArrayBinaryData.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_046_FetchArrayMany_05.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_047_FetchArrayMany_06.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_048_FetchArrayBinaryData.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_049_BindParamInsertStmtNULL.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_050_GetAutocommit.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_051_SetAutocommit.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_052_SetAutocommit_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_053_SetAutocommit_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_060_Tables_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_061_Tables_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_062_Tables_03.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_063_Tables_04.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_064_Tables_05.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_065_FilterTableName.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_066_TableObjects.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_070_Close.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_071_CloseSuccess.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_080_ConnWrongDbAlias.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_081_ConnWrongUser.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_082_ConnWrongPwd.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_090_ConnmsgWrongDbAlias.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_091_ConnmsgWrongUser.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_092_ConnmsgWrongPwd.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_100_SelectDeleteInsertFieldCount.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_101_InsertDeleteFieldCount.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_102_NumFieldsSelect_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_103_NumFieldsSelect_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_110_FieldNum.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_111_FieldNumAddCol.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_112_FieldNumDiffCaseColNames.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_120_FieldName.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_121_FieldNameAddCol.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_122_FieldNameDiffCaseColNames.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_123_FieldNamePos_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_124_FieldNamePos_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_125_FieldNamePos_03.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_130_PrepExecuteSelectStmt.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_131a_PrepExecuteDataTypeConversionsErrs.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_131_PrepareExecuteSelectStatementParams.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_132_ExecuteStatementArrayMultipleParams.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_133_ExecuteLongInputParams.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_140_BindParamSelectStmt.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_141_BindParamSelectStmtMultipleParams_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_142_BindParamSelectStmtMultipleParams_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_143_BindParamInsertStmtNULLParam.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_144_BindParamInsertStmtPARAM_FILE.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_145_BindRetrieveNULLEmptyString.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_146_CallSPINAndOUTParams.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_147_CallSPINAndOUTParamsMultipleTimes.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_148_CallSPDiffBindPattern_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_149_CallSPDiffBindPattern_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_150_FetchAssocSelect_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_151_FetchAssocSelect_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_152_FetchAssocSelect_03.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_153_FetchAssocSelect_04.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_154_AllFetches.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_155_FetchAssocSelect_06.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_156_FetchAssocNestedSelects_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_157a_FetchAssocWithoutScrollableCursorErr.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_157b_FetchAssocScrollableCursor_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_157_FetchAssocScrollableCursor_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_158_FetchAssocNestedSelects_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_159a_FetchAssocSeveralRows_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_159_FetchAssocSeveralRows_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_160_FetchBoth.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_161_FetchBothNestedSelects_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_162_FetchBothNestedSelects_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_163_FetchBothBinary.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_180_StmtErrMsg.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_190_ColumnsTable_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_191_ColumnsTable_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_192_ColumnsTable_03.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_193_RetrieveCLOBColFwdOnly.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_194_RetrieveCLOBColScrollable.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_195_InsertRetrieveXMLData_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_196_InsertRetrieveXMLData_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_197_StatisticsIndexes.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_198_LobReadWriteFromMemory.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_200_MultipleRsltsetsUniformColDefs.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_201_MultipleRsltsetsDiffColDefs.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_210_FieldDisplaySize_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_211_FieldDisplaySize_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_212_FieldDisplaySize_03.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_213_FieldDisplaySize_04.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_220_PersistentConn.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_221_100PersistentConns.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_230_FieldTypePos.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_231_FieldTypeName.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_232_FieldTypePosName.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_240_FieldWidthPosName_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_241_FieldWidthPosName_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_250_FreeResult_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_251_FreeResult_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_252_FreeResult_03.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_260_FetchObject.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_261_FetchObjectAccess.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_263_XML_OUTParamsInSPs.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_264_InsertRetrieveBIGINTTypeColumn.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_300_ServerInfo.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_310_ClientInfo.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_320_EscapeString.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_321_ResultFetchArraysLobsXMLTypes.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_1551_FetchAssocBinary.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_6528_ScopingProblemBindParam.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_6561_ReturnNULLValues.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_6572_SQLStringsContNULLChar.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_6755_ExtraNULLChar_ResultCLOBCol.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_9173_ProcedurePersistentConn.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_9194_FetchBothCLOBColumns.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_10353_MemLeak.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_10931_LcaseTableName.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_clob_special_char.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_decfloat.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_graphic_data_type.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_last_insert_id.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_queryTimeout.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_RealDataType.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_timestamp.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_trusted_context_connect.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_trusted_context_pconnect.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_000_PrepareDb.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="trusted_connection.inc" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_graphic_data_type.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_check_rollback.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_connect_deallocator.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_execute_many.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_bigint.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_002_ConnDbUncatalogedConn.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_023_ColumnPrivileges.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_039_FetchRowIndexPosNested_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_041_FetchArrayMany_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_053_SetAutocommit_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_060_Tables_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_061_Tables_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_062_Tables_03.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_064_Tables_05.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_065_FilterTableName.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_066_TableObjects.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_080_ConnWrongDbAlias.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_090_ConnmsgWrongDbAlias.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_091_ConnmsgWrongUser.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_092_ConnmsgWrongPwd.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_102_NumFieldsSelect_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_10353.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_10353_MemLeak.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_10931_LcaseTableName.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_131a_PrepExecuteDataTypeConversionsErrs.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_133_ExecuteLongInputParams.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_148_CallSPDiffBindPattern_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_149_CallSPDiffBindPattern_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_160_FetchBoth.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_161_FetchBothNestedSelects_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_162_FetchBothNestedSelects_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_180_StmtErrMsg.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_191_ColumnsTable_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_192_ColumnsTable_03.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_194_RetrieveCLOBColScrollable.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_195_InsertRetrieveXMLData_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_196_InsertRetrieveXMLData_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_197_StatisticsIndexes.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_197_StatisticsIndexes_with_lib_1028_issue.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_198_LobReadWriteFromMemory.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_201_MultipleRsltsetsDiffColDefs.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_240_FieldWidthPosName_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_241_FieldWidthPosName_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_260_FetchObject.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_263_XML_OUTParamsInSPs.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_300_ServerInfo.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_310_ClientInfo.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_320_EscapeString.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_321_ResultFetchArraysLobsXMLTypes.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_6792_FieldTypeRetStrDatetimeTimestamp.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_9173_ProcedurePersistentConn.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_bigint.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_clob_special_char.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_connect_deallocator.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_execute_many.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_graphic_data_type.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_hebrew.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_ini_i5_all_pconnect.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_ini_i5_allow_commit.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_ini_i5_blank_userid.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_ini_i5_check_pconnect.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_ini_i5_guard_profile.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_ini_i5_ignore_userid.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_ini_i5_max_pconnect.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_ini_i5_servermode_subsystem.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_ini_i5_sys_naming.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_last_insert_id.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_timestamp.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_trusted_context_connect.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_trusted_context_pconnect.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_x001_IBMi_LUW_DB2_I5_NAMING_ON.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_x002_IBMi_LUW_DB2_I5_TXN_NO_COMMIT.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_x010_IBMi_LUW_DB2_I5_FMT.phpt" role="test" />
-
-   </dir> <!-- //tests -->
-   <file baseinstalldir="ibm_db2" name="config.m4" role="src" />
-   <file baseinstalldir="ibm_db2" name="config.w32" role="src" />
-   <file baseinstalldir="ibm_db2" name="ibm_db2.c" role="src" />
-   <file baseinstalldir="ibm_db2" name="ibm_db2.dsp" role="src" />
-   <file baseinstalldir="ibm_db2" name="php_ibm_db2.h" role="src" />
-   <file baseinstalldir="ibm_db2" name="TODO" role="doc" />
-   <file baseinstalldir="ibm_db2" name="LICENSE" role="doc" />
-  </dir> <!-- / -->
+   <file baseinstalldir="ibm_db2" md5sum="633eef81bd0736586feea2db78371875" name="tests/connection.inc" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="92a848dedabd8c06ee52252f7019e36e" name="tests/rollbackhandler.inc" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="4a1a6831e4f9fe74777e7c9f0ad2ed16" name="tests/escape.dat" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="63154ff0b723fc7324098b4a3d40c81a" name="tests/pic1.jpg" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b6625d34378b7cfb85391ca7e60faf8b" name="tests/resume_000130.txt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="cb8cf5cf6c080c3a04e58ec9daf8305c" name="tests/resume_000140.txt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="5fa487b378f4ce7a6af1485760e35a5e" name="tests/resume_000150.txt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="8fcc9159cee3f2ff15ce6ef3b403c10b" name="tests/resume_000190.txt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="18b83571b40f5e24e5ef3ab5c527c83d" name="tests/skipif.inc" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="dfe55fc65b95a97c6cb5e12f11b90bee" name="tests/skipif.PASE" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="a310091ea5bf844b422e86ff700c1617" name="tests/skipif2.inc" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="2b4d0bf8c055a0aac0e7dca4d3dfe27b" name="tests/skipif3.inc" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="29987eac3bf0555743c546ae791afb37" name="tests/skipifNotRowcountPrefetch.inc" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="bd24200fc2711e4d426ef2703bb074ac" name="tests/skipifNotTrustedContext.inc" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="10a7d4a0d86f777ae1ebcf9b3ec4d1ae" name="tests/spook.png" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="9a01c168aec04442de09f732646ee746" name="tests/xmlservice.inc" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="88ec063822ae05a32c45a7d862837ea1" name="tests/skipifNot10_5.inc" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="d188e0e1fc78033a08ac9b29223db261" name="tests/skipifTBD.inc" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="4b87aac5c9a93b6a2e2d381e690c1cfb" name="tests/test_001_ConnDb.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="3b5da3e49eae79231bf94f5309be7ff5" name="tests/test_002_ConnDbUncatalogedConn.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="c8e6be2e04475207817c7d8d182d0de7" name="tests/test_03a_ResultNonExistCol.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="058f1b84c19279ab4672cfb62457b999" name="tests/test_003_NumAffectedRows.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="f4bcbf174403c88897557ff00529e561" name="tests/test_004_ConnWrongUserPwd.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="1acf8bb90e9e834b28c8239ae1c6e807" name="tests/test_005_ConnBadUserBadPwd.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="133ba64c41779591aa22ea056b52da9c" name="tests/test_006_ConnPassingOpts.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b9619e46ea9ab363f9c5797dbc9c565a" name="tests/test_007_pConnPassingOpts.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="1c5fd1cab31ac528447193c22b6ffcd1" name="tests/test_010_UpdateRowCount.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="a35c4990057a1694b4daf8fa2293a045" name="tests/test_011_DeleteRowCount.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="6144b34d8cd3d4b5355a71c50078cf63" name="tests/test_012_ScrollableCursorSelectRowCount01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="139bc9387dfddc7414afcdbfb0d29cfe" name="tests/test_013_ScrollableCursorSelectRowCount02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="3720e906793f079c6e21b90ff0f4ecb2" name="tests/test_014_ScrollableCursorRetrieveNegativeRow.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="a5213d4855964ae74d1ce98e382fd00d" name="tests/test_015_InsertDeleteRowCount_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="cdb8f200957027edc01c12646e22d21d" name="tests/test_016_InsertDeleteRowCount_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="7983b91e1e943c2505a32517090c5181" name="tests/test_017_selectRowcountPrefetchSTMTOpt.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="227a5e19dd2e04cab935d6235a0ee602" name="tests/test_018_selectRowcountPrefetchSetOpt.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="94fdf509d7a71d43ee1e5bed72488ab4" name="tests/test_019_selectRowcountPrefetchPrepOpt.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="bb6458f55912560330500771d59eaad2" name="tests/test_020_RollbackDelete.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="95244c75b2a5fd68371afd4e95b4111a" name="tests/test_021_CommitDelete.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="45f0b81645d328e4df02ca0bd9b62d4c" name="tests/test_022_RollbackInsert.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="effd5423a853282a94d68b61b22e5a9b" name="tests/test_023_ColumnPrivileges.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b5e13e0d16130e60e00f42ebea5e6f7c" name="tests/test_024_ForeignKeys.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="78ce16c99c2f8284a08f12758d57ba26" name="tests/test_025_PrimaryKeys.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="33f51ca4cf0bedffc91ea3b38eaa2819" name="tests/test_026_BindParam.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="e0d5c56678a2dfe1452d83c425bf3fc4" name="tests/test_030_Result.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="f27e107afa71bdf40b2a4aec4ec4f79b" name="tests/test_031_ResultIndexPosition.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="6a7dcd29596d03499e1712fab33a81eb" name="tests/test_032_ResultIndexName.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="93ab623c3211df1a88e8d227647b72f0" name="tests/test_033_ResultOutSequenceColumn.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="cc033ae23bbd79d40383871875c919ea" name="tests/test_034_FetchRow.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b64fb34dcba8798a829b3f21892245d6" name="tests/test_035_FetchRowMany_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="c819d9b6bf050e2a5e37b2cde7490c9e" name="tests/test_036_FetchRowMany_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="577849fb9ff5d55444d45a128a27f709" name="tests/test_037_FetchRowIndexPos.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="470efb5de93863a5ac5b17e74bdac602" name="tests/test_038_FetchRowIndexPosNested_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="0e485874d06c11aa847fcdc4afab3064" name="tests/test_039_FetchRowIndexPosNested_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="37d53e9d4c5992a554f26d069afa4e64" name="tests/test_040_FetchArray.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="60d4865a4841882b9b40292ff38098e4" name="tests/test_041_FetchArrayMany_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="0c17b9496a17dfbd8e984bb3658b9476" name="tests/test_042_FetchArrayMany_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="e6fd346a65480000585078e3233756cb" name="tests/test_043_FetchArrayMany_03.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="d8450db66d2d1a1d5ebbdf181f65cecb" name="tests/test_044_FetchArrayMany_04.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="595b70fc23ae9883b3a39a1df6d72540" name="tests/test_045_FetchArrayBinaryData.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="81d17f3dbae87cc705fd60833100f129" name="tests/test_046_FetchArrayMany_05.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="3ddfc1db4417a5a77a8e4c362e3042b3" name="tests/test_047_FetchArrayMany_06.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="e3af410d702e655165e183890afd7148" name="tests/test_048_FetchArrayBinaryData.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="0106271a4fbd0c2537dbaf1ef3cff0e5" name="tests/test_049_BindParamInsertStmtNULL.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="48edf05447f593d53c06345b7f3edfa3" name="tests/test_050_GetAutocommit.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="d342b06355d8544fac93937f87a2a998" name="tests/test_051_SetAutocommit.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="de703b4a217716da6884329431aeb3ff" name="tests/test_052_SetAutocommit_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35ba6529acd66983ef074793f446817d" name="tests/test_053_SetAutocommit_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="74c23e32da70c4577e58830ffeeaa89d" name="tests/test_060_Tables_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="0abbab1505a46eebb6e811bd7009ce7a" name="tests/test_061_Tables_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="ba0e8f5d7f568110abf2f018e85caa4c" name="tests/test_062_Tables_03.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="caa9764ff0a76ac0e9056333a7166d65" name="tests/test_063_Tables_04.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="1813cb5d27ffe956aae882f683b9f49c" name="tests/test_064_Tables_05.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="452caef00a9ebc6356044e5d2b65b42f" name="tests/test_065_FilterTableName.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="8f62425f2b0fffc2caef25c9ad401e14" name="tests/test_066_TableObjects.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="129ed3174f84065f9049792421751d16" name="tests/test_070_Close.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="7be394dad54e3bb7fdd1d954975a1e55" name="tests/test_071_CloseSuccess.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="51218c74cdeeb7999612039c9504b663" name="tests/test_080_ConnWrongDbAlias.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="032d650e5c5a7982a70cf1bf841b44db" name="tests/test_081_ConnWrongUser.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="0d493b6db99f85be403b1d8057c61b9b" name="tests/test_082_ConnWrongPwd.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="bfb034e866c35948f2086f8fac3a6114" name="tests/test_090_ConnmsgWrongDbAlias.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="ec7aaa52aa127729f51188649efb7654" name="tests/test_091_ConnmsgWrongUser.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="eb181e1914ecf845ae7474cf10f32fe4" name="tests/test_092_ConnmsgWrongPwd.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="c34a8fede69722da0905b1b55d02a110" name="tests/test_100_SelectDeleteInsertFieldCount.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="8ea27e66e9bad79914077706e80c6fc4" name="tests/test_101_InsertDeleteFieldCount.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="db98dae6ae8c02551e6c9c5c2f38a144" name="tests/test_102_NumFieldsSelect_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="1a21e0c4d7c7ca520eff2e1c817b85ff" name="tests/test_103_NumFieldsSelect_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="f050f79ef01a27a080d6a28c914dd564" name="tests/test_110_FieldNum.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="477f7ce862ac078e1f71347f0e3f2861" name="tests/test_111_FieldNumAddCol.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="ede9357736141b52acf6260cde7092ce" name="tests/test_112_FieldNumDiffCaseColNames.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="7b0b64e21cb2264dc1c52505ada2b643" name="tests/test_120_FieldName.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="7446b985d57235f07785f7e8d96478d6" name="tests/test_121_FieldNameAddCol.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="5f1d0a9464bbb57ebc4d71d21ce7c91e" name="tests/test_122_FieldNameDiffCaseColNames.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="e0bc114d733f192e48cdda88aef77d61" name="tests/test_123_FieldNamePos_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="75275258d9f0377db0f5993b43c443b2" name="tests/test_124_FieldNamePos_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="e4e94d1e5c71eef8440727a922581b95" name="tests/test_125_FieldNamePos_03.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="83068a0c1a01ae0a60576e8afd743c12" name="tests/test_130_PrepExecuteSelectStmt.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="fd28d9bbeaafb79b7da122e3b6dbd172" name="tests/test_131a_PrepExecuteDataTypeConversionsErrs.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="e4019e9aa4fa7a76e271d45debe957a3" name="tests/test_131_PrepareExecuteSelectStatementParams.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="94b84d60ccde0bd952ffdcfd37f878fc" name="tests/test_132_ExecuteStatementArrayMultipleParams.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="e78f599bc5cbec5ee2455e17c32a7977" name="tests/test_133_ExecuteLongInputParams.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="7cd229b110b22aa327446df6efe82e20" name="tests/test_140_BindParamSelectStmt.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="146dc021049f091f6f8097cfcf5cd55e" name="tests/test_141_BindParamSelectStmtMultipleParams_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="2ffb401c069c9b60ad69e0d4d8aeaf9a" name="tests/test_142_BindParamSelectStmtMultipleParams_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="bcb64d568fe7786e6da9da3e77738883" name="tests/test_143_BindParamInsertStmtNULLParam.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="be2dc0d1d127084ead6305b7ebe24de4" name="tests/test_144_BindParamInsertStmtPARAM_FILE.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="2bf68491a11eec0279d0fa3ec448f78c" name="tests/test_145_BindRetrieveNULLEmptyString.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="8261885dd58a075031276089b5b326c9" name="tests/test_146_CallSPINAndOUTParams.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="c08fca18bbc5e87a1b073e8e03e607c2" name="tests/test_147_CallSPINAndOUTParamsMultipleTimes.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="16b310aeddf99d011dc877472da6aafa" name="tests/test_148_CallSPDiffBindPattern_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b71248d076dd0fb4378478c1d47fa990" name="tests/test_149_CallSPDiffBindPattern_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="362a77a5f87e24523fb477079b1839f8" name="tests/test_150_FetchAssocSelect_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="499e7943c6f8a55b7d7372dad72d1f28" name="tests/test_151_FetchAssocSelect_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="d0de86f65e79379ab32940fb52c923af" name="tests/test_152_FetchAssocSelect_03.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="378862bce86452b7ebfb46a24ba04600" name="tests/test_153_FetchAssocSelect_04.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="43bafb0dabe6b5cfec12ef0edabb3d39" name="tests/test_154_AllFetches.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="ae5db57206250bad7b5019c2f1bbb1f5" name="tests/test_155_FetchAssocSelect_06.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b88d1c51dbc46e81101bda2080f7318b" name="tests/test_156_FetchAssocNestedSelects_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="3ff630436dba89eee2489cccb83c4cb3" name="tests/test_157a_FetchAssocWithoutScrollableCursorErr.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="96eaa4ffed028203b8c1a126877e92f6" name="tests/test_157b_FetchAssocScrollableCursor_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="a2fa68e9b8e10b62ad9b76edf1b07605" name="tests/test_157_FetchAssocScrollableCursor_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="fd4a3f24716d00d78034aef1faa5786f" name="tests/test_158_FetchAssocNestedSelects_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="a0969bb6f017761a8629be2069bf97a3" name="tests/test_159a_FetchAssocSeveralRows_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="48ad05b43c4238e1d942531b40920754" name="tests/test_159_FetchAssocSeveralRows_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="94432dfbb0682da72182a450e649da65" name="tests/test_160_FetchBoth.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="0a2693e91e2caf9c65c729198c600d77" name="tests/test_161_FetchBothNestedSelects_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b4c1b387ddc13d619d1d76b755583289" name="tests/test_162_FetchBothNestedSelects_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="426dc7ba66f04e941e515e568ae9dd9a" name="tests/test_163_FetchBothBinary.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="6e8bd1a5ee8d516ae4ea88a599084e3d" name="tests/test_180_StmtErrMsg.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="0ceb1fdfd9141f2e4ed7181d9583c4ce" name="tests/test_190_ColumnsTable_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="09100de672e597c066894e1c4d5ef23c" name="tests/test_191_ColumnsTable_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="24a034809fa078cb69e87a60a96667ec" name="tests/test_192_ColumnsTable_03.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="0ced17eb59bfe2ac3699c39512c29301" name="tests/test_193_RetrieveCLOBColFwdOnly.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="91e94726e7e295c266369790f80a859e" name="tests/test_194_RetrieveCLOBColScrollable.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="f8518282cdfcdf1154892a5db9fbf3c8" name="tests/test_195_InsertRetrieveXMLData_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="3d9083b761028332f27beda86c821a03" name="tests/test_196_InsertRetrieveXMLData_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="3172e33aeb226d9550a266d96a8d3fd9" name="tests/test_197_StatisticsIndexes.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="1d6bc002e7e80baf1bde07d5140d9140" name="tests/test_198_LobReadWriteFromMemory.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="39deef54e36c434177f5e5963a9c9809" name="tests/test_200_MultipleRsltsetsUniformColDefs.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="1558d76167c4aac0658fae6ef4ef7cf6" name="tests/test_201_MultipleRsltsetsDiffColDefs.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="26b63cc9a8803abb42f4290dc43e1b80" name="tests/test_210_FieldDisplaySize_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="74fa38d355758d45e474b06fc5dcf750" name="tests/test_211_FieldDisplaySize_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="44c625b237190e99dbe5eb3552355572" name="tests/test_212_FieldDisplaySize_03.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="0e16253cbe6c1b4fc719dac498f22dda" name="tests/test_213_FieldDisplaySize_04.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="48a3a75fc25132043f178b2a94ddf335" name="tests/test_220_PersistentConn.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="67692c852b55ea9b4489247b95bab7d9" name="tests/test_221_100PersistentConns.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="bdfd0777dd8f3cd0b549fac6efd8ee8e" name="tests/test_230_FieldTypePos.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="093cb505af7ddca6b8d74309cc204709" name="tests/test_231_FieldTypeName.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="558e2858c75bf8dfdb7dd82f4a6152c5" name="tests/test_232_FieldTypePosName.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="eaacc7d1063594821bd84ec0185579e2" name="tests/test_240_FieldWidthPosName_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="9ac91d8b8f3f066060c4d1475980e49f" name="tests/test_241_FieldWidthPosName_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b12af12d3c17b5301e253e9c5c947e47" name="tests/test_250_FreeResult_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="502593cbf694453d802f1aa5ac1a0a00" name="tests/test_251_FreeResult_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="77b697c0ce5b0f73c4a466f6115b21e8" name="tests/test_252_FreeResult_03.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="cdc7d1ac1a3a5c3fd8f083aa6fea0a20" name="tests/test_260_FetchObject.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="7670e312bacc05d7b99440576976e059" name="tests/test_261_FetchObjectAccess.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="48570d8f039bd7a52d4d7ca75e749c16" name="tests/test_263_XML_OUTParamsInSPs.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="980a1f439391ebd458db90b132d2ec6c" name="tests/test_264_InsertRetrieveBIGINTTypeColumn.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="5d397dad0eccd5fe19b8accaf4da49e9" name="tests/test_300_ServerInfo.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="781e39cad373b82c617b6a44c5a95973" name="tests/test_310_ClientInfo.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="ba9f30944d79104c9c8eeb922d424073" name="tests/test_320_EscapeString.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="6c5af05b8881963473a5c2b9f6be009d" name="tests/test_321_ResultFetchArraysLobsXMLTypes.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="e83f1a5210f58debad9f7c76e37240ed" name="tests/test_1551_FetchAssocBinary.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="ed50f10e566945c7311ef9f049951577" name="tests/test_6528_ScopingProblemBindParam.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="4d7cd503e633f5440e5e807bbe1d82bb" name="tests/test_6561_ReturnNULLValues.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="e8e6237b4ac957504d2fae6047ce5a8a" name="tests/test_6572_SQLStringsContNULLChar.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="7b46dfb4b0d1cc2fe3e86a23115e0112" name="tests/test_6755_ExtraNULLChar_ResultCLOBCol.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="34a0ebe73582cb632948017f5c324be4" name="tests/test_9173_ProcedurePersistentConn.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="7af33703807c0d763b5612b3db3feb56" name="tests/test_9194_FetchBothCLOBColumns.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="30f487a3fbfe59fb1aed75109d20a945" name="tests/test_10353_MemLeak.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="19519a2803dafdba5657f32a78a153bc" name="tests/test_10931_LcaseTableName.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="89d0f61cbc77172ec1e7f8083c8d5365" name="tests/test_clob_special_char.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="3af13b276cf69492c7a91413e7252e61" name="tests/test_decfloat.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="3ee58e26e0a080c9655f9aaee1128873" name="tests/test_graphic_data_type.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="f0ee6afe6e6908104852fe5ccff0f0b7" name="tests/test_last_insert_id.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="99bf845c00dd475a67d9f1caba650dfc" name="tests/test_queryTimeout.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b2d63e4971eb8332a566abfed4f697cb" name="tests/test_RealDataType.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="7a703b223f0f989f4f2d0b72879aea14" name="tests/test_timestamp.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b54566ebbbbc1e20777f8a2673fc9f4f" name="tests/test_trusted_context_connect.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="9a739540e2faac11cdde5828455e2b97" name="tests/test_trusted_context_pconnect.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="d777ef5a14ade8e9e76098f6cd96b595" name="tests/test_000_PrepareDb.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b3866aef971948c877a30d6c1f7fcef2" name="tests/trusted_connection.inc" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="3ee58e26e0a080c9655f9aaee1128873" name="tests/test_graphic_data_type.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="d975620ff30ed4081c2de9ceed9f0f8f" name="tests/test_check_rollback.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="06813f64908bb906f4c58b3261df2234" name="tests/test_connect_deallocator.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="e21e67b72873e0cf22dbd7095f89aa97" name="tests/test_execute_many.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="5b8d50bb435987c02b187143f089d753" name="tests/test_bigint.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="afecec30199f168e3fb82c771b64cb43" name="tests/test_V6_002_ConnDbUncatalogedConn.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_023_ColumnPrivileges.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="551863f24ccd2dcafcc1bbc414952dce" name="tests/test_V6_039_FetchRowIndexPosNested_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="77d6223b4bbd90143da69e0f2e7c3864" name="tests/test_V6_041_FetchArrayMany_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_053_SetAutocommit_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="8e854f13811c8c586cc47b7cf7e018d1" name="tests/test_V6_060_Tables_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="9ec6d65bb847fd394ce87dd9f7410daa" name="tests/test_V6_061_Tables_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="480e7995627cfaaf6eb9177b3ddbd3cd" name="tests/test_V6_062_Tables_03.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="65279dd747aae2b01c3397970476b81e" name="tests/test_V6_064_Tables_05.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="3df4c80ae3f064270cc850223ef24baf" name="tests/test_V6_065_FilterTableName.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="a5fbbb4eacd3b30e241c449c4bf649da" name="tests/test_V6_066_TableObjects.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="8d7d09c66804ae604ca22e981ac6b1c2" name="tests/test_V6_080_ConnWrongDbAlias.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="d3682df139d4a24561a55899c22bfe4f" name="tests/test_V6_090_ConnmsgWrongDbAlias.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_091_ConnmsgWrongUser.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_092_ConnmsgWrongPwd.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_102_NumFieldsSelect_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_10353.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_10353_MemLeak.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="767b62067961358779fe988b5ca80491" name="tests/test_V6_10931_LcaseTableName.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="770c40f179cdd90493c0be08b233e82b" name="tests/test_V6_131a_PrepExecuteDataTypeConversionsErrs.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="f24d507906487cc95ca83ca649973233" name="tests/test_V6_133_ExecuteLongInputParams.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="539b753db362996e167fc24008951dbd" name="tests/test_V6_148_CallSPDiffBindPattern_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b71248d076dd0fb4378478c1d47fa990" name="tests/test_V6_149_CallSPDiffBindPattern_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="138770d6b7a02aaa360f26a1ea9a9541" name="tests/test_V6_160_FetchBoth.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="ecea8bb1c3bb410c8852f209fb4e6ea4" name="tests/test_V6_161_FetchBothNestedSelects_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="df60f7398c5b099a63e50e90eabd22d8" name="tests/test_V6_162_FetchBothNestedSelects_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="9b1b4c3810810c33fd410305dc3d4520" name="tests/test_V6_180_StmtErrMsg.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="406e2850f4e7bc631d9707afccc25fac" name="tests/test_V6_191_ColumnsTable_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="887f55bc5f2253c5945a71f70601350f" name="tests/test_V6_192_ColumnsTable_03.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="608fe8e01072f26aa79f654725935acb" name="tests/test_V6_194_RetrieveCLOBColScrollable.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_195_InsertRetrieveXMLData_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_196_InsertRetrieveXMLData_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="d33768cfac39cb30b97a61d505f29df6" name="tests/test_V6_197_StatisticsIndexes.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="85ada37608c651c8b6d6a8faca2f30e1" name="tests/test_V6_197_StatisticsIndexes_with_lib_1028_issue.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_198_LobReadWriteFromMemory.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="4f94b927a737a5019689ce8866423f54" name="tests/test_V6_201_MultipleRsltsetsDiffColDefs.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="4e075dc7192e9b0ca6e004e682d61dda" name="tests/test_V6_240_FieldWidthPosName_01.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="07c21e13ff9507d225759393596196bf" name="tests/test_V6_241_FieldWidthPosName_02.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b3b934f738ecc001a4372b4dfbe243b8" name="tests/test_V6_260_FetchObject.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_263_XML_OUTParamsInSPs.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="28f27ca1a5407adb2b7d40aca4c529f8" name="tests/test_V6_300_ServerInfo.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b34a1ea700d3f420ebb31d0adfca6ee8" name="tests/test_V6_310_ClientInfo.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="9c7d13a89b52b2f92fd3aaee1e3577fe" name="tests/test_V6_320_EscapeString.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_321_ResultFetchArraysLobsXMLTypes.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="c1af0f2dc9dbd521b8de0a6f6ed5ce16" name="tests/test_V6_6792_FieldTypeRetStrDatetimeTimestamp.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="34a0ebe73582cb632948017f5c324be4" name="tests/test_V6_9173_ProcedurePersistentConn.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="796db5500652a5dd9bd1aec6231fbc7b" name="tests/test_V6_bigint.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_clob_special_char.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="43559e777b63a06807cb2ddf3f60fd3d" name="tests/test_V6_connect_deallocator.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_execute_many.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_graphic_data_type.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="421e1d22f9b0dc513ccb92617bee0a32" name="tests/test_V6_hebrew.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="e19b53f94f5920484e406b719597d359" name="tests/test_V6_ini_i5_all_pconnect.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="22e3eca33e8e99c58164ea43cc23592c" name="tests/test_V6_ini_i5_allow_commit.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="5866fca8dc7f7548bb674de74635c236" name="tests/test_V6_ini_i5_blank_userid.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="b3071aac864ba1f6accc45c39ade9dc5" name="tests/test_V6_ini_i5_check_pconnect.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="f7723908eedbe827a5c46fe0f53d7193" name="tests/test_V6_ini_i5_guard_profile.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="654d55583e051d17227bdb12da912cf4" name="tests/test_V6_ini_i5_ignore_userid.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="4d29735865d50d5e52154bb1f471eb31" name="tests/test_V6_ini_i5_max_pconnect.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="73e32d917156327df38ec435d9d83d6b" name="tests/test_V6_ini_i5_servermode_subsystem.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="47528ff6441a248d748d3a55d819febd" name="tests/test_V6_ini_i5_sys_naming.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="ce01f244a3dd53444c512dc7aaf356cf" name="tests/test_V6_last_insert_id.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="0cda903fcac47393a6d6a98f8f498ed5" name="tests/test_V6_timestamp.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_trusted_context_connect.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="35bef46667af75fe2af49678cf7235d0" name="tests/test_V6_trusted_context_pconnect.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="59b6169d3ac1ff9afc32b806b70b765e" name="tests/test_x001_IBMi_LUW_DB2_I5_NAMING_ON.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="e1ee0f8c34fe01c31a28881573dede56" name="tests/test_x002_IBMi_LUW_DB2_I5_TXN_NO_COMMIT.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="bb50774ad5c43b05700793eaad4289a7" name="tests/test_x010_IBMi_LUW_DB2_I5_FMT.phpt" role="test" />
+   <file baseinstalldir="ibm_db2" md5sum="cfcb2edf9f657735355070d4bf5509b8" name="config.m4" role="src" />
+   <file baseinstalldir="ibm_db2" md5sum="415f5c9831bba062629df9a002644945" name="config.w32" role="src" />
+   <file baseinstalldir="ibm_db2" md5sum="216e685d13e0dc96303e4f96435a509b" name="ibm_db2.c" role="src" />
+   <file baseinstalldir="ibm_db2" md5sum="50c8871b7921a625bd09104fb19a677a" name="ibm_db2.dsp" role="src" />
+   <file baseinstalldir="ibm_db2" md5sum="e2fe73e5e32f36c88256c1ea84ea1143" name="php_ibm_db2.h" role="src" />
+   <file baseinstalldir="ibm_db2" md5sum="bed3d9c095178e7089183faff85ff506" name="TODO" role="doc" />
+   <file baseinstalldir="ibm_db2" md5sum="2565745239557cee06d0fc4b2bbf05a5" name="LICENSE" role="doc" />
+  </dir>
  </contents>
  <dependencies>
   <required>
