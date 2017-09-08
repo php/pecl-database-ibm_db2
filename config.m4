@@ -8,7 +8,7 @@ dnl without editing.
 dnl If your extension references something external, use with:
 
 PHP_ARG_WITH(IBM_DB2, for IBM_DB2 support,
-[  --with-IBM_DB2=[DIR]      Include IBM DB2 Univeral Database and Cloudscape support.
+[  --with-IBM_DB2=[DIR]      Include IBM DB2 Universal Database and Cloudscape support.
                           DIR is the location of the DB2 application development 
                           headers and libraries. Set the PHP_IBM_DB2_LIB
                           environment variable to set the specific location of
