@@ -472,7 +472,7 @@ static void _php_db2_errorlog(const char * format, ...)
 
 /* {{{ static int _php_db2_hash_find_ind(const char * varname, int varlen, zval ***bind_data)
     */
-static int _php_db2_hash_find_ind(char * varname, int varlen, zval **temp, zval ***bind_data, zend_array ** symbol_table_used)
+static int _php_db2_hash_find_ind(char * varname, int varlen, zval **temp, zval ***bind_data, zend_array ** symbol_table_used TSRMLS_DC)
 {
     int rc = FAILURE;
     zend_array * symbol_table_local; /* php 5.3+, php 7+ */
@@ -518,12 +518,12 @@ static int _php_db2_hash_find_ind(char * varname, int varlen, zval **temp, zval 
 
 /* {{{ static void _php_db2_set_symbol(char * varname, zval *var)
     */
-static void _php_db2_set_symbol(char * varname, zval *var)
+static void _php_db2_set_symbol(char * varname, zval *var TSRMLS_DC)
 {
     zval **bind_data;       /* Data value from symbol table */
     zval *temp = NULL;
     zend_array * symbol_table_used; /* php 5.3+, php 7+ */
-    if (_php_db2_hash_find_ind(varname, strlen(varname), &temp, &bind_data, &symbol_table_used) != FAILURE ) {
+    if (_php_db2_hash_find_ind(varname, strlen(varname), &temp, &bind_data, &symbol_table_used TSRMLS_CC ) != FAILURE ) {
 #if PHP_MAJOR_VERSION >= 7
         /* $mydata = 3;
          * function callme () {
@@ -4749,7 +4749,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
                 convert_to_string(*bind_data);
             }
             /* make sure out and inout param allocation large enough for full length writes */
-            if ((rc = (_php_db2_bind_pad(curr, nullterm, isvarying, isbinary, &origlen, bind_data))) == SQL_ERROR) {
+            if ((rc = (_php_db2_bind_pad(curr, nullterm, isvarying, isbinary, &origlen, bind_data TSRMLS_CC))) == SQL_ERROR) {
                 return SQL_ERROR;
             }
             break;
@@ -4925,7 +4925,7 @@ static int _php_db2_execute_helper(stmt_handle *stmt_res, zval **data, int bind_
         /* Used when no parameters array is passed in */
         curr = stmt_res->head_cache_list;
         while (curr != NULL ) {
-            if (_php_db2_hash_find_ind(curr->varname, strlen(curr->varname), &temp, &bind_data, &symbol_table_used) != FAILURE ) {
+            if (_php_db2_hash_find_ind(curr->varname, strlen(curr->varname), &temp, &bind_data, &symbol_table_used TSRMLS_CC) != FAILURE ) {
                 rc = _php_db2_bind_data( stmt_res, curr, bind_data TSRMLS_CC);
                 if ( rc == SQL_ERROR ) {
                     php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binding Error 1");
@@ -5250,7 +5250,7 @@ PHP_FUNCTION(db2_execute)
                         /* bind in the value of long_value instead */
                         tmp_curr->value->value.lval = (long)tmp_curr->long_value;
                     }
-                    _php_db2_set_symbol(tmp_curr->varname, tmp_curr->value);
+                    _php_db2_set_symbol(tmp_curr->varname, tmp_curr->value TSRMLS_CC);
                 default:
                     break;
             }

@@ -18,11 +18,11 @@ Cloudscape, and Apache Derby databases.</description>
   <email>opendev@us.ibm.com</email>
   <active>yes</active>
  </lead>
- <date>2017-09-21</date>
- <time>13:05:12</time>
+ <date>2017-10-13</date>
+ <time>10:24:59</time>
  <version>
-  <release>2.0.0</release>
-  <api>2.0.0</api>
+  <release>2.0.1</release>
+  <api>2.0.1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -33,6 +33,7 @@ Cloudscape, and Apache Derby databases.</description>
 Fixed : signal 11 in db2_pconnect
 Fixed : Security flaw with using user and password for hashing in db2_pconnect.
 Fxied : Local scope bound values in a class are not used
+Fixed : Compilation issue of PHP-5.6 in windows.
  </notes>
  <contents>
   <dir name="/">
@@ -292,9 +293,9 @@ Fxied : Local scope bound values in a class are not used
    <file baseinstalldir="ibm_db2" md5sum="bb50774ad5c43b05700793eaad4289a7" name="tests/test_x010_IBMi_LUW_DB2_I5_FMT.phpt" role="test" />
    <file baseinstalldir="ibm_db2" md5sum="cfcb2edf9f657735355070d4bf5509b8" name="config.m4" role="src" />
    <file baseinstalldir="ibm_db2" md5sum="415f5c9831bba062629df9a002644945" name="config.w32" role="src" />
-   <file baseinstalldir="ibm_db2" md5sum="115105ba4ab1be3dd45eae248a10488c" name="ibm_db2.c" role="src" />
+   <file baseinstalldir="ibm_db2" md5sum="f2a23d02b38535e9675e1d1d84b807f1" name="ibm_db2.c" role="src" />
    <file baseinstalldir="ibm_db2" md5sum="50c8871b7921a625bd09104fb19a677a" name="ibm_db2.dsp" role="src" />
-   <file baseinstalldir="ibm_db2" md5sum="21c0bc17c35778dfa3210cbfffe22123" name="php_ibm_db2.h" role="src" />
+   <file baseinstalldir="ibm_db2" md5sum="64f5c860e1b5e650e58d112409be7419" name="php_ibm_db2.h" role="src" />
    <file baseinstalldir="ibm_db2" md5sum="bed3d9c095178e7089183faff85ff506" name="TODO" role="doc" />
    <file baseinstalldir="ibm_db2" md5sum="2565745239557cee06d0fc4b2bbf05a5" name="LICENSE" role="doc" />
    <file baseinstalldir="ibm_db2" md5sum="e48e9a9ff6da12b687451d60f70794f3" name="CONTRIBUTING.md" role="doc" />
