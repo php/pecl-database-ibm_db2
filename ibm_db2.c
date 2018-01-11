@@ -5077,7 +5077,11 @@ PHP_FUNCTION(db2_execute)
     }
 
 #if PHP_MAJOR_VERSION >= 7
+#if PHP_MINOR_VERSION >= 2
+    if (parameters_array && Z_TYPE_P(parameters_array) == IS_ARRAY && (Z_TYPE_FLAGS_P(parameters_array) & IS_TYPE_COPYABLE)) {
+#else
     if (parameters_array && Z_TYPE_P(parameters_array) == IS_ARRAY && (Z_TYPE_FLAGS_P(parameters_array) & IS_TYPE_IMMUTABLE)) {
+#endif
         SEPARATE_ARRAY(parameters_array);
     }
 #endif
@@ -7779,7 +7783,11 @@ PHP_FUNCTION( db2_execute_many )
     }
 
 #if PHP_MAJOR_VERSION >= 7
+#if PHP_MINOR_VERSION >= 2
+    if (params && Z_TYPE_P(params) == IS_ARRAY && (Z_TYPE_FLAGS_P(params) & IS_TYPE_COPYABLE)) {
+#else
     if (params && Z_TYPE_P(params) == IS_ARRAY && (Z_TYPE_FLAGS_P(params) & IS_TYPE_IMMUTABLE)) {
+#endif
         SEPARATE_ARRAY(params);
     }
 #endif
