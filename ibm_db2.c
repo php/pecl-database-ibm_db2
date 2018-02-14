@@ -5077,9 +5077,15 @@ PHP_FUNCTION(db2_execute)
     }
 
 #if PHP_MAJOR_VERSION >= 7
-    if (parameters_array && Z_TYPE_P(parameters_array) == IS_ARRAY && (Z_TYPE_FLAGS_P(parameters_array) & IS_TYPE_IMMUTABLE)) {
-        SEPARATE_ARRAY(parameters_array);
-    }
+    #if PHP_MINOR_VERSION >= 2
+        if (parameters_array && Z_TYPE_P(parameters_array) == IS_ARRAY && (Z_TYPE_FLAGS_P(parameters_array) & IS_TYPE_COPYABLE)) {
+            SEPARATE_ARRAY(parameters_array);
+        }
+    #else
+        if (parameters_array && Z_TYPE_P(parameters_array) == IS_ARRAY && (Z_TYPE_FLAGS_P(parameters_array) & IS_TYPE_IMMUTABLE)) {
+            SEPARATE_ARRAY(parameters_array);
+        }
+    #endif
 #endif
 
     ZEND_FETCH_RESOURCE_NEW(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
@@ -7779,9 +7785,15 @@ PHP_FUNCTION( db2_execute_many )
     }
 
 #if PHP_MAJOR_VERSION >= 7
-    if (params && Z_TYPE_P(params) == IS_ARRAY && (Z_TYPE_FLAGS_P(params) & IS_TYPE_IMMUTABLE)) {
-        SEPARATE_ARRAY(params);
-    }
+    #if PHP_MINOR_VERSION >= 2
+        if (params && Z_TYPE_P(params) == IS_ARRAY && (Z_TYPE_FLAGS_P(params) & IS_TYPE_COPYABLE)) {
+            SEPARATE_ARRAY(params);
+        }
+    #else
+        if (params && Z_TYPE_P(params) == IS_ARRAY && (Z_TYPE_FLAGS_P(params) & IS_TYPE_IMMUTABLE)) {
+            SEPARATE_ARRAY(params);
+        }
+    #endif
 #endif
 
     ZEND_FETCH_RESOURCE_NEW(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
