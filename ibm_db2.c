@@ -239,6 +239,7 @@ typedef struct _conn_handle_struct {
 #ifdef PASE /* IBM i overrides php.ini */
     long c_i5_dbcs_alloc;       /* orig  - IBM i 6x space for CCSID<>UTF-8 convert  (DBCS customer issue) */
     long c_i5_max_pconnect;     /* 1.9.7 - IBM i count max usage connection recycle (customer issue months live connection)  */
+	long c_i5_executing;		/* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
 #endif /* PASE */
     /* 1.9.7 - IBM i + LUW 10.5 system naming on (*libl)/file.mbr */
     long c_i5_sys_naming;           /* 1.9.7 - IBM i + LUW DB2 Connect 10.5 system naming (customer *LIBL issues) */
@@ -284,8 +285,8 @@ typedef struct _stmt_handle_struct {
     long cursor_type;
     long s_case_mode;
     long s_rowcount;
-#ifdef PASE /* IBM i override php.ini */
-    long s_i5_dbcs_alloc;
+#ifdef PASE /* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
+	conn_handle * s_i5_conn_parent;
 #endif /* PASE */
     SQLSMALLINT error_recno_tracker;
     SQLSMALLINT errormsg_recno_tracker;
@@ -829,8 +830,8 @@ static stmt_handle *_db2_new_stmt_struct(conn_handle* conn_res)
     stmt_res->cursor_type = conn_res->c_cursor_type;
     stmt_res->s_case_mode = conn_res->c_case_mode;
 
-#ifdef PASE /* IBM i allow 6x DBCS convert php.ini */
-    stmt_res->s_i5_dbcs_alloc   = conn_res->c_i5_dbcs_alloc;
+#ifdef PASE /* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
+	stmt_res->s_i5_conn_parent = conn_res;
 #endif /* PASE */
 
     stmt_res->expansion_factor = conn_res->expansion_factor;
@@ -2172,7 +2173,7 @@ static int _php_db2_get_result_set_info(stmt_handle *stmt_res TSRMLS_DC)
                 break;
         }
 #ifdef PASE /* i5/OS DBCS may have up to 6 times growth in column alloc size on convert */
-        if (stmt_res->s_i5_dbcs_alloc > 0) {
+		if (stmt_res->s_i5_conn_parent->c_i5_dbcs_alloc > 0) {
             switch (stmt_res->column_info[i].type) {
                 case SQL_CHAR:
                 case SQL_VARCHAR:
@@ -2579,6 +2580,11 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
                     reused = 1;
                 } /* else will re-connect since connection is dead */
 #else
+				/* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
+				if (conn_res->c_i5_executing) {
+					conn_res->flag_pconnect = 9;
+					conn_res->c_i5_executing = 0;
+				} else {
                 /* 1.9.7 - IBM i remote persistent connection or long lived local (customer issue dead connection) */
                 /* 1.9.7 - IBM i i5/OS DB2 Maid Service (monitor QSQSRVR jobs) */
                 /* 1.9.7 - IBM i level 4: try conn new statement (check statement) */
@@ -2638,6 +2644,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
                     /* close sets conn_res->flag_pconnect=9 */
                     _php_db2_close_now(conn_res, 1 TSRMLS_CC);
                 }
+				} /* 1.9.9 executing */
                 reused = 1;
 #endif /* PASE */
             }
@@ -2708,6 +2715,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
             }
 #ifdef PASE /* 1.9.7 - IBM i count max usage connection recycle (customer issue months live connection) */
             conn_res->c_i5_max_pconnect = IBM_DB2_G(i5_max_pconnect);
+			conn_res->c_i5_executing = 0; /* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
 #endif /* PASE */
         }
 
@@ -4254,7 +4262,13 @@ static int _php_db2_execute_stmt(stmt_handle *stmt_res TSRMLS_DC)
 {
     int rc;
 
+#ifdef PASE /* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
+	stmt_res->s_i5_conn_parent->c_i5_executing = 1;
+#endif /* PASE */
     rc = SQLExecute((SQLHSTMT)stmt_res->hstmt);
+#ifdef PASE /* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
+	stmt_res->s_i5_conn_parent->c_i5_executing = 0;
+#endif /* PASE */
     if ( rc == SQL_ERROR ) {
         _php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
     }
@@ -4312,7 +4326,13 @@ PHP_FUNCTION(db2_exec)
             }
         }
 
+#ifdef PASE /* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
+		stmt_res->s_i5_conn_parent->c_i5_executing = 1;
+#endif /* PASE */
         rc = SQLExecDirect((SQLHSTMT)stmt_res->hstmt, stmt_string , stmt_string_len);
+#ifdef PASE /* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
+		stmt_res->s_i5_conn_parent->c_i5_executing = 0;
+#endif /* PASE */
         if ( rc == SQL_ERROR ) {
             _php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
         }
@@ -4548,7 +4568,10 @@ static int _php_db2_bind_pad(param_node *curr, int nullterm, int isvarying, int 
      */
     if (IS_INTERNED(ZEND_STR(*data))) {
 #if PHP_MAJOR_VERSION >= 7
-        Z_STR_P(*data) = zend_string_init(ZEND_Z_STRVAL_PP(data), ZEND_Z_STRLEN_PP(data), 0);
+		/* Need use macro assignment to avoid leak in php 7. (Thanks Dimitry) 
+		 * Z_STR_P(*data) = zend_string_init(ZEND_Z_STRVAL_PP(data), ZEND_Z_STRLEN_PP(data), 0);
+		 */
+        ZVAL_STR(*data, zend_string_init(ZEND_Z_STRVAL_PP(data), ZEND_Z_STRLEN_PP(data), 0));
 #else
         ZEND_Z_STRVAL_PP(data) = estrndup(ZEND_Z_STRVAL_PP(data), ZEND_Z_STRLEN_PP(data));
 #endif
@@ -4557,7 +4580,10 @@ static int _php_db2_bind_pad(param_node *curr, int nullterm, int isvarying, int 
     /* make enough space for full write */
     if (*poriglen < curr->param_size) {
 #if PHP_MAJOR_VERSION >= 7
-        Z_STR_P(*data) = zend_string_extend(Z_STR_P(*data), curr->param_size + nullterm, 0);
+		/* Need use macro assignment in php 7 (follow pattern zend_string_init)
+		 * Z_STR_P(*data) = zend_string_extend(Z_STR_P(*data), curr->param_size + nullterm, 0);
+		 */
+		ZVAL_STR(*data, zend_string_extend(Z_STR_P(*data), curr->param_size + nullterm, 0));
 #else
         ZEND_Z_STRVAL_PP(data) = erealloc(ZEND_Z_STRVAL_PP(data), curr->param_size + nullterm);
 #endif
@@ -5077,7 +5103,7 @@ PHP_FUNCTION(db2_execute)
     }
 
 #if PHP_MAJOR_VERSION >= 7
-    if (parameters_array && Z_TYPE_P(parameters_array) == IS_ARRAY && (Z_TYPE_FLAGS_P(parameters_array) & IS_TYPE_IMMUTABLE)) {
+    if (parameters_array && Z_TYPE_P(parameters_array) == IS_ARRAY && (Z_TYPE_FLAGS_P(parameters_array) & (IS_TYPE_COPYABLE & !IS_TYPE_REFCOUNTED))) {
         SEPARATE_ARRAY(parameters_array);
     }
 #endif
@@ -5180,7 +5206,13 @@ PHP_FUNCTION(db2_execute)
     } else {
         /* No Parameters */
         /* We just execute the statement. No additional work needed. */
+#ifdef PASE /* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
+		stmt_res->s_i5_conn_parent->c_i5_executing = 1;
+#endif /* PASE */
         rc = SQLExecute((SQLHSTMT)stmt_res->hstmt);
+#ifdef PASE /* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
+		stmt_res->s_i5_conn_parent->c_i5_executing = 0;
+#endif /* PASE */
         if ( rc == SQL_ERROR ) {
             php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Execute Failed");
             _php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -5189,7 +5221,13 @@ PHP_FUNCTION(db2_execute)
         RETURN_TRUE;
     }
     /* Execute Stmt -- All parameters bound */
+#ifdef PASE /* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
+	stmt_res->s_i5_conn_parent->c_i5_executing = 1;
+#endif /* PASE */
     rc = SQLExecute((SQLHSTMT)stmt_res->hstmt);
+#ifdef PASE /* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
+	stmt_res->s_i5_conn_parent->c_i5_executing = 0;
+#endif /* PASE */
     if ( rc == SQL_ERROR ) {
         php_error_docref(NULL TSRMLS_CC, E_WARNING, "Statement Execute Failed");
         _php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -5438,8 +5476,8 @@ PHP_FUNCTION(db2_next_result)
         new_stmt_res->s_bin_mode = stmt_res->s_bin_mode;
         new_stmt_res->cursor_type = stmt_res->cursor_type;
         new_stmt_res->s_case_mode = stmt_res->s_case_mode;
-#ifdef PASE /* i5 override php.ini */
-        new_stmt_res->s_i5_dbcs_alloc = stmt_res->s_i5_dbcs_alloc;
+#ifdef PASE /* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
+		new_stmt_res->s_i5_conn_parent = stmt_res->s_i5_conn_parent;
 #endif /* PASE */
         new_stmt_res->head_cache_list = NULL;
         new_stmt_res->current_node = NULL;
@@ -5953,7 +5991,7 @@ static RETCODE _php_db2_get_length(stmt_handle* stmt_res, SQLUSMALLINT col_num, 
     }
 #ifdef PASE /* i5/OS special DBCS */
     if (*sLength != SQL_NULL_DATA){
-        if (stmt_res->s_i5_dbcs_alloc > 0) {
+		if (stmt_res->s_i5_conn_parent->c_i5_dbcs_alloc > 0) {
             switch (stmt_res->column_info[col_num-1].type) {
                 case SQL_CHAR:
                 case SQL_VARCHAR:
@@ -7779,7 +7817,7 @@ PHP_FUNCTION( db2_execute_many )
     }
 
 #if PHP_MAJOR_VERSION >= 7
-    if (params && Z_TYPE_P(params) == IS_ARRAY && (Z_TYPE_FLAGS_P(params) & IS_TYPE_IMMUTABLE)) {
+    if (params && Z_TYPE_P(params) == IS_ARRAY && (Z_TYPE_FLAGS_P(params) & (IS_TYPE_COPYABLE & !IS_TYPE_REFCOUNTED))) {
         SEPARATE_ARRAY(params);
     }
 #endif
