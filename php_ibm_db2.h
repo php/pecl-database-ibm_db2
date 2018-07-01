@@ -19,8 +19,6 @@
   |          Dan Scott, Helmut Tessarek, Ambrish Bhargava,               |
   |          Rahul Priyadarshi                                           |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #define	PHP_IBM_DB2_VERSION	"2.0.4"
