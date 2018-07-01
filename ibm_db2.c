@@ -19,8 +19,6 @@
   |          Tony Cairns, Krishna Raman, Ambrish Bhargava,               |
   |          Rahul Priyadarshi, Praveen Devarao,                         |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
