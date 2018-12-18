@@ -33,11 +33,21 @@ Procedure to install the ibm_db2 extension in Linux or Unix:
 5. Optional: If the PHP application that is connecting to an IBM database server is running ini
    the HTTP server environment, add the LD_LIBRARY_PATH variable in the httpd.conf file.
 
+Procedure to configure the ibm_db2 extension in Windows:
+
+1. Download the php_ibm_db2 DLLs for PHP 7.x(7.0, 7.1, 7.2) from below link.
+   https://github.com/ibmdb/php_ibm_db2
+   
+2. Open the php.ini file in an editor of your choice. Edit the extension entry in the
+   php.ini file in the <local_php_directory>\php\lib directory to reference the PHP driver:
+	  extension=php_ibm_db2
+   
+Blog to install and compile PHP ibm_db2 for Linux and windows is pasted below.
+   https://www.ibm.com/developerworks/community/blogs/96960515-2ea1-4391-8170-b0515d08e4da/entry/Install_PHP_ibm_db2_Driver?lang=en
+   
 Contributing:
 
 See CONTRIBUTING.md
 
 The developer sign-off should include the reference to the DCO in defect remarks(example below):
 DCO 1.1 Signed-off-by: Random J Developer <random@developer.org>
-
-
