@@ -13,7 +13,7 @@ if ($conn) {
     db2_close($conn);
 }
 else {
-    echo "Connection failed.";
+    echo "Connection failed: " . db2_conn_errormsg();
 }
 
 ?>
