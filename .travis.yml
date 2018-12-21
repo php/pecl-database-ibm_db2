@@ -30,6 +30,8 @@ script:
   Database=sample
   EOF
 - cat db2cli.ini
+# Ensure that tests are not skipped (false positive) due to bad configuration
+- export IBM_DB2_TEST_SKIP_CONNECT_FAILURE=0
 # Ensure CLI can find the configuration
 - export DB2CLIINIPATH=$PWD
 # Ensure make returns non-zero when a test fails
