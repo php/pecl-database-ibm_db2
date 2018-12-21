@@ -1,0 +1,30 @@
+# phpize stuff
+.libs
+Makefile*
+*.m4
+autom4te.cache
+build
+config.*
+configure*
+ibm_db2.la
+ibm_db2.lo
+install-sh
+libtool
+ltmain.sh
+missing
+mkinstalldirs
+modules
+run-tests.php
+tmp-php.ini
+
+# phpt generated files
+tests/*.diff
+tests/*.exp
+tests/*.log
+tests/*.out
+tests/*.sh
+tests/*.php
+
+# downloaded cli driver
+clidriver
+
