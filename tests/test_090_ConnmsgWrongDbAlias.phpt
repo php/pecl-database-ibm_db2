@@ -19,4 +19,4 @@ else {
 
 ?>
 --EXPECTF--
-[IBM][CLI Driver] %s SQLSTATE=%d SQLCODE=-%d
+[IBM][CLI Driver] %s SQLCODE=-%d

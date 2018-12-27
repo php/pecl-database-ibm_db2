@@ -1,10 +1,8 @@
 
 Original:                 Some random special characters: 
- , 
- , \ , ' , "  .
+ ,  , \ , ' , "  .
 db2_escape_string:        Some random special characters: 
- , 
- , \ , ' , "  .
+ ,  , \ , ' , "  .
 
 Original:                 Backslash (\). Single quote ('). Double quote (")
 db2_escape_string:        Backslash (\). Single quote ('). Double quote (")
