@@ -13,10 +13,9 @@ if ($conn) {
     echo "??? No way.\n";
 }
 else {
-    $err = db2_conn_error();
-    echo $err."\n";
+    echo var_dump(db2_conn_error());
 }
 
 ?>
 --EXPECTF--
-0800%d
+string(5) "%s"

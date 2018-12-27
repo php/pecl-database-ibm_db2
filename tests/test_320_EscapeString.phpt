@@ -14,9 +14,6 @@ if ($conn) {
 	$create = 'CREATE TABLE escapeit(id INTEGER, info VARCHAR(200))';
 	$result = @db2_exec($conn, $create);
 
-	$orig = fopen("escape.dat", "rb");
-	$new = fopen("escape_out.dat", "wb");
-
 	$str[0] = "Some random special characters: \n , \r , \ , ' , \"  .";
 	$str[1] = "Backslash (\). Single quote ('). Double quote (\")";
 	$str[2] = "The NULL character \\0 must be escaped manually";
@@ -26,8 +23,9 @@ if ($conn) {
 	$str[6] = "";
 
     $count = 0;
+    $out = "";
 	foreach( $str as $string ) {
-        $escaped = db2_escape_string($string);        
+        $escaped = db2_escape_string($string);
         $insert = "INSERT INTO escapeit VALUES($count, '$escaped')";
         db2_exec($conn, $insert);    
 
@@ -39,19 +37,18 @@ if ($conn) {
         $result = db2_fetch_array($stmt);
         $escapedFromDb = $result[0];        
 
-        fwrite($new, "\n");
-       	fwrite($new, "Original:                 " . $string);
-       	fwrite($new, "\n");
-       	fwrite($new, "db2_escape_string:        " . $escapedFromDb);
-       	fwrite($new, "\n");
-
+        $out .= "\n";
+        $out .=  "Original:                 " . $string;
+        $out .= "\n";
+        $out .= "db2_escape_string:        " . $escapedFromDb;
+        $out .= "\n";
+        
         $count++;
 	}
 
-	$file0 = file_get_contents("escape.dat");
-	$file1 = file_get_contents("escape_out.dat");
+	$in = file_get_contents(dirname(__FILE__)."/escape.dat");
 
-	if(strcmp($file0, $file1) == 0) {
+	if(strcmp($in, $out) == 0) {
 		echo "The files are the same...good.\n";
 	} else {
 		echo "The files are not the same...bad.\n";
