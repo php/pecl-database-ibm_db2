@@ -240,6 +240,7 @@ typedef struct _conn_handle_struct {
     long c_i5_dbcs_alloc;       /* orig  - IBM i 6x space for CCSID<>UTF-8 convert  (DBCS customer issue) */
     long c_i5_max_pconnect;     /* 1.9.7 - IBM i count max usage connection recycle (customer issue months live connection)  */
 	long c_i5_executing;		/* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
+	long c_i5_char_trim;		/* 2.0.3 - IBM i trim spaces character results  (customer size request issue) */
 #endif /* PASE */
     /* 1.9.7 - IBM i + LUW 10.5 system naming on (*libl)/file.mbr */
     long c_i5_sys_naming;           /* 1.9.7 - IBM i + LUW DB2 Connect 10.5 system naming (customer *LIBL issues) */
@@ -453,6 +454,9 @@ PHP_INI_BEGIN()
     /* 1.9.7 - IBM i monitor switch user profile applications (customer security issue) */
     STD_PHP_INI_ENTRY("ibm_db2.i5_guard_profile", "0", PHP_INI_SYSTEM, OnUpdateLong,
         i5_guard_profile, zend_ibm_db2_globals, ibm_db2_globals)
+    /* 2.0.3  - IBM i trim spaces character results  (customer size request issue) */
+    STD_PHP_INI_BOOLEAN("ibm_db2.i5_char_trim", "0", PHP_INI_SYSTEM, OnUpdateLong,
+        i5_char_trim, zend_ibm_db2_globals, ibm_db2_globals)
 #endif /* PASE */
     PHP_INI_ENTRY("ibm_db2.instance_name", NULL, PHP_INI_SYSTEM, NULL)
 PHP_INI_END()
@@ -674,6 +678,7 @@ static void php_ibm_db2_init_globals(zend_ibm_db2_globals *ibm_db2_globals)
     ibm_db2_globals->i5_check_pconnect = 0; /* 1.9.7 - IBM i remote persistent connection or long lived local (customer issue dead connection) */
     ibm_db2_globals->i5_servermode_subsystem = NULL; /* 1.9.7 - IBM i consultant request switch subsystem QSQSRVR job (customer workload issues) */
     ibm_db2_globals->i5_guard_profile = 0;  /* 1.9.7 - IBM i monitor switch user profile applications (customer security issue) */
+    ibm_db2_globals->i5_char_trim = 0;      /* 2.0.3  - IBM i trim spaces character results  (customer size request issue) */
 #endif /* PASE */
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
     memset(i5_handle_refcount,0,sizeof(i5_handle_refcount));
@@ -698,6 +703,7 @@ static void _php_db2_i5_test_helper() {
     if (getenv("IBM_DB_i5_sys_naming")) IBM_DB2_G(i5_sys_naming) = atoi(getenv("IBM_DB_i5_sys_naming"));
     if (getenv("IBM_DB_i5_servermode_subsystem")) IBM_DB2_G(i5_servermode_subsystem) = getenv("IBM_DB_i5_servermode_subsystem");
     if (getenv("IBM_DB_i5_guard_profile")) IBM_DB2_G(i5_guard_profile) = atoi(getenv("IBM_DB_i5_guard_profile"));
+    if (getenv("IBM_DB_i5_char_trim")) IBM_DB2_G(i5_char_trim) = atoi(getenv("IBM_DB_i5_char_trim"));
 }
 #endif /* PASE */
 
@@ -946,6 +952,8 @@ PHP_MINIT_FUNCTION(ibm_db2)
     REGISTER_LONG_CONSTANT("DB2_I5_DBCS_ALLOC_OFF", SQL_FALSE, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("DB2_FIRST_IO", SQL_FIRST_IO, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("DB2_ALL_IO",   SQL_ALL_IO, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("DB2_I5_CHAR_TRIM_ON",  SQL_TRUE, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("DB2_I5_CHAR_TRIM_OFF", SQL_FALSE, CONST_CS | CONST_PERSISTENT);
 #endif /* PASE */
 
     REGISTER_LONG_CONSTANT("DB2_BINARY", 1, CONST_CS | CONST_PERSISTENT);
@@ -1169,6 +1177,12 @@ PHP_MINFO_FUNCTION(ibm_db2)
         php_info_print_table_row(2, "Guard profile (ibm_db2.i5_guard_profile)", "1 - enabled");
     } else {
         php_info_print_table_row(2, "Guard profile (ibm_db2.i5_guard_profile)", "0 - disabled");
+    }
+    /* 2.0.3  - IBM i trim spaces character results  (customer size request issue) */
+    if (IBM_DB2_G(i5_char_trim) > 0) {
+        php_info_print_table_row(2, "Trim spaces character results (ibm_db2.i5_char_trim)", "1 - enabled");
+    } else {
+        php_info_print_table_row(2, "rim spaces character results (ibm_db2.i5_char_trim)", "0 - disabled");
     }
 #endif /* PASE */
     php_info_print_table_end();
@@ -1937,6 +1951,24 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
                 break;
             default:
                 php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_dbcs_alloc (DB2_I5_DBCS_ALLOC_ON, DB2_I5_DBCS_ALLOC_OFF)");
+        }
+    } else if (!STRCASECMP(opt_key, "i5_char_trim")) {
+        /*
+         * DB2_I5_CHAR_TRIM_ON value turns on trim spaces character results .
+         * DB2_I5_CHAR_TRIM_OFF value turns off trim spaces character results .
+         */
+        pvParam = option_num;
+        switch (option_num) {
+            case DB2_I5_CHAR_TRIM_ON:
+                /* override i5_char_trim in php.ini */
+                ((conn_handle*)handle)->c_i5_char_trim = 1;
+                break;
+            case DB2_I5_CHAR_TRIM_OFF:
+                /* override i5_char_trim in php.ini */
+                ((conn_handle*)handle)->c_i5_char_trim = 0;
+                break;
+            default:
+                php_error_docref(NULL TSRMLS_CC, E_WARNING, "i5_char_trim (DB2_I5_CHAR_TRIM_ON, DB2_I5_CHAR_TRIM_OFF)");
         }
     } else if (!STRCASECMP(opt_key, "i5_query_optimize")) {
         /* i5_query_optimize - SQL_ATTR_QUERY_OPTIMIZE_GOAL
@@ -2734,6 +2766,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
 
 #ifdef PASE /* 1.9.7 - move structure attr init one place (code clarity) */
         conn_res->c_i5_dbcs_alloc = IBM_DB2_G(i5_dbcs_alloc); /* orig  - IBM i 6x space for CCSID<>UTF-8 convert  (DBCS customer issue) */
+        conn_res->c_i5_char_trim = IBM_DB2_G(i5_char_trim); /* 2.0.3  - IBM i trim spaces character results  (customer size request issue) */
 #endif /* PASE */
         /* 1.9.7 - moved before _php_db2_parse_options, error ibm_db2.ini isolation was overriding user connect */
         /* 1.9.7 - LUW to IBM i need isolation mode *NONE (required non journal CRTLIB) */
@@ -6383,6 +6416,8 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
     db2_row_data_type *row_data;
     SQLINTEGER out_length, loc_length, tmp_length;
     unsigned char *out_ptr;
+    int i5trim = 0;
+    int i5char;
     if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &stmt, &row_number) == FAILURE) {
         return;
     }
@@ -6490,7 +6525,28 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
                 case SQL_DECIMAL:
                 case SQL_NUMERIC:
                 case SQL_DECFLOAT:
-
+#ifdef PASE /* i5/OS trim spaces */
+					if (stmt_res->s_i5_conn_parent->c_i5_char_trim > 0) {
+						i5trim = strlen((char *)row_data->str_val);
+						for(; i5trim; i5trim--) {
+							i5char = (char)(((char *)row_data->str_val)[i5trim]);
+							if (i5char == 0x00 || i5char == 0x20) {
+								continue;
+							}
+							i5trim++;
+							break;
+						}
+                    	if ( op & DB2_FETCH_ASSOC ) {
+                        	ADD_ASSOC_STRINGL(return_value, (char *)stmt_res->column_info[i].name,
+                            (char *)row_data->str_val, i5trim, 1);
+                    	}
+                    	if ( op & DB2_FETCH_INDEX ) {
+                        	ADD_INDEX_STRINGL(return_value, i, (char *)row_data->str_val,
+                            i5trim, 1);
+                    	}
+                    	break;
+					}
+#endif /* PASE */
                     if ( op & DB2_FETCH_ASSOC ) {
                         ADD_ASSOC_STRINGL(return_value, (char *)stmt_res->column_info[i].name,
                             (char *)row_data->str_val, strlen((char *)row_data->str_val), 1);
