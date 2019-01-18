@@ -3,6 +3,7 @@ IBM-DB2: PECL bug 10353 -- Memory leak testing
 --SKIPIF--
 <?php
   require_once('skipif.inc');
+  if(version_compare(PHP_VERSION, '7.0.0', '<') == 1) die("skip: Test segfaults on PHP 5.6");
 ?>
 --FILE--
 <?php
