@@ -9,9 +9,11 @@ Procedure to install the ibm_db2 extension in Linux or Unix:
    $ export IBM_DB_HOME=/home/db2inst1/sqllib
 
 
-2. Using one of the following three methods, install the ibm_db and pdo_ibm extensions
+2. Using one of the following two methods, install the ibm_db and pdo_ibm extensions
    - Use the pecl install command included in the PHP Extension Community Library (PECL).
        pecl install ibm_db2
+       pecl install pdo_ibm.(pdo module needs to be installed prior to this.)
+	   
    - Use the commands included in the source code:
       a) Extract the source archive
       b) Run the following commands from the extracted directory:
@@ -35,8 +37,11 @@ Procedure to install the ibm_db2 extension in Linux or Unix:
 
 Procedure to configure the ibm_db2 extension in Windows:
 
-1. Download the php_ibm_db2 DLLs for PHP 7.x(7.0, 7.1, 7.2) from below link.
-   https://github.com/ibmdb/php_ibm_db2
+1.  Download the php_ibm_db2 DLLs for PHP 7.x(7.0, 7.1, 7.2) from below link.
+      https://github.com/ibmdb/php_ibm_db2
+	  
+    For PHP 5.x, Download the DLL from Pecl. Pasted the link below.
+      https://pecl.php.net/package/ibm_db2
    
 2. Open the php.ini file in an editor of your choice. Edit the extension entry in the
    php.ini file in the <local_php_directory>\php\lib directory to reference the PHP driver:
