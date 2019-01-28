@@ -538,7 +538,6 @@ static void _php_db2_set_symbol(char * varname, zval *var TSRMLS_DC)
         }
         zval_ptr_dtor(*bind_data);
         ZVAL_COPY_VALUE(*bind_data, var);
-        efree(var); /* 1.9.9-zs7 */
 #else
         ZEND_SET_SYMBOL(symbol_table_used, varname, var);
 #endif
@@ -5289,6 +5288,11 @@ PHP_FUNCTION(db2_execute)
                         tmp_curr->value->value.lval = (long)tmp_curr->long_value;
                     }
                     _php_db2_set_symbol(tmp_curr->varname, tmp_curr->value TSRMLS_CC);
+#if PHP_MAJOR_VERSION >= 7
+                    efree(tmp_curr->value); /* 1.9.9-zs7 */
+                    tmp_curr->value = NULL;
+#endif
+
                 default:
                     break;
             }
