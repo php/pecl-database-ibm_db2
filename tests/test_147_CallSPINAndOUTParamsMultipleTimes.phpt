@@ -2,6 +2,12 @@
 IBM-DB2: Call a stored procedure with IN and OUT parameters multiple times
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+<?php
+if(ZEND_THREAD_SAFE && version_compare(PHP_VERSION, '7.1', '>=') &&
+                       version_compare(PHP_VERSION, '7.2', '<')) {
+    die("skip: Test fails on PHP 7.1 with ZTS (https://bugs.php.net/bug.php?id=77547)");
+}
+?>
 --FILE--
 <?php
     require_once('connection.inc');
