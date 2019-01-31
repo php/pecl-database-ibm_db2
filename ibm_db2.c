@@ -183,6 +183,12 @@ return
 #define zend_array HashTable
 #endif
 
+#if PHP_VERSION_ID >= 70000 && PHP_VERSION_ID < 70300
+#define GC_ADDREF(p)            ++GC_REFCOUNT(p)
+#define GC_DELREF(p)            --GC_REFCOUNT(p)
+#define GC_SET_REFCOUNT(p, rc)  GC_REFCOUNT(p) = rc
+#endif
+
 /* True global resources - no need for thread safety here */
 static int le_conn_struct, le_stmt_struct, le_pconn_struct;
 
@@ -2893,7 +2899,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
             zend_resource newPersistentRes;
             newPersistentRes.type = le_pconn_struct;
             newPersistentRes.ptr = conn_res;
-            GC_REFCOUNT(&newPersistentRes) = 1;
+            GC_SET_REFCOUNT(&newPersistentRes, 1);
             if (zend_hash_str_update_mem(&EG(persistent_list), hKey, hKeyLen, &newPersistentRes, sizeof(newPersistentRes)) == NULL) {
 #else
             memset(&newEntry, 0, sizeof(newEntry));
