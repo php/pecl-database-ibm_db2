@@ -5108,7 +5108,7 @@ PHP_FUNCTION(db2_execute)
     }
 
 #if PHP_MAJOR_VERSION >= 7
-    if (parameters_array && Z_TYPE_P(parameters_array) == IS_ARRAY && (Z_TYPE_FLAGS_P(parameters_array) & (IS_TYPE_COPYABLE & !IS_TYPE_REFCOUNTED))) {
+    if (parameters_array && Z_TYPE_P(parameters_array) == IS_ARRAY) {
         SEPARATE_ARRAY(parameters_array);
     }
 #endif
@@ -7827,7 +7827,7 @@ PHP_FUNCTION( db2_execute_many )
     }
 
 #if PHP_MAJOR_VERSION >= 7
-    if (params && Z_TYPE_P(params) == IS_ARRAY && (Z_TYPE_FLAGS_P(params) & (IS_TYPE_COPYABLE & !IS_TYPE_REFCOUNTED))) {
+    if (params && Z_TYPE_P(params) == IS_ARRAY) {
         SEPARATE_ARRAY(params);
     }
 #endif
