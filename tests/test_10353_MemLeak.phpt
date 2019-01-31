@@ -139,7 +139,7 @@ Good, no memory leaks
 Good, no memory leaks
 Good, no memory leaks
 
-Warning: db2_fetch_array() expects parameter 1 to be resource, boolean given in %s
+Warning: db2_fetch_array() expects parameter 1 to be resource, bool%S given in %s
 Good, no memory leaks
 Good, no memory leaks
 Good, no memory leaks
