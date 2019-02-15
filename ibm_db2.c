@@ -2585,8 +2585,9 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
     SQLINTEGER try_date_len = SQL_NTS;
     char guard_uid[DB2_IBM_I_PROFILE_UID_MAX + 1];
     SQLINTEGER try_auto = 0;
-#endif /* PASE */
+#else
     struct sqlca sqlca;
+#endif /* PASE */
 
     conn_alive = 1;
 
