@@ -34,6 +34,20 @@ extern zend_module_entry ibm_db2_module_entry;
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1600
+#include <stdint.h>
+#else
+
+#ifdef _WIN64
+typedef int64_t intptr_t;
+typedef uint64_t uintptr_t;
+#else
+typedef int32_t intptr_t;
+typedef uint32_t uintptr_t;
+#endif
+#endif
+
 #include <sqlcli1.h>
 
 /* Needed for backward compatibility (IS_INTERNED not defined prior to PHP-5.4) */
