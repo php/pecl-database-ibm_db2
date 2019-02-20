@@ -35,6 +35,10 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(ibm_db2)
 
+#if PHP_MAJOR_VERSION < 7
+typedef long zend_long;
+#endif
+
 #if PHP_MAJOR_VERSION >= 7
 #define ZEND_RESOURCE zend_resource
 #else
