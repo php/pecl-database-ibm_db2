@@ -35,6 +35,10 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(ibm_db2)
 
+#if PHP_MAJOR_VERSION < 7
+typedef long zend_long;
+#endif
+
 #if PHP_MAJOR_VERSION >= 7
 #define ZEND_RESOURCE zend_resource
 #else
@@ -3094,29 +3098,33 @@ PHP_FUNCTION(db2_pconnect)
 }
 /* }}} */
 
-/* {{{ proto mixed db2_autocommit(resource connection[, bool value])
+/* {{{ proto mixed db2_autocommit(resource connection[, long value])
 Returns or sets the AUTOCOMMIT state for a database connection */
 PHP_FUNCTION(db2_autocommit)
 {
     int argc = ZEND_NUM_ARGS();
     int connection_id = -1;
-    zend_bool value;
+    zend_long value;
     zval *connection = NULL;
     conn_handle *conn_res;
     int rc;
     SQLINTEGER autocommit;
 
-    if (zend_parse_parameters(argc TSRMLS_CC, "r|b", &connection, &value) == FAILURE) {
+    if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &connection, &value) == FAILURE) {
         return;
     }
 
-    if (connection) {
+        if (connection) {
         ZEND_FETCH_RESOURCE_2(conn_res, conn_handle*, &connection, connection_id,
             "Connection Resource", le_conn_struct, le_pconn_struct);
 
         /* If value in handle is different from value passed in */
         if (argc == 2) {
             autocommit = value;
+			if (autocommit != DB2_AUTOCOMMIT_ON && autocommit != DB2_AUTOCOMMIT_OFF) {
+                php_error_docref(NULL TSRMLS_CC, E_WARNING, "value must be one of DB2_AUTOCOMMIT_ON or DB2_AUTOCOMMIT_OFF");
+                RETURN_FALSE;
+            }
             rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(intptr_t)autocommit, SQL_IS_INTEGER);
             if ( rc == SQL_ERROR ) {
                 _php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
