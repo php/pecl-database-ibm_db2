@@ -90,5 +90,10 @@ Below blog mentiones how to build php ibm_db2 from source in windows.
 https://www.ibm.com/developerworks/community/blogs/96960515-2ea1-4391-8170-b0515d08e4da/entry/Install_PHP_ibm_db2_Driver?lang=en
 
 ```
+## Contributing:
+```
+See CONTRIBUTING.md
 
-
+The developer sign-off should include the reference to the DCO in defect remarks(example below):
+DCO 1.1 Signed-off-by: Random J Developer <random@developer.org>
+```
