@@ -3114,7 +3114,7 @@ PHP_FUNCTION(db2_autocommit)
         return;
     }
 
-        if (connection) {
+    if (connection) {
         ZEND_FETCH_RESOURCE_2(conn_res, conn_handle*, &connection, connection_id,
             "Connection Resource", le_conn_struct, le_pconn_struct);
 
