@@ -9,15 +9,25 @@ If not installed Download from the below link.
 
 <a name="downloadCli"></a> [DOWNLOAD CLI DRIVER](https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/)
 
-PHP should be installed in your system.
+PHP, gcc, make, tar should be installed in your system.
 
-## How to install php ibm_db2 extension in Linux/Mac
+You may not find gcc, make, tar in some of the docker containers (Example Amazon Linux2).
+In such cases use below command to install gcc etc.
+```
+yum install make gcc
+```
+## How to install php ibm_db2 extension in Linux/Mac.
 ```
 if IBM_DB_HOME and LD_LIBRARY_PATH environment variable not set then set them with installed CLIDRIVER.
 (say CLIDRIVER installed at "/home/user/clidriver")
 
 export IBM_DB_HOME=/home/user/clidriver 
 export LD_LIBRARY_PATH=/home/user/clidriver/lib
+export PATH=/home/user/clidriver/bin:$PATH
+
+In case of Docker(Example Amazon Linux2):
+  execute 'db2level' command in your command prompt, If any error comes then install 'pam' from package manager.
+  yum install pam
 
 1) pecl install ibm_db2
         
