@@ -49,7 +49,7 @@ Set CLIDRIVER\bin path to PATH environment variable.
 
 set PATH=<CLIDRIVER installed path>\bin;%PATH%
 
-1.  Download the php_ibm_db2 DLLs for PHP 7.x(7.0, 7.1, 7.2) from below link.
+1.  Download the php_ibm_db2 DLLs for PHP 7.x(7.0, 7.1, 7.2 and 7.3) from below link.
       https://github.com/ibmdb/php_ibm_db2
 	  
     For PHP 5.x, Download the DLL from Pecl. Pasted the link below.
