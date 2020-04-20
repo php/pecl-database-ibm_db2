@@ -12,7 +12,7 @@ $conn = db2_connect($database, $user, $password);
 $result = db2_tables($conn, NULL, strtoupper($user), 'ANIM%');
 
 while ($row = db2_fetch_object($result)) {
-    if (eregi("ANIME_CAT|ANIMALS",$row->TABLE_NAME)) {
+    if (preg_match("/ANIME_CAT|ANIMALS/i",$row->TABLE_NAME)) {
     echo 'Schema:  ' . $row->TABLE_SCHEM . "\n";
     echo 'Name:    ' . $row->TABLE_NAME . "\n";
     echo 'Type:    ' . $row->TABLE_TYPE . "\n";

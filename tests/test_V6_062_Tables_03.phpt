@@ -31,7 +31,7 @@ if ($conn)
    $i = 0;
    while ($row = db2_fetch_both($result)) 
    {
-      if (eregi("T1|T2|T3|T4",$row[2])) {			
+      if (preg_match("/T1|T2|T3|T4/i",$row[2])) {			
       $str = $row[1] ."/". $row[2] ."/". $row[3];
       if ($i < 4) print $str . "\n";
       $i++;
