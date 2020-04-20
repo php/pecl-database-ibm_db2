@@ -17,7 +17,7 @@ if (!$conn) {
 }
 
 $stmt = db2_prepare($conn, $sql);
-$res = db2_execute($stmt, array(128, 'hacker of human and technological nature', 'Wez the ruler of all things PECL', 88.3));
+$res = @db2_execute($stmt, array(128, 'hacker of human and technological nature', 'Wez the ruler of all things PECL', 88.3));
 var_dump($res);
 print "SQLSTATE: " . db2_stmt_error($stmt);
 print "\nMessage: " . db2_stmt_errormsg($stmt);
@@ -31,5 +31,6 @@ db2_rollback($conn);
 
 ?>
 --EXPECTF--
-%s(false)
-%sMessage: Value for column or variable NAME too long.
+bool(false)
+SQLSTATE: 22001
+Message: Value for column or variable NAME too long.
