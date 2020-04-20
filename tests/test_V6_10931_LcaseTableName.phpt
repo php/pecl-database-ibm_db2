@@ -9,7 +9,8 @@ IBM-DB2: PECL bug 10931 -- no result for db2_columns with lowercase table name
 
 require_once('connection.inc');
 
-$conn = db2_connect($database, $user, $password);
+// HACK: so you dont need to run as a "DB2" user; make sure you have the DB2 schema made though
+$conn = db2_connect($database, $user, $password, array('i5_lib' => 'DB2'));
 
 if ($conn) {
 		 $sql = "DROP TABLE \"DB2\".\"test_10931\"";
