@@ -3206,7 +3206,15 @@ static void _php_db2_add_param_cache( stmt_handle *stmt_res, int param_no, char 
         tmp_curr = (param_node *)ecalloc(1, sizeof(param_node));
         /* assign values */
         tmp_curr->data_type = data_type;
+#ifdef PASE
+       /*
+        * HACK: A bigint test fails with truncation because DescribeParam
+        * returns a precision of 8, which isn't accurate. (CB 20200423)
+        */
+        tmp_curr->param_size = data_type == SQL_BIGINT ? 20 : precision;
+#else
         tmp_curr->param_size = precision;
+#endif
         tmp_curr->nullable = nullable;
         tmp_curr->scale = scale;
         tmp_curr->param_num = param_no;
@@ -3237,7 +3245,11 @@ static void _php_db2_add_param_cache( stmt_handle *stmt_res, int param_no, char 
         /* Both the nodes are for the same param no */
         /* Replace Information */
         curr->data_type = data_type;
+#ifdef PASE
+        curr->param_size = data_type == SQL_BIGINT ? 20 : precision;
+#else
         curr->param_size = precision;
+#endif
         curr->nullable = nullable;
         curr->scale = scale;
         curr->param_num = param_no;
@@ -4491,7 +4503,11 @@ static param_node* _php_db2_build_list( stmt_handle *stmt_res, int param_no, SQL
     tmp_curr = (param_node *)ecalloc(1, sizeof(param_node));
     /* assign values */
     tmp_curr->data_type = data_type;
+#ifdef PASE
+    tmp_curr->param_size = data_type == SQL_BIGINT ? 20 : precision;
+#else
     tmp_curr->param_size = precision;
+#endif
     tmp_curr->nullable = nullable;
     tmp_curr->scale = scale;
     tmp_curr->param_num = param_no;
