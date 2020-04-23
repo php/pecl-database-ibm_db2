@@ -83,11 +83,11 @@ if ($conn) {
 	$stmt = db2_prepare($conn , $updateRow);
 	$parameters = array('PK_pass0', 'fakeUserID');
 	//print "Updating TESTTABLE with 'fake' USERID" . "\n";
-	$result = db2_execute($stmt, $parameters);
-	if($result) {
+	$result = @db2_execute($stmt, $parameters);
+	if(!$result) {
 		print "Test case failed." . "\n";
 	}
-	print db2_num_rows($stmt) . "\n";
+	else print @db2_num_rows($stmt) . "\n";
 
 	//Updating row with USERID = '1' (PK Test).
 	$stmt = db2_prepare($conn , $updateRow);
@@ -136,11 +136,11 @@ if ($conn) {
 	$stmt = db2_prepare($conn , $updateRow);
 	$parameters = array('SINT_pass0', 'fakeNUMBER_SINT');
 	//print "Updating TESTTABLE with 'fake' NUMBER_SINT" . "\n";
-	$result = db2_execute($stmt, $parameters);
-	if($result) {
+	$result = @db2_execute($stmt, $parameters);
+	if(!$result) {
 		print "Test case failed." . "\n";
 	}
-	print db2_num_rows($stmt) . "\n";
+	else print @db2_num_rows($stmt) . "\n";
 
 	//Updating row with NUMBER_SINT = '1' (SMALLINT Test).
 	$stmt = db2_prepare($conn , $updateRow);
@@ -189,11 +189,11 @@ if ($conn) {
 	$stmt = db2_prepare($conn , $updateRow);
 	$parameters = array('INT_pass0', 'fakeNUMBER_INT');
 	//print "Updating TESTTABLE with 'fake' NUMBER_INT" . "\n";
-	$result = db2_execute($stmt, $parameters);
-	if($result) {
+	$result = @db2_execute($stmt, $parameters);
+	if(!$result) {
 		print "Test case failed." . "\n";
 	}
-	print db2_num_rows($stmt) . "\n";
+	else print @db2_num_rows($stmt) . "\n";
 
 	//Updating row with NUMBER_INT = '1' (INTEGER Test).
 	$stmt = db2_prepare($conn , $updateRow);
@@ -242,11 +242,11 @@ if ($conn) {
 	$stmt = db2_prepare($conn , $updateRow);
 	$parameters = array('BINT_pass0', 'fakeNUMBER_BINT');
 	//print "Updating TESTTABLE with 'fake' NUMBER_BINT" . "\n";
-	$result = db2_execute($stmt, $parameters);
-	if($result) {
+	$result = @db2_execute($stmt, $parameters);
+	if(!$result) {
 		print "Test case failed." . "\n";
 	}
-	print db2_num_rows($stmt) . "\n";
+	else print @db2_num_rows($stmt) . "\n";
 
 	//Updating row with NUMBER_BINT = '1' (BIGINT Test).
 	$stmt = db2_prepare($conn , $updateRow);
@@ -294,11 +294,11 @@ if ($conn) {
 	$stmt = db2_prepare($conn , $updateRow);
 	$parameters = array('DOU_pass0', 'fakeNUMBER_DOU');
 	//print "Updating TESTTABLE with NUMBER_DOU = 'fake'" . "\n";
-	$result = db2_execute($stmt, $parameters);
-	if($result) {
+	$result = @db2_execute($stmt, $parameters);
+	if(!$result) {
 		print "Test case failed." . "\n";
 	}
-	print db2_num_rows($stmt) . "\n";
+	else print @db2_num_rows($stmt) . "\n";
 
 	//Updating row with NUMBER_DOU = '1000' (DOUBLE Test).
 	$updateRow = "UPDATE TESTTABLE SET PASSWORD = ? WHERE NUMBER_DOU = ?";
@@ -349,11 +349,11 @@ if ($conn) {
 	$stmt = db2_prepare($conn , $updateRow);
 	$parameters = array('DOU_pass0', 'fakeNUMBER_R');
 	//print "Updating TESTTABLE with NUMBER_R = 'fake'" . "\n";
-	$result = db2_execute($stmt, $parameters);
-	if($result) {
+	$result = @db2_execute($stmt, $parameters);
+	if(!$result) {
 		print "Test case failed." . "\n";
 	}
-	print db2_num_rows($stmt) . "\n";
+	else print @db2_num_rows($stmt) . "\n";
 
 	//Updating row with NUMBER_R = '1000' (REAL Test).
 	$updateRow = "UPDATE TESTTABLE SET PASSWORD = ? WHERE NUMBER_R = ?";
@@ -404,11 +404,11 @@ if ($conn) {
 	$stmt = db2_prepare($conn , $updateRow);
 	$parameters = array('DOU_pass0', 'fakeNUMBER_DEC');
 	//print "Updating TESTTABLE with NUMBER_DEC = 'fake'" . "\n";
-	$result = db2_execute($stmt, $parameters);
-	if($result) {
+	$result = @db2_execute($stmt, $parameters);
+	if(!$result) {
 		print "Test case failed." . "\n";
 	}
-	print db2_num_rows($stmt) . "\n";
+	else print @db2_num_rows($stmt) . "\n";
 
 	//Updating row with NUMBER_DEC = '1000' (DECIMAL Test).
 	$updateRow = "UPDATE TESTTABLE SET PASSWORD = ? WHERE NUMBER_DEC = ?";
