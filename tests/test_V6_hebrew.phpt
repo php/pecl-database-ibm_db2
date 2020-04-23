@@ -38,6 +38,7 @@ The conversion from 62211 to 1200 or 1208 (ST 5 to ST 10) results in no reorderi
 
 ?>
 --EXPECTF--
-%s
+IBM i data string "123Eאבג"
+IBM i data string "123Eאבג"
 success
 
