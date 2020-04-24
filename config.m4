@@ -76,24 +76,30 @@ if test "$PHP_IBM_DB2" != "no"; then
     fi
   fi
 
-  AC_MSG_CHECKING([for DB2 CLI include files in default path])
-  for i in $SEARCH_PATH ; do
-    AC_MSG_CHECKING([in $i])
-    dnl this is for V8.1 and previous
-    if test -r "$i/include/sqlcli1.h" ; then
-      IBM_DB2_DIR=$i
-      AC_MSG_RESULT(found in $i)
-      break
+  if test -r $LIB_DIR/libdb400.a ; then
+    dnl PASE doesn't need that, we'll use the sqlcli-devel package.
+    PHP_ADD_INCLUDE(/QOpenSys/pkgs/include/cli)
+  else
+    dnl but LUW/Connect will
+    AC_MSG_CHECKING([for DB2 CLI include files in default path])
+    for i in $SEARCH_PATH ; do
+      AC_MSG_CHECKING([in $i])
+      dnl this is for V8.1 and previous
+      if test -r "$i/include/sqlcli1.h" ; then
+        IBM_DB2_DIR=$i
+        AC_MSG_RESULT(found in $i)
+        break
+      fi
+    done
+
+    if test -z "$IBM_DB2_DIR"; then
+      AC_MSG_RESULT([not found])
+      AC_MSG_ERROR([Please reinstall the DB2 CLI distribution])
     fi
-  done
 
-  if test -z "$IBM_DB2_DIR"; then
-    AC_MSG_RESULT([not found])
-    AC_MSG_ERROR([Please reinstall the DB2 CLI distribution])
+    dnl # --with-IBM_DB2 -> add include path
+    PHP_ADD_INCLUDE($IBM_DB2_DIR/include)
   fi
-
-  dnl # --with-IBM_DB2 -> add include path
-  PHP_ADD_INCLUDE($IBM_DB2_DIR/include)
 
   dnl # --with-IBM_DB2 -> check for lib and symbol presence
   if test -r $LIB_DIR/libdb400.a ; then
