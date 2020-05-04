@@ -2559,7 +2559,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
     int hKeyLen = 0;
     char *hKey = NULL;
     char server[2048];
-    long attr = SQL_TRUE;
+    int attr = SQL_TRUE;
 #if PHP_MAJOR_VERSION >= 7
     size_t database_len;
     size_t uid_len;
