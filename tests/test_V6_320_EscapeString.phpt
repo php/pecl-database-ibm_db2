@@ -14,8 +14,9 @@ if ($conn) {
 	$create = 'CREATE TABLE escapeit(id INTEGER, info VARCHAR(200))';
 	$result = @db2_exec($conn, $create);
 
-	$orig = fopen("escape.dat", "rb");
-	$new = fopen("escape_out.dat", "wb");
+	// Our current working directory is the root of the repo above tests
+	$orig = fopen("tests/escape.dat", "rb");
+	$new = fopen("tests/escape_out.dat", "wb");
 
 	$str[0] = "Some random special characters: \n , \r , \ , ' , \"  .";
 	$str[1] = "Backslash (\). Single quote ('). Double quote (\")";
