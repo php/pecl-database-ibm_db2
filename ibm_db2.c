@@ -4697,6 +4697,17 @@ static int _php_db2_bind_pad(param_node *curr, int nullterm, int isvarying, int 
 
     /* other fix up types */
     switch ( curr->data_type ) {
+        /*
+         * CB 20200505: Seems unnecessary and causes test failures in
+         * test_V6_148_CallSPDiffBindPattern_01 and
+         * test_V6_149_CallSPDiffBindPattern_02. I don't know if this
+         * vestigal (and necessary at one point), an incorrect fix, or
+         * legitimate with an unknown test case/unfixed other cases.
+         * The commit that added it added thousands of lines with an
+         * explanation of something completely unrelated, so...
+         * If needed, it can be brought back.
+         */
+#if 0
         /* BIGINT<implicit>CHAR works consistently if 0x30 pad left, 
          * '2' becomes '000000000000000000002'
          */
@@ -4724,6 +4735,7 @@ static int _php_db2_bind_pad(param_node *curr, int nullterm, int isvarying, int 
                 back--;
             }
             break;
+#endif
         default:
             break;
     }
