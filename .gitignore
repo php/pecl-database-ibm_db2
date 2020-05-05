@@ -25,6 +25,9 @@ tests/*.out
 tests/*.sh
 tests/*.php
 
+# test crud
+tests/escape_out.dat
+
 # downloaded cli driver
 clidriver
 
