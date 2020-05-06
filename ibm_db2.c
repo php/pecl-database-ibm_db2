@@ -2493,7 +2493,7 @@ static int _php_db2_i5_current_user(conn_handle *conn_res, char *uid, int uid_le
     SQLINTEGER fStrLen = SQL_NTS;
 
     if (!conn_res || !uid || uid_len < 10) {
-        return;
+        return SQL_ERROR; /* not really from CLI, but... */
     }
 
     _php_db2_clear_stmt_err_cache(TSRMLS_C);
