@@ -1,5 +1,5 @@
 <?php
-function xmlservice($conn, $xml, $ctlIn='*here', $ipcIn="*na", $lib='xmlservice') {
+function xmlservice($conn, $xml, $ctlIn='*here', $ipcIn="*na", $lib='qxmlserv') {
   $ctl = $ctlIn;
   $ipc = $ipcIn;
   $xmlIn = $xml;
@@ -14,7 +14,7 @@ function xmlservice($conn, $xml, $ctlIn='*here', $ipcIn="*na", $lib='xmlservice'
 }
 
 /* C6F3C3F1C4F0 00000005*/
-function xmlservice_QSYGETPH($conn, $uid="*CURRENT", $pwd="*NOPWD", $ctlIn='*here', $ipcIn="*na", $lib='xmlservice') {
+function xmlservice_QSYGETPH($conn, $uid="*CURRENT", $pwd="*NOPWD", $ctlIn='*here', $ipcIn="*na", $lib='qxmlserv') {
 $xml = "<?xml version='1.0'?>
 <xmlservice>
 <pgm name='QSYGETPH' lib='QSYS' error='fast'>
@@ -33,7 +33,7 @@ $xml .= "</pgm>
 return xmlservice($conn, $xml, $ctlIn, $ipcIn, $lib);
 }
 
-function xmlservice_QWTSETP($conn, $profile_handle, $ctlIn='*here', $ipcIn="*na", $lib='xmlservice') {
+function xmlservice_QWTSETP($conn, $profile_handle, $ctlIn='*here', $ipcIn="*na", $lib='qxmlserv') {
 $xml = "<?xml version='1.0'?>
 <xmlservice>
 <pgm name='QWTSETP' lib='QSYS' error='fast'>
@@ -45,7 +45,7 @@ $xml = "<?xml version='1.0'?>
 return xmlservice($conn, $xml, $ctlIn, $ipcIn, $lib);
 }
 
-function xmlservice_QSYRLSPH($conn, $profile_handle, $ctlIn='*here', $ipcIn="*na", $lib='xmlservice') {
+function xmlservice_QSYRLSPH($conn, $profile_handle, $ctlIn='*here', $ipcIn="*na", $lib='qxmlserv') {
 $xml = "<?xml version='1.0'?>
 <xmlservice>
 <pgm name='QSYRLSPH' lib='QSYS' error='fast'>
@@ -55,7 +55,7 @@ $xml = "<?xml version='1.0'?>
 ";
 return xmlservice($conn, $xml, $ctlIn, $ipcIn, $lib);
 }
-function xmlservice_switch_profile($conn, $uid="*CURRENT", $pwd="*NOPWD", $ctlIn='*here', $ipcIn="*na", $lib='xmlservice') {
+function xmlservice_switch_profile($conn, $uid="*CURRENT", $pwd="*NOPWD", $ctlIn='*here', $ipcIn="*na", $lib='qxmlserv') {
   $xml = xmlservice_QSYGETPH($conn, $uid, $pwd, $ctlIn, $ipcIn, $lib);
   // var_dump($xml);
   $xmlobj = simplexml_load_string($xml);
@@ -78,11 +78,11 @@ function xmlservice_diag_jobinfo($xml) {
   return "{$sbsname[0]}-{$jobname[0]}-{$jobuser[0]}-{$jobnbr[0]}-{$curuser[0]}";
 }
 
-function xmlservice_diag($conn, $ctlIn='*here', $ipcIn="*na", $lib='xmlservice') {
+function xmlservice_diag($conn, $ctlIn='*here', $ipcIn="*na", $lib='qxmlserv') {
   return xmlservice($conn, "<?xml version='1.0'?><xmlservice><diag/></xmlservice>", $ctlIn, $ipcIn, $lib);
 }
 
-function xmlservice_kill($conn, $ctlIn='*here *immed', $ipcIn="*na", $lib='xmlservice') {
+function xmlservice_kill($conn, $ctlIn='*here *immed', $ipcIn="*na", $lib='qxmlserv') {
   if ($ipcIn == "*na") {
     /* ENDJOBABN JOB(*) ??? ENDJOB JOB(*) OPTION(*IMMED)??? */
     return xmlservice($conn, "<?xml version='1.0'?><xmlservice><cmd>ENDJOB JOB(*) OPTION(*IMMED)</cmd></xmlservice>", $ctlIn, $ipcIn, $lib);
