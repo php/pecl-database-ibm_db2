@@ -41,6 +41,7 @@ if ($key3 == $key2) {
 ?>
 --EXPECTF--
 %s
+%s
 success
 %s
 success

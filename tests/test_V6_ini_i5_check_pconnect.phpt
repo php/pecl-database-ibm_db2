@@ -48,8 +48,11 @@ if ($key3 == $key2) {
 
 ?>
 --EXPECTF--
+(IBM_DB_i5_check_pconnect=-42)
+%s
 %s
 success
+(IBM_DB_i5_check_pconnect=4)
 %s
 success
 

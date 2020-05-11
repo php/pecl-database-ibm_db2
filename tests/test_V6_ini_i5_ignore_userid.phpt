@@ -89,9 +89,11 @@ if ($key3 != $key4) {
 ?>
 --EXPECTF--
 %s
+%s
 success
 success
 success
+%s
 %s
 success
 success
