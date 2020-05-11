@@ -31,7 +31,11 @@ $key3 = xmlservice_diag_jobinfo($xml);
 echo "key3 $key3\n";
 db2_close($conn2);
 
-if (strpos($key1,$user) === false) {
+/*
+ * On PASE, we can use an empty user for implict same user, which
+ * messes up this test, so just skip it
+ */
+if ($user !== "" && strpos($key1,$user) === false) {
   echo "failed key1 ($key1) missing ".$user."\n";
 } else {
   echo "success\n";
@@ -49,7 +53,9 @@ if (strpos($key3,$switch_user) === false) {
 
 ?>
 --EXPECTF--
-%s
+key1 %s
+key2 %s
+key3 %s
 success
 success
 success
