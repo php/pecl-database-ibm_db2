@@ -194,6 +194,11 @@ extern int SQLOverrideCCSID400(int newCCSID);
 #define SQL_SCROLL_FORWARD_ONLY SQL_CURSOR_FORWARD_ONLY
 #endif
 
+/* CB 20200826 - This is documented, but not defined by headers in 7.2/7.4 */
+#ifndef SQL_ATTR_NON_HEXCCSID
+#define SQL_ATTR_NON_HEXCCSID 10203
+#endif
+
 /* 1.9.7 - IBM i + LUW 10.5 system naming on (*libl)/file.mbr */
 #define DB2_I5_NAMING_ON  SQL_TRUE
 #define DB2_I5_NAMING_OFF SQL_FALSE

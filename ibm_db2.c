@@ -210,6 +210,7 @@ static int is_ios, is_zos;      /* 1 == TRUE; 0 == FALSE; */
 static int is_i5_server_mode;       /* orig  - 1 == TRUE; 0 == FALSE; (IBM i use QSQSRVR proxy for DB2) */
 static int is_i5_override_ccsid;    /* 1.9.7 - 1 == TRUE; 0 == FALSE; (IBM i force CCSID (DBCS customer UTF-8 issue)); */
 static int is_i5_null_in_len;       /* 1.9.7 - 1 == TRUE; 0 == FALSE; (IBM i lobs come back +1 (bug)); */
+static int is_i5_non_hex_ccsid;     /* CB 20200826 - CCSID 65535 is bad news */
 #endif /* PASE */
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
 #define DB2_I5_MAX_HANDLES 33000
@@ -2742,6 +2743,16 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
                 if (rc == SQL_SUCCESS) {
                     is_i5_null_in_len=1;
                 }
+            }
+            /*
+             * CB 20200826: 65535 is bad news for conversions. If our job has
+             * that, force to the default job CCSID. This is what the Python
+             * ibmdb has to do. Set unconditionally in case.
+             */
+            attr = SQL_TRUE;
+            rc = SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_NON_HEXCCSID, (SQLPOINTER)(intptr_t)attr, SQL_IS_INTEGER);
+            if (rc == SQL_SUCCESS) {
+                is_i5_non_hex_ccsid = 1;
             }
             /* 1.9.7 - IBM i 1208 data */
             if (is_i5_override_ccsid == 1 && IBM_DB2_G(i5_override_ccsid) == 1208) {
