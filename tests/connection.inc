@@ -39,9 +39,19 @@ else {
 date_default_timezone_set('UTC');
 
 
+$skip_on_connect_failure = getenv("IBM_DB2_TEST_SKIP_CONNECT_FAILURE") !== FALSE ?
+                            getenv("IBM_DB2_TEST_SKIP_CONNECT_FAILURE") : true;
+
+
 // test connection ok
 $prepconn = db2_connect($database, $user, $password);
-if (!$prepconn) die('skip');
-db2_close($prepconn);
+if (!$prepconn) {
+  if($skip_on_connect_failure) die("skip - Couldn't connect");
+}
+else {
+  db2_close($prepconn);
+}
+
+unset($skip_on_connect_failure);
 
 ?>

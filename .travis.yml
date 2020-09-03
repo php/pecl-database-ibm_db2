@@ -1,0 +1,44 @@
+language: php
+
+php:
+  - '7.3'
+  - '7.2'
+  - '7.1'
+  - '7.0'
+  - '5.6'
+
+install:
+- curl https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/linuxx64_odbc_cli.tar.gz | tar -xz
+- docker pull ibmcom/db2express-c
+- docker run --name db2 -p 60000:50000 -e DB2INST1_PASSWORD=password -e LICENSE=accept -d ibmcom/db2express-c db2start
+- docker ps -as
+- docker exec -it db2 su - db2inst1 -c "db2 create db sample"
+
+before_script:
+# Ensure that DB2CLIINIPATH gets passed to the tests
+- echo 'variables_order = "EGPCS"' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+
+script:
+- phpize
+- ./configure --with-IBM_DB2=$PWD/clidriver
+- make
+- |
+  cat <<EOF > db2cli.ini
+  [SAMPLE]
+  Hostname=localhost
+  Protocol=TCPIP
+  Port=60000
+  Database=sample
+  EOF
+- cat db2cli.ini
+# Ensure that tests are not skipped (false positive) due to bad configuration
+- export IBM_DB2_TEST_SKIP_CONNECT_FAILURE=0
+# Ensure CLI can find the configuration
+- export DB2CLIINIPATH=$PWD
+# Ensure make returns non-zero when a test fails
+- export REPORT_EXIT_STATUS=1
+# Save the report so we can print it if a test fails
+- make test TESTS='-s report.txt'
+
+after_failure:
+- cat report.txt

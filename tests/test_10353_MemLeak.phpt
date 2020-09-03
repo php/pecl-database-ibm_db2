@@ -3,6 +3,7 @@ IBM-DB2: PECL bug 10353 -- Memory leak testing
 --SKIPIF--
 <?php
   require_once('skipif.inc');
+  if(version_compare(PHP_VERSION, '7.0.0', '<') == 1) die("skip: Test segfaults on PHP 5.6");
 ?>
 --FILE--
 <?php
@@ -138,7 +139,7 @@ Good, no memory leaks
 Good, no memory leaks
 Good, no memory leaks
 
-Warning: db2_fetch_array() expects parameter 1 to be resource, boolean given in %s
+Warning: db2_fetch_array() expects parameter 1 to be resource, bool%S given in %s
 Good, no memory leaks
 Good, no memory leaks
 Good, no memory leaks
