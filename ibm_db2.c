@@ -35,6 +35,10 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(ibm_db2)
 
+#if PHP_MAJOR_VERSION < 7
+typedef long zend_long;
+#endif
+
 #if PHP_MAJOR_VERSION >= 7
 #define ZEND_RESOURCE zend_resource
 #else
@@ -183,6 +187,12 @@ return
 #define zend_array HashTable
 #endif
 
+#if PHP_VERSION_ID >= 70000 && PHP_VERSION_ID < 70300
+#define GC_ADDREF(p)            ++GC_REFCOUNT(p)
+#define GC_DELREF(p)            --GC_REFCOUNT(p)
+#define GC_SET_REFCOUNT(p, rc)  GC_REFCOUNT(p) = rc
+#endif
+
 /* True global resources - no need for thread safety here */
 static int le_conn_struct, le_stmt_struct, le_pconn_struct;
 
@@ -240,7 +250,7 @@ typedef struct _conn_handle_struct {
     long c_i5_dbcs_alloc;       /* orig  - IBM i 6x space for CCSID<>UTF-8 convert  (DBCS customer issue) */
     long c_i5_max_pconnect;     /* 1.9.7 - IBM i count max usage connection recycle (customer issue months live connection)  */
 	long c_i5_executing;		/* 1.9.9 - IBM i customer request abandon connection stored proc in MSQW (human response needed) */
-	long c_i5_char_trim;		/* 2.0.3 - IBM i trim spaces character results  (customer size request issue) */
+        long c_i5_char_trim;            /* 2.0.3 - IBM i trim spaces character results  (customer size request issue) */
 #endif /* PASE */
     /* 1.9.7 - IBM i + LUW 10.5 system naming on (*libl)/file.mbr */
     long c_i5_sys_naming;           /* 1.9.7 - IBM i + LUW DB2 Connect 10.5 system naming (customer *LIBL issues) */
@@ -454,7 +464,7 @@ PHP_INI_BEGIN()
     /* 1.9.7 - IBM i monitor switch user profile applications (customer security issue) */
     STD_PHP_INI_ENTRY("ibm_db2.i5_guard_profile", "0", PHP_INI_SYSTEM, OnUpdateLong,
         i5_guard_profile, zend_ibm_db2_globals, ibm_db2_globals)
-    /* 2.0.3  - IBM i trim spaces character results  (customer size request issue) */
+     /* 2.0.3  - IBM i trim spaces character results  (customer size request issue) */
     STD_PHP_INI_BOOLEAN("ibm_db2.i5_char_trim", "0", PHP_INI_SYSTEM, OnUpdateLong,
         i5_char_trim, zend_ibm_db2_globals, ibm_db2_globals)
 #endif /* PASE */
@@ -542,7 +552,6 @@ static void _php_db2_set_symbol(char * varname, zval *var TSRMLS_DC)
         }
         zval_ptr_dtor(*bind_data);
         ZVAL_COPY_VALUE(*bind_data, var);
-        efree(var); /* 1.9.9-zs7 */
 #else
         ZEND_SET_SYMBOL(symbol_table_used, varname, var);
 #endif
@@ -606,8 +615,10 @@ SQLRETURN _php_db2_override_SQLSetConnectAttr(
     /* IBM i requires pointer to value; 
      * LUW supports raw integer (SQL_IS_INTEGER) or pointer (SQL_NTS) 
      */
+    // attr located intentionally outside the 'if' scope to survive SQLSetConnectAttr
+    int attr = (int)(intptr_t)vParam;
     if (fStrLen != SQL_NTS) {
-        pvParam = &vParam;
+        pvParam = &attr;
     }
     rc = SQLSetConnectAttr(hdbc, fOption, pvParam, fStrLen);
     return rc;
@@ -623,8 +634,10 @@ SQLRETURN _php_db2_override_SQLSetStmtAttr(
     /* IBM i requires pointer to value; 
      * LUW supports raw integer (SQL_IS_INTEGER) or pointer (SQL_NTS) 
      */
+    // attr located intentionally outside the 'if' scope to survive SQLSetConnectAttr
+    int attr = (int)(intptr_t)vParam;
     if (fStrLen != SQL_NTS) {
-        pvParam = &vParam;
+        pvParam = &attr;
     }
     rc = SQLSetStmtAttr(hstmt, fOption, pvParam, fStrLen);
     return rc;
@@ -640,8 +653,10 @@ SQLRETURN _php_db2_override_SQLSetEnvAttr(
     /* IBM i requires pointer to value; 
      * LUW supports raw integer (SQL_IS_INTEGER) or pointer (SQL_NTS) 
      */
+    // attr located intentionally outside the 'if' scope to survive SQLSetConnectAttr
+    int attr = (int)(intptr_t)vParam;
     if (fStrLen != SQL_NTS) {
-        pvParam = &vParam;
+        pvParam = &attr;
     }
     rc = SQLSetEnvAttr(henv, fOption, pvParam, fStrLen);
     return rc;
@@ -1390,7 +1405,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
                                 vParam = SQL_CURSOR_KEYSET_DRIVEN;
                                 ((stmt_handle *)handle)->cursor_type = DB2_SCROLLABLE;
                                 rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-                                    SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)vParam,
+                                    SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)(intptr_t)vParam,
                                     SQL_IS_INTEGER );
                                 if ( rc == SQL_ERROR ) {
                                     _php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -1399,7 +1414,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
                                 vParam = DB2_SCROLLABLE;
                                 ((stmt_handle *)handle)->cursor_type = DB2_SCROLLABLE;
                                 rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-                                    SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)vParam, /* was (SQLPOINTER)&vParam */
+                                    SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)(intptr_t)vParam, /* was (SQLPOINTER)&vParam */
                                     SQL_IS_INTEGER );
                                 if ( rc == SQL_ERROR ) {
                                     _php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -1411,7 +1426,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
                             if (is_ios != 1) {      /* Not i5 */
                                 vParam = SQL_SCROLL_FORWARD_ONLY;
                                 rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-                                    SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)vParam,
+                                    SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)(intptr_t)vParam,
                                     SQL_IS_INTEGER );
                                 if ( rc == SQL_ERROR ) {
                                     _php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -1419,7 +1434,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
                             } else {                /* Is i5 */
                                 vParam = DB2_FORWARD_ONLY;
                                 rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-                                    SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)vParam, /* was (SQLPOINTER)&vParam */
+                                    SQL_ATTR_CURSOR_TYPE, (SQLPOINTER)(intptr_t)vParam, /* was (SQLPOINTER)&vParam */
                                     SQL_IS_INTEGER );
                                 if ( rc == SQL_ERROR ) {
                                     _php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -1448,7 +1463,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
                             vParam = DB2_ROWCOUNT_PREFETCH_ON;
                             ((stmt_handle *)handle)->s_rowcount = DB2_ROWCOUNT_PREFETCH_ON;
                             rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-                                SQL_ATTR_ROWCOUNT_PREFETCH, (SQLPOINTER)vParam,
+                                SQL_ATTR_ROWCOUNT_PREFETCH, (SQLPOINTER)(intptr_t)vParam,
                                 SQL_IS_INTEGER );
                             if ( rc == SQL_ERROR ) {
                                 _php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -1457,7 +1472,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
                             vParam = DB2_ROWCOUNT_PREFETCH_ON;
                             ((stmt_handle *)handle)->s_rowcount = DB2_ROWCOUNT_PREFETCH_ON;
                             rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-                                SQL_ATTR_ROWCOUNT_PREFETCH, (SQLPOINTER)vParam, /* was (SQLPOINTER)&vParam */
+                                SQL_ATTR_ROWCOUNT_PREFETCH, (SQLPOINTER)(intptr_t)vParam, /* was (SQLPOINTER)&vParam */
                                 SQL_IS_INTEGER );
                             if ( rc == SQL_ERROR ) {
                                 _php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -1469,7 +1484,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
                         if (is_ios != 1) {      /* Not i5 */
                             vParam = DB2_ROWCOUNT_PREFETCH_OFF;
                             rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-                                SQL_ATTR_ROWCOUNT_PREFETCH, (SQLPOINTER)vParam,
+                                SQL_ATTR_ROWCOUNT_PREFETCH, (SQLPOINTER)(intptr_t)vParam,
                                 SQL_IS_INTEGER );
                             if ( rc == SQL_ERROR ) {
                                 _php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -1477,7 +1492,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
                         } else {                /* Is i5 */
                             vParam = DB2_ROWCOUNT_PREFETCH_OFF;
                             rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-                                SQL_ATTR_ROWCOUNT_PREFETCH, (SQLPOINTER)vParam, /* was (SQLPOINTER)&vParam */
+                                SQL_ATTR_ROWCOUNT_PREFETCH, (SQLPOINTER)(intptr_t)vParam, /* was (SQLPOINTER)&vParam */
                                 SQL_IS_INTEGER );
                             if ( rc == SQL_ERROR ) {
                                 _php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -1502,7 +1517,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
                         rc = SQLSetConnectAttr(
                                 (SQLHDBC)((conn_handle*)handle)->hdbc, 
                                 SQL_ATTR_USE_TRUSTED_CONTEXT, 
-                                (SQLPOINTER)SQL_TRUE, SQL_IS_INTEGER);
+                                (SQLPOINTER)(intptr_t)SQL_TRUE, SQL_IS_INTEGER);
 
                         if ( rc == SQL_ERROR ) {
                             _php_db2_check_sql_errors((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -1571,7 +1586,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
         }
     } else if (!STRCASECMP(opt_key, "query_timeout")) {
         if (type == SQL_HANDLE_STMT) {
-            rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle*)handle)->hstmt, SQL_ATTR_QUERY_TIMEOUT, (SQLPOINTER) option_num, SQL_IS_UINTEGER );
+            rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle*)handle)->hstmt, SQL_ATTR_QUERY_TIMEOUT, (SQLPOINTER)(uintptr_t)option_num, SQL_IS_UINTEGER );
             if ( rc == SQL_ERROR ) {
                 _php_db2_check_sql_errors((SQLHSTMT)((stmt_handle*)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
             }
@@ -1586,7 +1601,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
                      * with this option.
                      */
                     pvParam = SQL_AUTOCOMMIT_ON;
-                    rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)pvParam, SQL_IS_INTEGER);
+                    rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(intptr_t)pvParam, SQL_IS_INTEGER);
                     if ( rc == SQL_ERROR ) {
                         _php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
                     } else {
@@ -1598,7 +1613,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 
                 case DB2_AUTOCOMMIT_OFF:
                     pvParam = SQL_AUTOCOMMIT_OFF;
-                    rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)pvParam, SQL_IS_INTEGER);
+                    rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(intptr_t)pvParam, SQL_IS_INTEGER);
                     if ( rc == SQL_ERROR ) {
                         _php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
                     } else {
@@ -1712,7 +1727,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
             case DB2_I5_TXN_REPEATABLE_READ:
             case DB2_I5_TXN_SERIALIZABLE:
             case DB2_I5_TXN_NO_COMMIT:
-                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)pvParam, SQL_IS_INTEGER);
+                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)(intptr_t)pvParam, SQL_IS_INTEGER);
                 if ( rc == SQL_ERROR ) {
                     _php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
                 }
@@ -1736,7 +1751,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
             case DB2_I5_NAMING_ON:
             case DB2_I5_NAMING_OFF:
                 ((conn_handle*)handle)->c_i5_sys_naming = option_num;
-                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_DBC_SYS_NAMING, (SQLPOINTER)pvParam, SQL_IS_INTEGER);
+                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_DBC_SYS_NAMING, (SQLPOINTER)(intptr_t)pvParam, SQL_IS_INTEGER);
                 if ( rc == SQL_ERROR ) {
                     _php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
                 }
@@ -1810,7 +1825,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
             case DB2_I5_FMT_YMD:
             case DB2_I5_FMT_JUL:
             case DB2_I5_FMT_JOB:
-                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_DATE_FMT, (SQLPOINTER)pvParam, SQL_IS_INTEGER);
+                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_DATE_FMT, (SQLPOINTER)(intptr_t)pvParam, SQL_IS_INTEGER);
                 if ( rc == SQL_ERROR ) {
                     _php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
                 }
@@ -1835,7 +1850,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
             case DB2_I5_SEP_COMMA:
             case DB2_I5_SEP_BLANK:
             case DB2_I5_SEP_JOB:
-                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_DATE_SEP, (SQLPOINTER)pvParam, SQL_IS_INTEGER);
+                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_DATE_SEP, (SQLPOINTER)(intptr_t)pvParam, SQL_IS_INTEGER);
                 if ( rc == SQL_ERROR ) {
                     _php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
                 }
@@ -1858,7 +1873,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
             case DB2_I5_FMT_EUR:
             case DB2_I5_FMT_JIS:
             case DB2_I5_FMT_HMS:
-                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_TIME_FMT, (SQLPOINTER)pvParam, SQL_IS_INTEGER);
+                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_TIME_FMT, (SQLPOINTER)(intptr_t)pvParam, SQL_IS_INTEGER);
                 if ( rc == SQL_ERROR ) {
                     _php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
                 }
@@ -1881,7 +1896,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
             case DB2_I5_SEP_COMMA:
             case DB2_I5_SEP_BLANK:
             case DB2_I5_SEP_JOB:
-                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_TIME_SEP, (SQLPOINTER)pvParam, SQL_IS_INTEGER);
+                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_TIME_SEP, (SQLPOINTER)(intptr_t)pvParam, SQL_IS_INTEGER);
                 if ( rc == SQL_ERROR ) {
                     _php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
                 }
@@ -1900,7 +1915,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
             case DB2_I5_SEP_PERIOD:
             case DB2_I5_SEP_COMMA:
             case DB2_I5_SEP_JOB:
-                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_DECIMAL_SEP, (SQLPOINTER)pvParam, SQL_IS_INTEGER);
+                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_DECIMAL_SEP, (SQLPOINTER)(intptr_t)pvParam, SQL_IS_INTEGER);
                 if ( rc == SQL_ERROR ) {
                     _php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
                 }
@@ -1930,7 +1945,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
          * DB2_I5_JOB_SORT_OFF value turns off DB2 UDB CLI job sortmode. 
          */
         pvParam = option_num;
-        rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_CONN_SORT_SEQUENCE, (SQLPOINTER)pvParam, SQL_IS_INTEGER);
+        rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_CONN_SORT_SEQUENCE, (SQLPOINTER)(intptr_t)pvParam, SQL_IS_INTEGER);
         if ( rc == SQL_ERROR ) {
             _php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
         }
@@ -1984,7 +1999,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
         switch (option_num) {
             case DB2_FIRST_IO:
             case DB2_ALL_IO:
-                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_QUERY_OPTIMIZE_GOAL, (SQLPOINTER)pvParam, SQL_IS_INTEGER);
+                rc = SQLSetConnectAttr((SQLHDBC)((conn_handle*)handle)->hdbc, SQL_ATTR_QUERY_OPTIMIZE_GOAL, (SQLPOINTER)(intptr_t)pvParam, SQL_IS_INTEGER);
                 if ( rc == SQL_ERROR ) {
                     _php_db2_check_sql_errors((SQLHSTMT)((conn_handle*)handle)->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
                 }
@@ -2003,7 +2018,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
             case DB2_I5_FETCH_ON:
             case DB2_I5_FETCH_OFF:
                 rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-                    SQL_ATTR_FOR_FETCH_ONLY, (SQLPOINTER)pvParam,
+                    SQL_ATTR_FOR_FETCH_ONLY, (SQLPOINTER)(intptr_t)pvParam,
                     SQL_IS_INTEGER );
                 if ( rc == SQL_ERROR ) {
                     _php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -2044,7 +2059,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
             case DB2_DEFERRED_PREPARE_ON:
                 pvParam = SQL_DEFERRED_PREPARE_ON;
                 rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-                        SQL_ATTR_DEFERRED_PREPARE, (SQLPOINTER)pvParam,
+                        SQL_ATTR_DEFERRED_PREPARE, (SQLPOINTER)(intptr_t)pvParam,
                         SQL_IS_INTEGER );
                 if ( rc == SQL_ERROR ) {
                     _php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -2054,7 +2069,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
             case DB2_DEFERRED_PREPARE_OFF:
                 pvParam = SQL_DEFERRED_PREPARE_OFF;
                 rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle *)handle)->hstmt,
-                        SQL_ATTR_DEFERRED_PREPARE, (SQLPOINTER)pvParam,
+                        SQL_ATTR_DEFERRED_PREPARE, (SQLPOINTER)(intptr_t)pvParam,
                         SQL_IS_INTEGER );
                 if ( rc == SQL_ERROR ) {
                     _php_db2_check_sql_errors((SQLHSTMT)((stmt_handle *)handle)->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1 TSRMLS_CC);
@@ -2709,12 +2724,12 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
                 break;
             }
 #ifndef PASE /* IBM i not support SQL_ATTR_ODBC_VERSION */
-            rc = SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_ODBC_VERSION, (void *)SQL_OV_ODBC3, SQL_IS_INTEGER);
+            rc = SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER)(intptr_t)SQL_OV_ODBC3, SQL_IS_INTEGER);
 #else /* IBM i enter server mode early (connect QSQSRVR jobs) */
             /* orig  - IBM i enter server mode early (connect QSQSRVR jobs) */
             if (IBM_DB2_G(i5_ignore_userid) < 1 && !is_i5_server_mode) {
                 attr = SQL_TRUE;
-                rc = SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_SERVER_MODE, (SQLPOINTER)attr, SQL_IS_INTEGER);
+                rc = SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_SERVER_MODE, (SQLPOINTER)(intptr_t)attr, SQL_IS_INTEGER);
                 if (rc == SQL_SUCCESS) {
                     is_i5_server_mode=1;
                 }
@@ -2722,7 +2737,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
             /* 1.9.7 - IBM i lobs come back +1 (bug) */
             if (!is_i5_null_in_len) {
                 attr = SQL_FALSE;
-                rc = SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_INCLUDE_NULL_IN_LEN, (SQLPOINTER)attr, SQL_IS_INTEGER);
+                rc = SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_INCLUDE_NULL_IN_LEN, (SQLPOINTER)(intptr_t)attr, SQL_IS_INTEGER);
                 if (rc == SQL_SUCCESS) {
                     is_i5_null_in_len=1;
                 }
@@ -2730,7 +2745,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
             /* 1.9.7 - IBM i 1208 data */
             if (is_i5_override_ccsid == 1 && IBM_DB2_G(i5_override_ccsid) == 1208) {
                 attr = SQL_TRUE;
-                rc = SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_UTF8, (SQLPOINTER)attr, SQL_IS_INTEGER);
+                rc = SQLSetEnvAttr((SQLHENV)conn_res->henv, SQL_ATTR_UTF8, (SQLPOINTER)(intptr_t)attr, SQL_IS_INTEGER);
                 if (rc == SQL_SUCCESS) {
                     is_i5_override_ccsid=2;
                 }
@@ -2776,22 +2791,22 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
             else if (IBM_DB2_G(i5_allow_commit) >= 2) attr = SQL_TXN_READ_COMMITTED;
             else if (IBM_DB2_G(i5_allow_commit) >= 1) attr = SQL_TXN_READ_UNCOMMITTED;
             else attr = SQL_TXN_NO_COMMIT;
-            rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)attr, SQL_IS_INTEGER);
+            rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)(intptr_t)attr, SQL_IS_INTEGER);
         }
         /* 1.9.7 - IBM i + LUW 10.5 system naming on (*libl)/file.mbr */
         conn_res->c_i5_sys_naming = IBM_DB2_G(i5_sys_naming);
         conn_res->c_i5_pending_chglibl = NULL;
         conn_res->c_i5_pending_chgcurlib = NULL;
         if (conn_res->c_i5_sys_naming > 0) {
-            rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_DBC_SYS_NAMING, (SQLPOINTER)SQL_TRUE, SQL_IS_INTEGER);
+            rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_DBC_SYS_NAMING, (SQLPOINTER)(intptr_t)SQL_TRUE, SQL_IS_INTEGER);
         }
         /* 1.9.7 - default autocommit=on before _php_db2_parse_options (comment add only) */ 
-        rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(conn_res->auto_commit), SQL_IS_INTEGER);
+        rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(intptr_t)(conn_res->auto_commit), SQL_IS_INTEGER);
 #ifdef PASE /* 1.9.7 - IBM i  moved before _php_db2_parse_options (bug) */
         /* orig  - IBM i SQL_ATTR_JOB_SORT_SEQUENCE (customer request DB2 PTF) */
         if (IBM_DB2_G(i5_job_sort) > 0) {
             attr = SQL_JOBRUN_SORT_SEQUENCE;
-            rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_CONN_SORT_SEQUENCE, (SQLPOINTER)attr, SQL_IS_INTEGER);
+            rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_CONN_SORT_SEQUENCE, (SQLPOINTER)(intptr_t)attr, SQL_IS_INTEGER);
         }
         /* 1.9.7 - IBM i consultant request switch subsystem QSQSRVR job (customer workload issues) */
         if (IBM_DB2_G(i5_servermode_subsystem) && strlen(IBM_DB2_G(i5_servermode_subsystem)) > 0 && IBM_DB2_G(i5_ignore_userid) < 1) {
@@ -2927,7 +2942,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
             zend_resource newPersistentRes;
             newPersistentRes.type = le_pconn_struct;
             newPersistentRes.ptr = conn_res;
-            GC_REFCOUNT(&newPersistentRes) = 1;
+            GC_SET_REFCOUNT(&newPersistentRes, 1);
             if (zend_hash_str_update_mem(&EG(persistent_list), hKey, hKeyLen, &newPersistentRes, sizeof(newPersistentRes)) == NULL) {
 #else
             memset(&newEntry, 0, sizeof(newEntry));
@@ -3011,7 +3026,7 @@ static void _php_db2_set_decfloat_rounding_mode_client(void* handle TSRMLS_DC)
     if(strcmp(decflt_rounding, "ROUND_FLOOR") == 0) {
         rounding_mode = SQL_ROUND_FLOOR;
     }
-    rc = SQLSetConnectAttr((SQLHDBC)hdbc, SQL_ATTR_DECFLOAT_ROUNDING_MODE, (SQLPOINTER)rounding_mode, SQL_IS_INTEGER);
+    rc = SQLSetConnectAttr((SQLHDBC)hdbc, SQL_ATTR_DECFLOAT_ROUNDING_MODE, (SQLPOINTER)(intptr_t)rounding_mode, SQL_IS_INTEGER);
     
     return;
 }
@@ -3122,19 +3137,19 @@ PHP_FUNCTION(db2_pconnect)
 }
 /* }}} */
 
-/* {{{ proto mixed db2_autocommit(resource connection[, bool value])
+/* {{{ proto mixed db2_autocommit(resource connection[, long value])
 Returns or sets the AUTOCOMMIT state for a database connection */
 PHP_FUNCTION(db2_autocommit)
 {
     int argc = ZEND_NUM_ARGS();
     int connection_id = -1;
-    zend_bool value;
+    zend_long value;
     zval *connection = NULL;
     conn_handle *conn_res;
     int rc;
     SQLINTEGER autocommit;
 
-    if (zend_parse_parameters(argc TSRMLS_CC, "r|b", &connection, &value) == FAILURE) {
+    if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &connection, &value) == FAILURE) {
         return;
     }
 
@@ -3145,7 +3160,11 @@ PHP_FUNCTION(db2_autocommit)
         /* If value in handle is different from value passed in */
         if (argc == 2) {
             autocommit = value;
-            rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)autocommit, SQL_IS_INTEGER);
+			if (autocommit != DB2_AUTOCOMMIT_ON && autocommit != DB2_AUTOCOMMIT_OFF) {
+                php_error_docref(NULL TSRMLS_CC, E_WARNING, "value must be one of DB2_AUTOCOMMIT_ON or DB2_AUTOCOMMIT_OFF");
+                RETURN_FALSE;
+            }
+            rc = SQLSetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)(intptr_t)autocommit, SQL_IS_INTEGER);
             if ( rc == SQL_ERROR ) {
                 _php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1 TSRMLS_CC);
                 RETURN_FALSE;
@@ -5136,7 +5155,7 @@ PHP_FUNCTION(db2_execute)
     }
 
 #if PHP_MAJOR_VERSION >= 7
-    if (parameters_array && Z_TYPE_P(parameters_array) == IS_ARRAY && (Z_TYPE_FLAGS_P(parameters_array) & (IS_TYPE_COPYABLE & !IS_TYPE_REFCOUNTED))) {
+    if (parameters_array && Z_TYPE_P(parameters_array) == IS_ARRAY) {
         SEPARATE_ARRAY(parameters_array);
     }
 #endif
@@ -5322,6 +5341,11 @@ PHP_FUNCTION(db2_execute)
                         tmp_curr->value->value.lval = (long)tmp_curr->long_value;
                     }
                     _php_db2_set_symbol(tmp_curr->varname, tmp_curr->value TSRMLS_CC);
+#if PHP_MAJOR_VERSION >= 7
+                    efree(tmp_curr->value); /* 1.9.9-zs7 */
+                    tmp_curr->value = NULL;
+#endif
+
                 default:
                     break;
             }
@@ -7769,7 +7793,7 @@ PHP_FUNCTION(db2_last_insert_id)
  */
 static int _ibm_db_chaining_flag( stmt_handle *stmt_res, SQLINTEGER flag, error_msg_node *error_list, int client_err_cnt TSRMLS_DC ) {
     int rc;
-    rc = SQLSetStmtAttr((SQLHSTMT)stmt_res->hstmt, flag, (SQLPOINTER)SQL_TRUE, SQL_IS_INTEGER);
+    rc = SQLSetStmtAttr((SQLHSTMT)stmt_res->hstmt, flag, (SQLPOINTER)(intptr_t)SQL_TRUE, SQL_IS_INTEGER);
     if ( flag == SQL_ATTR_CHAINING_BEGIN ) {
         if ( rc  == SQL_ERROR ) {
             php_error_docref(NULL TSRMLS_CC, E_WARNING, "Chaining begin failed");
@@ -7873,7 +7897,7 @@ PHP_FUNCTION( db2_execute_many )
     }
 
 #if PHP_MAJOR_VERSION >= 7
-    if (params && Z_TYPE_P(params) == IS_ARRAY && (Z_TYPE_FLAGS_P(params) & (IS_TYPE_COPYABLE & !IS_TYPE_REFCOUNTED))) {
+    if (params && Z_TYPE_P(params) == IS_ARRAY) {
         SEPARATE_ARRAY(params);
     }
 #endif
