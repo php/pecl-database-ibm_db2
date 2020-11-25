@@ -7620,7 +7620,7 @@ PHP_FUNCTION(db2_escape_string)
     /* reallocate to the real length */  
     new_str = (char *)realloc(new_str, new_length + 1);  
 
-    ZEND_RETURN_STRINGL(new_str, new_length, 1)      
+    ZEND_RETURN_STRINGL(new_str, new_length, 1);
 }    
 /* }}} */
 
