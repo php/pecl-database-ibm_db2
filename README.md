@@ -2,7 +2,24 @@
 
 Interface for PHP to DB2 for z/OS, DB2 for LUW, DB2 for i.
 
-## Prerequisite
+## IBM i users
+
+When running on IBM i, `IBM_DB2` doesn't link with the Db2 LUW client library,
+but instead with libdb400, which provides a PASE wrapper for SQL/CLI. The
+differences between SQL/CLI in IBM i and the LUW driver are wrapped for you.
+You don't need Db2 Connect on IBM i as a result.
+
+To install, make sure you have the new Yum-based OSS environment. Install PHP,
+plus any dependencies like so:
+
+```shell
+yum install sqlcli-devel gcc make-gnu
+```
+
+Tony Cairns' [replacement libdb400](https://bitbucket.org/litmis/db2sock/src/master/db2/)
+is not yet tested, but may be desirable due to its greater debugging features.
+
+## LUW/z/Db2 Connect users
 
 CLIDRIVER should be installed in your system.
 If not installed Download from the below link.
@@ -13,7 +30,7 @@ PHP, gcc, make, tar should be installed in your system.
 
 You may not find gcc, make, tar in some of the docker containers (Example Amazon Linux2).
 In such cases use below command to install gcc etc.
-```
+```shell
 yum install make gcc
 ```
 ## How to install php ibm_db2 extension in Linux/Mac.
@@ -100,6 +117,30 @@ Below blog mentiones how to build php ibm_db2 from source in windows.
 https://www.ibm.com/developerworks/community/blogs/96960515-2ea1-4391-8170-b0515d08e4da/entry/Install_PHP_ibm_db2_Driver?lang=en
 
 ```
+
+## Test suite
+
+`make test` is adequate for most tests except those involving XMLSERVICE.
+For more complex tests, use `run-tests.php` and set `TEST_PHP_ARGS` as needed.
+
+Many tests rely on having libraries like `DB2` added. On IBM i, `create schema`
+instead of `crtlib` is recommended to properly set up things like journals.
+Please let us know if there are any hardcoded library names; we've tried to
+clean up usage of them when not documented.
+
+If you have strange failures during the tests, you might want to adjust the
+autocommit setting. `ibm_db2.i5_allow_commit=1` is tested to work.
+
+On IBM i, you might want to use `*LOCAL` as your DSN without a username or
+password. This means you won't need to provide another account for most tests.
+Modify `tests/connection.inc` to do so.
+
+On IBM i, it's strongly recommended to set QCCSID to a reasonable value, not
+65535. Without setting this, you will have many string values failing to
+convert from EBCDIC. `IBM_DB2` provides a workaround for this nowadays due to
+the amount of systems in the wild without a properly set QCCSID, but you
+should do this anyways. To check and set QCCSID, run `WRKSYSVAL` from a 5250.
+
 ## Contributing:
 ```
 See CONTRIBUTING.md
