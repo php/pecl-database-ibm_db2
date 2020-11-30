@@ -613,13 +613,15 @@ SQLRETURN _php_db2_override_SQLSetConnectAttr(
 {
     int rc = SQL_ERROR;
     SQLPOINTER pvParam = vParam;
+    /* must be 32-bit, or reads first 32-bits in 64-bit word (always 0) */
+    int iParam = (SQLINTEGER)(intptr_t)vParam;
     /* IBM i requires pointer to value; 
      * LUW supports raw integer (SQL_IS_INTEGER) or pointer (SQL_NTS) 
      */
-    // attr located intentionally outside the 'if' scope to survive SQLSetConnectAttr
-    int attr = (int)(intptr_t)vParam;
-    if (fStrLen != SQL_NTS) {
-        pvParam = &attr;
+    if (fStrLen == SQL_IS_INTEGER) {
+        pvParam = &iParam;
+    } else if (fStrLen != SQL_NTS) {
+        pvParam = &vParam;
     }
     rc = SQLSetConnectAttr(hdbc, fOption, pvParam, fStrLen);
     return rc;
@@ -632,13 +634,15 @@ SQLRETURN _php_db2_override_SQLSetStmtAttr(
 {
     int rc = SQL_ERROR;
     SQLPOINTER pvParam = vParam;
+    /* must be 32-bit, or reads first 32-bits in 64-bit word (always 0) */
+    int iParam = (SQLINTEGER)(intptr_t)vParam;
     /* IBM i requires pointer to value; 
      * LUW supports raw integer (SQL_IS_INTEGER) or pointer (SQL_NTS) 
      */
-    // attr located intentionally outside the 'if' scope to survive SQLSetConnectAttr
-    int attr = (int)(intptr_t)vParam;
-    if (fStrLen != SQL_NTS) {
-        pvParam = &attr;
+    if (fStrLen == SQL_IS_INTEGER) {
+        pvParam = &iParam;
+    } else if (fStrLen != SQL_NTS) {
+        pvParam = &vParam;
     }
     rc = SQLSetStmtAttr(hstmt, fOption, pvParam, fStrLen);
     return rc;
@@ -651,13 +655,15 @@ SQLRETURN _php_db2_override_SQLSetEnvAttr(
 {
     int rc = SQL_ERROR;
     SQLPOINTER pvParam = vParam;
+    /* must be 32-bit, or reads first 32-bits in 64-bit word (always 0) */
+    int iParam = (SQLINTEGER)(intptr_t)vParam;
     /* IBM i requires pointer to value; 
      * LUW supports raw integer (SQL_IS_INTEGER) or pointer (SQL_NTS) 
      */
-    // attr located intentionally outside the 'if' scope to survive SQLSetConnectAttr
-    int attr = (int)(intptr_t)vParam;
-    if (fStrLen != SQL_NTS) {
-        pvParam = &attr;
+    if (fStrLen == SQL_IS_INTEGER) {
+        pvParam = &iParam;
+    } else if (fStrLen != SQL_NTS) {
+        pvParam = &vParam;
     }
     rc = SQLSetEnvAttr(henv, fOption, pvParam, fStrLen);
     return rc;
