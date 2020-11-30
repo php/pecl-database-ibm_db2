@@ -279,6 +279,8 @@ extern int SQLOverrideCCSID400(int newCCSID);
 #define DB2_I5_JOB_SORT_OFF SQL_FALSE
 #define DB2_I5_DBCS_ALLOC_ON  SQL_TRUE
 #define DB2_I5_DBCS_ALLOC_OFF SQL_FALSE
+#define DB2_I5_CHAR_TRIM_ON  SQL_TRUE
+#define DB2_I5_CHAR_TRIM_OFF SQL_FALSE
 #define DB2_FIRST_IO SQL_FIRST_IO
 #define DB2_ALL_IO SQL_ALL_IO
 #endif
@@ -409,6 +411,7 @@ ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 	zend_long		i5_check_pconnect;	/* 1.9.7 - IBM i remote persistent connection or long lived local (customer issue dead connection) */
 	char		        *i5_servermode_subsystem; /* 1.9.7 - IBM i consultant request switch subsystem QSQSRVR job (customer workload issues) */
 	zend_long		i5_guard_profile;	/* 1.9.7 - IBM i monitor switch user profile applications (customer security issue) */
+	zend_long		i5_char_trim;		/* 2.0.3  - IBM i trim spaces character results  (customer size request issue) */
 #endif /* PASE */
 ZEND_END_MODULE_GLOBALS(ibm_db2)
 #else
@@ -432,6 +435,7 @@ ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 	long		i5_check_pconnect;	/* 1.9.7 - IBM i remote persistent connection or long lived local (customer issue dead connection) */
 	char		*i5_servermode_subsystem; /* 1.9.7 - IBM i consultant request switch subsystem QSQSRVR job (customer workload issues) */
 	long		i5_guard_profile;	/* 1.9.7 - IBM i monitor switch user profile applications (customer security issue) */
+	long		i5_char_trim;		/* 2.0.3  - IBM i trim spaces character results  (customer size request issue) */
 #endif /* PASE */
 ZEND_END_MODULE_GLOBALS(ibm_db2)
 #endif
