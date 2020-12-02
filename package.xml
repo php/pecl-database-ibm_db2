@@ -30,10 +30,10 @@ Cloudscape, and Apache Derby databases.</description>
   <email>tessus@php.net</email>
   <active>yes</active>
  </helper>
- <date>2020-11-30</date>
- <time>17:35:59</time>
+ <date>2020-12-02</date>
+ <time>05:15:47</time>
  <version>
-  <release>2.1.0</release>
+  <release>2.1.1</release>
   <api>2.0.1</api>
  </version>
  <stability>
@@ -42,13 +42,8 @@ Cloudscape, and Apache Derby databases.</description>
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-* 2020-11-30: 2.1.0
-- Compatibility with PHP 8
-- Fix compatibility with 64-bit PASE/modern IBM i (sqlcli-dev package, pointer/integer width mismatch, XMLSERVICE location, etc)
-- Backport character trim from Zend Server
-- Major improvements to test suite (fix broken tests, less hardcoding)
-- Handle CCSID 65535 on IBM i
-- Fix warnings (returning void from non-void, etc)
+* 2020-12-02: 2.1.1
+- Fix build regression on LUW with db2_execute_many
  </notes>
  <contents>
   <dir name="/">

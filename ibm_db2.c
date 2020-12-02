@@ -510,7 +510,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_execute, 0, 0, 1)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+#ifndef PASE
 /* XXX: db2_execute_many isn't documented */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_execute_many, 0, 0, 1)
+	ZEND_ARG_INFO(0, stmt)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_stmt_errormsg, 0, 0, 0)
 	ZEND_ARG_INFO(0, stmt)
