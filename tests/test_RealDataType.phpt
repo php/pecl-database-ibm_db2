@@ -21,7 +21,8 @@ if ($conn) {
 	$res = db2_exec($conn, "SELECT tz_offset from test1R");
 	
 	while ($row = db2_fetch_both($res)) {
-		var_dump($row);
+		echo(var_export($row[0], true) . "\n");
+		echo(var_export($row["TZ_OFFSET"], true) . "\n");
 	}
 	
 	// Dropping the test table.
@@ -33,9 +34,5 @@ if ($conn) {
 }
 ?>
 --EXPECT--
-array(2) {
-  ["TZ_OFFSET"]=>
-  float(-2.3399999141693)
-  [0]=>
-  float(-2.3399999141693)
-}
+-2.3399999141693115
+-2.3399999141693115
