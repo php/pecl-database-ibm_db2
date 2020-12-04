@@ -37,8 +37,6 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(ibm_db2)
 
-#define ZEND_Z_STRVAL_PP(data) Z_STRVAL_P(*data)
-
 #define ZEND_FETCH_RESOURCE_NEW(res, stmt_type, stmt, stmt_id, resource_type_name, le_stmt)\
 res = (stmt_type) zend_fetch_resource(Z_RES_P(*stmt),resource_type_name,le_stmt);\
 if(res == NULL)\
@@ -57,16 +55,12 @@ RETVAL_STRING(str); \
 efree(str);\
 return
 
-#define ZEND_ZVAL_PTR_DTOR(data) zval_ptr_dtor(data)
-
 #define IBM_DB2_ZEND_GET_TYPE(data) (data)->u1.v.type
 #define RES_GET_TYPE(zval) (zval)->type
 
 #define ZEND_Z_TYPE_RESOURCE(newEntry) RES_GET_TYPE(&newEntry)
 
 #define ZEND_Z_TYPE(entry) IBM_DB2_ZEND_GET_TYPE(&entry)
-
-#define ZEND_Z_STRLEN_PP(value) Z_STRLEN_P(*value) 
 
 #define ZEND_Z_TYPE_P(entry) IBM_DB2_ZEND_GET_TYPE(entry)
 
@@ -990,7 +984,7 @@ static void _php_db2_free_result_struct(stmt_handle* handle)
 
             if( prev_ptr->param_type != DB2_PARAM_OUT && prev_ptr->param_type != DB2_PARAM_INOUT ) {
                 if (prev_ptr->value) {
-                    ZEND_ZVAL_PTR_DTOR(prev_ptr->value);
+                    zval_ptr_dtor(prev_ptr->value);
                 }
             }
             efree(prev_ptr);
@@ -1580,7 +1574,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
     char *option_str = NULL;
 
     if (ZEND_Z_TYPE_PP(data) == IS_STRING) {
-        option_str = ZEND_Z_STRVAL_PP(data);
+        option_str = Z_STRVAL_P(*data);
     } else {
         option_num = Z_LVAL_P(*data);
     }
@@ -4637,7 +4631,7 @@ static int _php_db2_bind_pad(param_node *curr, int nullterm, int isvarying, int 
         platform_pad = 0x20;
     }
     /* IBM i has no CHAR0 type (zero length null term string) */
-    if (ZEND_Z_STRLEN_PP(data) == 0 || ZEND_Z_STRVAL_PP(data)[0] == '\0') {
+    if (Z_STRLEN_P(*data) == 0 || Z_STRVAL_P(*data)[0] == '\0') {
         switch (isvarying) {
         case 0: /* need full *BLANKS */
             platform_need_full_pad = 1;
@@ -4670,7 +4664,7 @@ static int _php_db2_bind_pad(param_node *curr, int nullterm, int isvarying, int 
     }
 
     /* current length */
-    *poriglen = ZEND_Z_STRLEN_PP(data);
+    *poriglen = Z_STRLEN_P(*data);
 
     /*
      * IS_INTERNED() macro to check if a given char* is interned or regular string
@@ -4679,9 +4673,9 @@ static int _php_db2_bind_pad(param_node *curr, int nullterm, int isvarying, int 
      */
     if (IS_INTERNED(Z_STR_P(*data))) {
 		/* Need use macro assignment to avoid leak in php 7. (Thanks Dimitry) 
-		 * Z_STR_P(*data) = zend_string_init(ZEND_Z_STRVAL_PP(data), ZEND_Z_STRLEN_PP(data), 0);
+		 * Z_STR_P(*data) = zend_string_init(Z_STRVAL_P(*data), Z_STRLEN_P(*data), 0);
 		 */
-        ZVAL_STR(*data, zend_string_init(ZEND_Z_STRVAL_PP(data), ZEND_Z_STRLEN_PP(data), 0));
+        ZVAL_STR(*data, zend_string_init(Z_STRVAL_P(*data), Z_STRLEN_P(*data), 0));
     }
 
     /* make enough space for full write */
@@ -4691,27 +4685,27 @@ static int _php_db2_bind_pad(param_node *curr, int nullterm, int isvarying, int 
 		 */
 		ZVAL_STR(*data, zend_string_extend(Z_STR_P(*data), curr->param_size + nullterm, 0));
         if (platform_need_full_pad) {
-            memset(ZEND_Z_STRVAL_PP(data), platform_pad, curr->param_size + nullterm);
+            memset(Z_STRVAL_P(*data), platform_pad, curr->param_size + nullterm);
         } else {
-            memset(ZEND_Z_STRVAL_PP(data) + *poriglen, platform_pad, curr->param_size - *poriglen);
+            memset(Z_STRVAL_P(*data) + *poriglen, platform_pad, curr->param_size - *poriglen);
         }
 #ifdef PASE /* i5/OS -- do not remove length-1, breaks IBM i. Also null orig len breaks IBM i. */
         if (nullterm) {
-            ZEND_Z_STRVAL_PP(data)[curr->param_size] = '\0';
+            Z_STRVAL_P(*data)[curr->param_size] = '\0';
         }
-        ZEND_Z_STRLEN_PP(data) = curr->param_size; /* yes, length-1 for bind parm max */
+        Z_STRLEN_P(*data) = curr->param_size; /* yes, length-1 for bind parm max */
         *poriglen = curr->param_size;
 #else
         if (nullterm) {
-            ZEND_Z_STRVAL_PP(data)[*poriglen] = '\0';
+            Z_STRVAL_P(*data)[*poriglen] = '\0';
         }
-        ZEND_Z_STRLEN_PP(data) = curr->param_size; /* yes, length-1 for bind parm max */
+        Z_STRLEN_P(*data) = curr->param_size; /* yes, length-1 for bind parm max */
 #endif /* PASE */
     }
 
     /* IBM i has no CHAR0 type (return to normal) */
     if (dreadPirateCHAR0 == 1) {
-        ZEND_Z_STRVAL_PP(data)[0] = platform_pad;
+        Z_STRVAL_P(*data)[0] = platform_pad;
         dreadPirateCHAR0 = 0;
         curr->param_type = save_param_type;
         switch(platform_need_full_pad) {
@@ -4725,7 +4719,7 @@ static int _php_db2_bind_pad(param_node *curr, int nullterm, int isvarying, int 
     }
 
     /* something went very wrong with heap */
-    if (ZEND_Z_STRVAL_PP(data) == NULL ) {
+    if (Z_STRVAL_P(*data) == NULL ) {
         return SQL_ERROR;
     }
 
@@ -4746,8 +4740,8 @@ static int _php_db2_bind_pad(param_node *curr, int nullterm, int isvarying, int 
          * '2' becomes '000000000000000000002'
          */
         case SQL_BIGINT:
-            front=ZEND_Z_STRVAL_PP(data);
-            here=back=ZEND_Z_STRVAL_PP(data) + ZEND_Z_STRLEN_PP(data) - nullterm;
+            front=Z_STRVAL_P(*data);
+            here=back=Z_STRVAL_P(*data) + Z_STRLEN_P(*data) - nullterm;
             for (;here>=front;here--) {
                 if (*here == '-') {
                     isNeg = 1;
@@ -4803,7 +4797,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 
     /* Clean old zval value and create a new one */
     if( curr->value != 0 && curr->param_type != DB2_PARAM_OUT && curr->param_type != DB2_PARAM_INOUT )
-        ZEND_ZVAL_PTR_DTOR(curr->value);
+        zval_ptr_dtor(curr->value);
     if (!curr->value) {
         curr->value = (zval *)emalloc(sizeof(zval));
     }
@@ -4879,7 +4873,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
             if (ZEND_Z_TYPE_PP(bind_data) == IS_NULL){
                 break;
             }
-            /* make sure copy in is a string (ZEND_Z_STRVAL_PP(bind_data) && ) */
+            /* make sure copy in is a string (Z_STRVAL_P(*bind_data) && ) */
             if (*bind_data && ZEND_Z_TYPE_PP(bind_data) != IS_STRING) {
                 convert_to_string(*bind_data);
             }
@@ -7088,7 +7082,7 @@ PHP_FUNCTION(db2_server_info)
 
             add_property_zval(return_value, "KEYWORDS", karray);
 
-            ZEND_ZVAL_PTR_DTOR(karray);
+            zval_ptr_dtor(karray);
         }
 
         /* DFT_ISOLATION */
@@ -7159,7 +7153,7 @@ PHP_FUNCTION(db2_server_info)
 
             add_property_zval(return_value, "ISOLATION_OPTION", array);
 
-            ZEND_ZVAL_PTR_DTOR(array);
+            zval_ptr_dtor(array);
         }
 
         /* SQL_CONFORMANCE */
