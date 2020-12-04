@@ -37,15 +37,6 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(ibm_db2)
 
-
-#define ZEND_RESOURCE zend_resource
-
-#if ZEND_MODULE_API_NO > 20020429
-#define ONUPDATEFUNCTION OnUpdateLong
-#else
-#define ONUPDATEFUNCTION OnUpdateInt
-#endif
-
 #define ZEND_Z_STRVAL_PP(data) Z_STRVAL_P(*data)
 
 #define ZEND_RETVAL_STRINGL(str, len, dup) RETVAL_STRINGL(str, len)
@@ -682,7 +673,7 @@ ZEND_GET_MODULE(ibm_db2)
 /* {{{ PHP_INI
 */
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("ibm_db2.binmode", "1", PHP_INI_ALL, ONUPDATEFUNCTION,
+    STD_PHP_INI_ENTRY("ibm_db2.binmode", "1", PHP_INI_ALL, OnUpdateLong,
         bin_mode, zend_ibm_db2_globals, ibm_db2_globals)
     /* orig  - IBM i legacy CRTLIB containers fail under commit control (isolation *NONE) */
     STD_PHP_INI_BOOLEAN("ibm_db2.i5_allow_commit", "0", PHP_INI_SYSTEM, OnUpdateLong,
@@ -959,7 +950,7 @@ static void _php_db2_i5_test_helper() {
 #endif /* PASE */
 
 /* {{{ static void _php_db2_free_conn_struct */
-static void _php_db2_free_conn_struct(ZEND_RESOURCE *rsrc)
+static void _php_db2_free_conn_struct(zend_resource *rsrc)
 {
     int rc;
 
@@ -988,7 +979,7 @@ static void _php_db2_free_conn_struct(ZEND_RESOURCE *rsrc)
 /* }}} */
 
 /* {{{ static void _php_db2_free_pconn_struct */
-static void _php_db2_free_pconn_struct(ZEND_RESOURCE *rsrc)
+static void _php_db2_free_pconn_struct(zend_resource *rsrc)
 {
     _php_db2_free_conn_struct(rsrc);
 }
@@ -1132,7 +1123,7 @@ static int _php_db2_decr_stmt_struct(stmt_handle *handle)
 #endif /* PASE */
 
 /* {{{ static _php_db2_free_stmt_struct */
-static void _php_db2_free_stmt_struct(ZEND_RESOURCE *rsrc)
+static void _php_db2_free_stmt_struct(zend_resource *rsrc)
 {
     int rc;
 
@@ -1282,7 +1273,7 @@ PHP_MSHUTDOWN_FUNCTION(ibm_db2)
 
 /* {{{ _php_ibm_db2_conn
 */ 
-static int _php_ibm_db2_conn (ZEND_RESOURCE *le)
+static int _php_ibm_db2_conn (zend_resource *le)
 {
     conn_handle *conn_res;
     int rc = 0;
@@ -2792,7 +2783,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
     do {
         /* Check if we already have a connection for this userID & database combination */
         if (isPersistent) {
-            ZEND_RESOURCE *entry;
+            zend_resource *entry;
             hKeyLen = strlen(database) + strlen(uid) + 8;
             hKey = (char *) ecalloc(1, hKeyLen);
 
