@@ -395,7 +395,6 @@ PHP_FUNCTION(db2_last_insert_id);
 	Declare any global variables you may need between the BEGIN
 	and END macros here:
 */
-#if PHP_MAJOR_VERSION >= 7
 ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 	zend_long		bin_mode;
 	char		__php_conn_err_msg[DB2_MAX_ERR_MSG_LEN];
@@ -419,31 +418,6 @@ ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
 	zend_long		i5_char_trim;		/* 2.0.3  - IBM i trim spaces character results  (customer size request issue) */
 #endif /* PASE */
 ZEND_END_MODULE_GLOBALS(ibm_db2)
-#else
-ZEND_BEGIN_MODULE_GLOBALS(ibm_db2)
-	long		bin_mode;
-	char		__php_conn_err_msg[DB2_MAX_ERR_MSG_LEN];
-	char		__php_conn_err_state[SQL_SQLSTATE_SIZE + 1];
-	char		__php_stmt_err_msg[DB2_MAX_ERR_MSG_LEN];
-	char		__php_stmt_err_state[SQL_SQLSTATE_SIZE + 1];
-	long		i5_allow_commit;	/* orig  - IBM i legacy CRTLIB containers fail under commit control (isolation *NONE) */
-	long		i5_sys_naming;		/* 1.9.7 - IBM i + LUW DB2 Connect 10.5 system naming (customer *LIBL issues) */
-#ifdef PASE /* IBM i ibm_db2.ini options */
-	long		i5_dbcs_alloc;		/* orig  - IBM i 6x space for CCSID<>UTF-8 convert  (DBCS customer issue) */
-	long		i5_all_pconnect;	/* orig  - IBM i force all connect to pconnect (operator issue) */
-	long		i5_ignore_userid;	/* orig  - IBM i ignore user id enables no-QSQSRVR job (custom site request) */
-	long		i5_job_sort;		/* orig  - IBM i SQL_ATTR_JOB_SORT_SEQUENCE (customer request DB2 PTF) */
-	long		i5_override_ccsid;	/* 1.9.7 - IBM i force UTF-8 CCSID (DBCS customer issue) */
-	long		i5_blank_userid;	/* 1.9.7 - IBM i security restrict blank db,uid,pwd (unless customer allow flag) */
-	long		i5_log_verbose;		/* 1.9.7 - IBM i consultant request log additional information into php.log */
-	long		i5_max_pconnect;	/* 1.9.7 - IBM i count max usage connection recycle (customer issue months live connection) */
-	long		i5_check_pconnect;	/* 1.9.7 - IBM i remote persistent connection or long lived local (customer issue dead connection) */
-	char		*i5_servermode_subsystem; /* 1.9.7 - IBM i consultant request switch subsystem QSQSRVR job (customer workload issues) */
-	long		i5_guard_profile;	/* 1.9.7 - IBM i monitor switch user profile applications (customer security issue) */
-	long		i5_char_trim;		/* 2.0.3  - IBM i trim spaces character results  (customer size request issue) */
-#endif /* PASE */
-ZEND_END_MODULE_GLOBALS(ibm_db2)
-#endif
 
 /* In every utility function you add that needs to use variables
    in php_ibm_db2_globals, call TSRMLS_FETCH(); after declaring other
