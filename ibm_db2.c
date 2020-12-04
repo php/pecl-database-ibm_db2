@@ -56,9 +56,6 @@ efree(str);\
 return
 
 #define IBM_DB2_ZEND_GET_TYPE(data) (data)->u1.v.type
-#define RES_GET_TYPE(zval) (zval)->type
-
-#define ZEND_Z_TYPE_RESOURCE(newEntry) RES_GET_TYPE(&newEntry)
 
 #define ZEND_Z_TYPE(entry) IBM_DB2_ZEND_GET_TYPE(&entry)
 
