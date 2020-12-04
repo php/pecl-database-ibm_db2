@@ -309,6 +309,7 @@ Cloudscape, and Apache Derby databases.</description>
    <file baseinstalldir="ibm_db2" name="ibm_db2.c" role="src" />
    <file baseinstalldir="ibm_db2" name="ibm_db2.dsp" role="src" />
    <file baseinstalldir="ibm_db2" name="php_ibm_db2.h" role="src" />
+   <file baseinstalldir="ibm_db2" name="php_ibm_db2_int.h" role="src" />
    <file baseinstalldir="ibm_db2" name="TODO" role="doc" />
    <file baseinstalldir="ibm_db2" name="LICENSE" role="doc" />
    <file baseinstalldir="ibm_db2" name="CREDITS" role="doc" />

@@ -102,6 +102,7 @@ SOURCE=.\ibm_db2.c
 # Begin Source File
 
 SOURCE=.\php_ibm_db2.h
+SOURCE=.\php_ibm_db2_int.h
 # End Source File
 # End Group
 # End Target

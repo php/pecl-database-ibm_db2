@@ -32,6 +32,8 @@
 #include "../ext/standard/info.h"
 #include "../ext/standard/php_string.h"
 #include "php_ibm_db2.h"
+/* This is used so the public header doesn't need to have internal defs */
+#include "php_ibm_db2_int.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(ibm_db2)
 
