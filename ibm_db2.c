@@ -8134,7 +8134,11 @@ PHP_FUNCTION(db2_last_insert_id)
     char *last_id = emalloc( MAX_IDENTITY_DIGITS );
     char *sql;
     SQLHANDLE hstmt;
-    SQLUINTEGER out_length;
+#ifdef PASE
+    SQLINTEGER out_length;
+#else
+    SQLLEN out_length;
+#endif
 
     if (zend_parse_parameters(argc TSRMLS_CC, "r", &connection) == FAILURE) {
         return;
