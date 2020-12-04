@@ -39,10 +39,6 @@ ZEND_DECLARE_MODULE_GLOBALS(ibm_db2)
 
 #define ZEND_Z_STRVAL_PP(data) Z_STRVAL_P(*data)
 
-#define ZEND_RETVAL_STRINGL(str, len, dup) RETVAL_STRINGL(str, len)
-
-#define ZEND_RETVAL_STRING(str, val) RETVAL_STRING(str)
-
 #define ZEND_FETCH_RESOURCE_NEW(res, stmt_type, stmt, stmt_id, resource_type_name, le_stmt)\
 res = (stmt_type) zend_fetch_resource(Z_RES_P(*stmt),resource_type_name,le_stmt);\
 if(res == NULL)\
@@ -56,16 +52,10 @@ rsrc = (rsrc_type) zend_fetch_resource2(Z_RES_P(*passed_id),resource_type_name,r
 if(rsrc == NULL)\
 RETURN_FALSE;
 
-#define ZEND_RETURN_STRINGL(str,len,val) RETURN_STRINGL(str, len)
-
-#define ZEND_RETURN_STRING_NOFREE(str,val) RETURN_STRING(str)
-
 #define ZEND_RETURN_STRING(str,val) \
 RETVAL_STRING(str); \
 efree(str);\
 return
-
-#define ZEND_STR(data) Z_STR_P(data) 
 
 #define ZEND_ZVAL_PTR_DTOR(data) zval_ptr_dtor(data)
 
@@ -4694,7 +4684,7 @@ static int _php_db2_bind_pad(param_node *curr, int nullterm, int isvarying, int 
      * each string (or atom) is allocated once and never changed (immutable)
      * aka, not useful for INOUT and OUT parameters obviously
      */
-    if (IS_INTERNED(ZEND_STR(*data))) {
+    if (IS_INTERNED(Z_STR_P(*data))) {
 		/* Need use macro assignment to avoid leak in php 7. (Thanks Dimitry) 
 		 * Z_STR_P(*data) = zend_string_init(ZEND_Z_STRVAL_PP(data), ZEND_Z_STRLEN_PP(data), 0);
 		 */
@@ -5144,9 +5134,9 @@ static void _free_param_cache_list(stmt_handle *stmt_res) {
         /* Free Values */
         if (prev_ptr->value != NULL) {
             if ( ZEND_Z_TYPE_P(prev_ptr->value) == IS_STRING ) {
-                if((ZEND_STR(prev_ptr->value)) != NULL || Z_STRLEN_P(prev_ptr->value) != 0) {
-                    if (!IS_INTERNED((ZEND_STR(prev_ptr->value)))) {
-                        zend_string_release((ZEND_STR(prev_ptr->value)));
+                if((Z_STR_P(prev_ptr->value)) != NULL || Z_STRLEN_P(prev_ptr->value) != 0) {
+                    if (!IS_INTERNED((Z_STR_P(prev_ptr->value)))) {
+                        zend_string_release((Z_STR_P(prev_ptr->value)));
                     }
                 }
             }
@@ -5412,7 +5402,7 @@ PHP_FUNCTION(db2_conn_errormsg)
 
         ZEND_RETURN_STRING(return_str, 0);
     } else {
-        ZEND_RETURN_STRING_NOFREE(IBM_DB2_G(__php_conn_err_msg), 1);
+        RETURN_STRING(IBM_DB2_G(__php_conn_err_msg));
     }
 }
 /* }}} */
@@ -5434,7 +5424,7 @@ PHP_FUNCTION(db2_stmt_errormsg)
     if (stmt) {
         ZEND_FETCH_RESOURCE_NEW(stmt_res, stmt_handle*, &stmt, stmt_id, "Statement Resource", le_stmt_struct);
         if ( stmt_res->exec_many_err_msg != NULL ) {
-            ZEND_RETURN_STRING_NOFREE(stmt_res->exec_many_err_msg, 1);
+            RETURN_STRING(stmt_res->exec_many_err_msg);
         }
 
         return_str = (char*)ecalloc(1, DB2_MAX_ERR_MSG_LEN);
@@ -5445,7 +5435,7 @@ PHP_FUNCTION(db2_stmt_errormsg)
 
         ZEND_RETURN_STRING(return_str, 0);
     } else {
-        ZEND_RETURN_STRING_NOFREE(IBM_DB2_G(__php_stmt_err_msg), 1);
+        RETURN_STRING(IBM_DB2_G(__php_stmt_err_msg));
     }
 }
 /* }}} */
@@ -5478,7 +5468,7 @@ PHP_FUNCTION(db2_conn_error)
 
         ZEND_RETURN_STRING(return_str, 0);
     } else {
-        ZEND_RETURN_STRING_NOFREE(IBM_DB2_G(__php_conn_err_state), 1);
+        RETURN_STRING(IBM_DB2_G(__php_conn_err_state));
     }
 }
 /* }}} */
@@ -5511,7 +5501,7 @@ PHP_FUNCTION(db2_stmt_error)
 
         ZEND_RETURN_STRING(return_str, 0);
     } else {
-        ZEND_RETURN_STRING_NOFREE(IBM_DB2_G(__php_stmt_err_state), 1);
+        RETURN_STRING(IBM_DB2_G(__php_stmt_err_state));
     }
 }
 /* }}} */
@@ -5700,7 +5690,7 @@ PHP_FUNCTION(db2_field_name)
     if ( col < 0 ) {
         RETURN_FALSE;
     }
-    ZEND_RETURN_STRING_NOFREE((char *)stmt_res->column_info[col].name,1);
+    RETURN_STRING((char *)stmt_res->column_info[col].name);
 }
 /* }}} */
 
@@ -5920,7 +5910,7 @@ PHP_FUNCTION(db2_field_type)
             str_val = "string";
             break;
     }
-    ZEND_RETURN_STRING_NOFREE(str_val, 1);
+    RETURN_STRING(str_val);
 }
 /* }}} */
 
@@ -6249,7 +6239,7 @@ PHP_FUNCTION(db2_result)
                     efree(out_ptr);
                     RETURN_NULL();
                 } else {
-                    ZEND_RETVAL_STRING((char*)out_ptr, 1);
+                    RETVAL_STRING((char*)out_ptr);
                     efree(out_ptr);
                 }
                 break;
@@ -6319,7 +6309,7 @@ PHP_FUNCTION(db2_result)
                 if (rc == SQL_ERROR) {
                     RETURN_FALSE;
                 }
-                ZEND_RETURN_STRINGL(out_char_ptr, out_length, 0);
+                RETURN_STRINGL(out_char_ptr, out_length);
                 break;
             case SQL_BLOB:
             case SQL_BINARY:
@@ -6381,7 +6371,7 @@ PHP_FUNCTION(db2_result)
                         if (rc == SQL_ERROR) {
                             RETURN_FALSE;
                         }
-                        ZEND_RETVAL_STRINGL((char*)out_ptr,out_length, 0);
+                        RETVAL_STRINGL((char*)out_ptr,out_length);
                     default:
                         break;
                 }
@@ -6413,7 +6403,7 @@ PHP_FUNCTION(db2_result)
                 if (out_length == SQL_NULL_DATA) {
                     RETURN_NULL();
                 }
-                ZEND_RETVAL_STRINGL((char*)out_char_ptr,out_length, 0);
+                RETVAL_STRINGL((char*)out_char_ptr,out_length);
 #else /* not  PASE */
                 rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_BINARY, NULL, 0, (SQLINTEGER *)&in_length);
                 if ( rc == SQL_ERROR ) {
@@ -6431,7 +6421,7 @@ PHP_FUNCTION(db2_result)
                 if (rc == SQL_ERROR) {
                     RETURN_FALSE;
                 }
-                ZEND_RETVAL_STRINGL((char*)out_ptr,out_length, 0);
+                RETVAL_STRINGL((char*)out_ptr,out_length);
 #endif /* not  PASE */
                 break;
 
@@ -7573,7 +7563,7 @@ PHP_FUNCTION(db2_escape_string)
     /* reallocate to the real length */  
     new_str = (char *)realloc(new_str, new_length + 1);  
 
-    ZEND_RETURN_STRINGL(new_str, new_length, 1);
+    RETURN_STRINGL(new_str, new_length);
 }    
 /* }}} */
 
@@ -7623,7 +7613,7 @@ PHP_FUNCTION(db2_lob_read)
         RETURN_FALSE;
     }
 
-    ZEND_RETVAL_STRING((char*)out_ptr, 1);
+    RETVAL_STRING((char*)out_ptr);
     efree(out_ptr);
 }
 /* }}} */
@@ -7710,7 +7700,7 @@ PHP_FUNCTION(db2_get_option)
                 php_error_docref(NULL, E_WARNING, "Incorrect option string passed in");
                 RETURN_FALSE;
             }
-            ZEND_RETURN_STRINGL(value, val_len, 0);
+            RETURN_STRINGL(value, val_len);
         } else {
             php_error_docref(NULL, E_WARNING, "Supplied parameter is invalid");
             RETURN_FALSE;
