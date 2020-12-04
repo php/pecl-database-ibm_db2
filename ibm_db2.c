@@ -7781,7 +7781,7 @@ PHP_FUNCTION(db2_last_insert_id)
         SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
 
         /* Returning last insert ID (if any), or otherwise NULL */
-        if (last_id[0] == '\0') {
+        if (last_id[0] != '\0') {
             ZEND_RETURN_STRING(last_id, 0);
         } else {
             RETURN_NULL();
