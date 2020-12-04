@@ -131,7 +131,7 @@ return
 #endif
 
 #if PHP_MAJOR_VERSION >= 7 
-#define ZEND_GET_TYPE(data) (data)->u1.v.type
+#define IBM_DB2_ZEND_GET_TYPE(data) (data)->u1.v.type
 #define RES_GET_TYPE(zval) (zval)->type
 #endif
 
@@ -142,7 +142,7 @@ return
 #endif
 
 #if PHP_MAJOR_VERSION >= 7 
-#define ZEND_Z_TYPE(entry) ZEND_GET_TYPE(&entry) 
+#define ZEND_Z_TYPE(entry) IBM_DB2_ZEND_GET_TYPE(&entry)
 #else
 #define ZEND_Z_TYPE(entry) Z_TYPE(entry) 
 #endif
@@ -154,7 +154,7 @@ return
 #endif
 
 #if PHP_MAJOR_VERSION >= 7 
-#define ZEND_Z_TYPE_P(entry) ZEND_GET_TYPE(entry) 
+#define ZEND_Z_TYPE_P(entry) IBM_DB2_ZEND_GET_TYPE(entry)
 #else
 #define ZEND_Z_TYPE_P(entry) Z_TYPE_P(entry) 
 #endif
