@@ -72,13 +72,6 @@ return
 
 #define ZEND_Z_TYPE_PP(entry) ZEND_Z_TYPE_P(*entry) 
 
-#define ADD_PROPERTY_STRINGL(val1, val2, val3, val4, val5) add_property_stringl(val1, val2, val3, val4) 
-
-#define ADD_ASSOC_STRINGL(val1, val2, val3, val4, val5) add_assoc_stringl(val1, val2, val3, val4) 
-
-#define ADD_INDEX_STRINGL(val1, val2, val3, val4, val5) add_index_stringl(val1, val2, val3, val4) 
-
-
 #if PHP_VERSION_ID >= 70000 && PHP_VERSION_ID < 70300
 #define GC_ADDREF(p)            ++GC_REFCOUNT(p)
 #define GC_DELREF(p)            --GC_REFCOUNT(p)
@@ -6570,23 +6563,23 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 							break;
 						}
                     	if ( op & DB2_FETCH_ASSOC ) {
-                        	ADD_ASSOC_STRINGL(return_value, (char *)stmt_res->column_info[i].name,
-                            (char *)row_data->str_val, i5trim, 1);
+                        	add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name,
+                            (char *)row_data->str_val, i5trim);
                     	}
                     	if ( op & DB2_FETCH_INDEX ) {
-                        	ADD_INDEX_STRINGL(return_value, i, (char *)row_data->str_val,
-                            i5trim, 1);
+                        	add_index_stringl(return_value, i, (char *)row_data->str_val,
+                            i5trim);
                     	}
                     	break;
 					}
 #endif /* PASE */
                     if ( op & DB2_FETCH_ASSOC ) {
-                        ADD_ASSOC_STRINGL(return_value, (char *)stmt_res->column_info[i].name,
-                            (char *)row_data->str_val, strlen((char *)row_data->str_val), 1);
+                        add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name,
+                            (char *)row_data->str_val, strlen((char *)row_data->str_val));
                     }
                     if ( op & DB2_FETCH_INDEX ) {
-                        ADD_INDEX_STRINGL(return_value, i, (char *)row_data->str_val,
-                            strlen((char *)row_data->str_val), 1);
+                        add_index_stringl(return_value, i, (char *)row_data->str_val,
+                            strlen((char *)row_data->str_val));
                     }
                     break;
                 case SQL_SMALLINT:
@@ -6640,29 +6633,29 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
                 case SQL_VARBINARY:
                     if ( stmt_res->s_bin_mode == DB2_PASSTHRU ) {
                         if ( op & DB2_FETCH_ASSOC ) {
-                            ADD_ASSOC_STRINGL(return_value, (char *)stmt_res->column_info[i].name, "", 0, 1);
+                            add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, "", 0);
                         }
                         if ( op & DB2_FETCH_INDEX ) {
-                            ADD_INDEX_STRINGL(return_value, i, "", 0, 1);
+                            add_index_stringl(return_value, i, "", 0);
                         }
                     } else {
 #ifdef PASE /* i5/OS BINARY is strlen incompatible (may work for LUW) */
                         if ( op & DB2_FETCH_ASSOC ) {
-                            ADD_ASSOC_STRINGL(return_value, (char *)stmt_res->column_info[i].name,
-                                (char *)row_data->str_val, out_length, 1);
+                            add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name,
+                                (char *)row_data->str_val, out_length);
                         }
                         if ( op & DB2_FETCH_INDEX ) {
-                            ADD_INDEX_STRINGL(return_value, i, (char *)row_data->str_val,
-                                out_length, 1);
+                            add_index_stringl(return_value, i, (char *)row_data->str_val,
+                                out_length);
                         }
 #else
                         if ( op & DB2_FETCH_ASSOC ) {
-                            ADD_ASSOC_STRINGL(return_value, (char *)stmt_res->column_info[i].name,
-                                (char *)row_data->str_val, strlen((char *)row_data->str_val), 1);
+                            add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name,
+                                (char *)row_data->str_val, strlen((char *)row_data->str_val));
                         }
                         if ( op & DB2_FETCH_INDEX ) {
-                            ADD_INDEX_STRINGL(return_value, i, (char *)row_data->str_val,
-                                strlen((char *)row_data->str_val), 1);
+                            add_index_stringl(return_value, i, (char *)row_data->str_val,
+                                strlen((char *)row_data->str_val));
                         }
 #endif /* PASE */
                     }
@@ -6711,10 +6704,10 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
                                 }
 
                                 if ( op & DB2_FETCH_ASSOC ) {
-                                    ADD_ASSOC_STRINGL(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, out_length, 1);
+                                    add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, out_length);
                                 }
                                 if ( op & DB2_FETCH_INDEX ) {
-                                    ADD_INDEX_STRINGL(return_value, i, (char *)out_ptr, out_length, DB2_FETCH_BOTH & op);
+                                    add_index_stringl(return_value, i, (char *)out_ptr, out_length);
                                 }
 
                                 efree(out_ptr);
@@ -6762,10 +6755,10 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
                             }
 
                             if ( op & DB2_FETCH_ASSOC ) {
-                                ADD_ASSOC_STRINGL(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, out_length, 1);
+                                add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, out_length);
                             }
                             if ( op & DB2_FETCH_INDEX ) {
-                                ADD_INDEX_STRINGL(return_value, i, (char *)out_ptr, out_length, DB2_FETCH_BOTH & op);
+                                add_index_stringl(return_value, i, (char *)out_ptr, out_length);
                             }
 
                             efree(out_ptr);
@@ -6803,10 +6796,10 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
                         }
 
                         if ( op & DB2_FETCH_ASSOC ) {
-                            ADD_ASSOC_STRINGL(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, out_length, 1);
+                            add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name, (char *)out_ptr, out_length);
                         }
                         if ( op & DB2_FETCH_INDEX ) {
-                            ADD_INDEX_STRINGL(return_value, i, (char *)out_ptr, out_length, DB2_FETCH_BOTH & op);
+                            add_index_stringl(return_value, i, (char *)out_ptr, out_length);
                         }
                         efree(out_ptr);
                     }
@@ -6998,7 +6991,7 @@ PHP_FUNCTION(db2_server_info)
             RETURN_FALSE;
             return;
         } else {
-            ADD_PROPERTY_STRINGL(return_value, "DBMS_NAME", (char *)buffer255, strlen((char *)buffer255), 1);
+            add_property_stringl(return_value, "DBMS_NAME", (char *)buffer255, strlen((char *)buffer255));
         }
 
         /* DBMS_VER */
@@ -7010,7 +7003,7 @@ PHP_FUNCTION(db2_server_info)
             RETURN_FALSE;
             return;
         } else {
-            ADD_PROPERTY_STRINGL(return_value, "DBMS_VER", (char *)buffer11, strlen((char *)buffer11), 1);
+            add_property_stringl(return_value, "DBMS_VER", (char *)buffer11, strlen((char *)buffer11));
         }
 
 #ifndef PASE    /* i5/OS DB_CODEPAGE handled natively */
@@ -7038,7 +7031,7 @@ PHP_FUNCTION(db2_server_info)
             return;
 #endif /* not PASE */
         } else {
-            ADD_PROPERTY_STRINGL(return_value, "DB_NAME", (char *)buffer255, strlen((char *)buffer255), 1);
+            add_property_stringl(return_value, "DB_NAME", (char *)buffer255, strlen((char *)buffer255));
         }
 
 #ifndef PASE    /* i5/OS INST_NAME handled natively */
@@ -7051,7 +7044,7 @@ PHP_FUNCTION(db2_server_info)
             RETURN_FALSE;
             return;
         } else {
-            ADD_PROPERTY_STRINGL(return_value, "INST_NAME", (char *)buffer255, strlen((char *)buffer255), 1);
+            add_property_stringl(return_value, "INST_NAME", (char *)buffer255, strlen((char *)buffer255));
         }
 #endif /* PASE */
 
@@ -7065,7 +7058,7 @@ PHP_FUNCTION(db2_server_info)
             RETURN_FALSE;
             return;
         } else {
-            ADD_PROPERTY_STRINGL(return_value, "SPECIAL_CHARS", (char *)buffer255, strlen((char *)buffer255), 1);
+            add_property_stringl(return_value, "SPECIAL_CHARS", (char *)buffer255, strlen((char *)buffer255));
         }
 #endif /* PASE */
 
@@ -7089,7 +7082,7 @@ PHP_FUNCTION(db2_server_info)
 
             keyword = php_strtok_r((char *)buffer2k, ",", &last);
             while (keyword) {
-                ADD_INDEX_STRINGL(karray, key++, keyword, strlen(keyword), 1);
+                add_index_stringl(karray, key++, keyword, strlen(keyword));
                 keyword = php_strtok_r(NULL, ",", &last);
             }
 
@@ -7124,7 +7117,7 @@ PHP_FUNCTION(db2_server_info)
                 strcpy((char *)buffer11, "NC");
             }
 
-            ADD_PROPERTY_STRINGL(return_value, "DFT_ISOLATION", (char *)buffer11, strlen((char *)buffer11), 1);
+            add_property_stringl(return_value, "DFT_ISOLATION", (char *)buffer11, strlen((char *)buffer11));
         }
 
         /* ISOLATION_OPTION */
@@ -7149,19 +7142,19 @@ PHP_FUNCTION(db2_server_info)
             array_init(array);
 
             if( bitmask & SQL_TXN_READ_UNCOMMITTED ) {
-                ADD_INDEX_STRINGL(array, key++, "UR", 2, 1);
+                add_index_stringl(array, key++, "UR", 2);
             }
             if( bitmask & SQL_TXN_READ_COMMITTED ) {
-                ADD_INDEX_STRINGL(array, key++, "CS", 2, 1);
+                add_index_stringl(array, key++, "CS", 2);
             }
             if( bitmask & SQL_TXN_REPEATABLE_READ ) {
-                ADD_INDEX_STRINGL(array, key++, "RS", 2, 1);
+                add_index_stringl(array, key++, "RS", 2);
             }
             if( bitmask & SQL_TXN_SERIALIZABLE ) {
-                ADD_INDEX_STRINGL(array, key++, "RR", 2, 1);
+                add_index_stringl(array, key++, "RR", 2);
             }
             if( bitmask & SQL_TXN_NOCOMMIT ) {
-                ADD_INDEX_STRINGL(array, key++, "NC", 2, 1);
+                add_index_stringl(array, key++, "NC", 2);
             }
 
             add_property_zval(return_value, "ISOLATION_OPTION", array);
@@ -7195,7 +7188,7 @@ PHP_FUNCTION(db2_server_info)
                 default:
                     break;
             }
-            ADD_PROPERTY_STRINGL(return_value, "SQL_CONFORMANCE", (char *)buffer255, strlen((char *)buffer255), 1);
+            add_property_stringl(return_value, "SQL_CONFORMANCE", (char *)buffer255, strlen((char *)buffer255));
         }
 
         /* PROCEDURES */
@@ -7223,7 +7216,7 @@ PHP_FUNCTION(db2_server_info)
             RETURN_FALSE;
             return;
         } else {
-            ADD_PROPERTY_STRINGL(return_value, "IDENTIFIER_QUOTE_CHAR", (char *)buffer11, strlen((char *)buffer11), 1);
+            add_property_stringl(return_value, "IDENTIFIER_QUOTE_CHAR", (char *)buffer11, strlen((char *)buffer11));
         }
 
         /* LIKE_ESCAPE_CLAUSE */
@@ -7404,7 +7397,7 @@ PHP_FUNCTION(db2_client_info)
             RETURN_FALSE;
             return;
         } else {
-            ADD_PROPERTY_STRINGL(return_value, "DRIVER_NAME", (char *)buffer255, strlen((char *)buffer255), 1);
+            add_property_stringl(return_value, "DRIVER_NAME", (char *)buffer255, strlen((char *)buffer255));
         }
 
         /* DRIVER_VER */
@@ -7416,7 +7409,7 @@ PHP_FUNCTION(db2_client_info)
             RETURN_FALSE;
             return;
         } else {
-            ADD_PROPERTY_STRINGL(return_value, "DRIVER_VER", (char *)buffer255, strlen((char *)buffer255), 1);
+            add_property_stringl(return_value, "DRIVER_VER", (char *)buffer255, strlen((char *)buffer255));
         }
 
         /* DATA_SOURCE_NAME */
@@ -7428,7 +7421,7 @@ PHP_FUNCTION(db2_client_info)
             RETURN_FALSE;
             return;
         } else {
-            ADD_PROPERTY_STRINGL(return_value, "DATA_SOURCE_NAME", (char *)buffer255, strlen((char *)buffer255), 1);
+            add_property_stringl(return_value, "DATA_SOURCE_NAME", (char *)buffer255, strlen((char *)buffer255));
         }
 
         /* DRIVER_ODBC_VER */
@@ -7440,7 +7433,7 @@ PHP_FUNCTION(db2_client_info)
             RETURN_FALSE;
             return;
         } else {
-            ADD_PROPERTY_STRINGL(return_value, "DRIVER_ODBC_VER", (char *)buffer255, strlen((char *)buffer255), 1);
+            add_property_stringl(return_value, "DRIVER_ODBC_VER", (char *)buffer255, strlen((char *)buffer255));
         }
 
 #ifndef PASE    /* i5/OS ODBC_VER handled natively */
@@ -7453,7 +7446,7 @@ PHP_FUNCTION(db2_client_info)
             RETURN_FALSE;
             return;
         } else {
-            ADD_PROPERTY_STRINGL(return_value, "ODBC_VER", (char *)buffer255, strlen((char *)buffer255), 1);
+            add_property_stringl(return_value, "ODBC_VER", (char *)buffer255, strlen((char *)buffer255));
         }
 #endif /* PASE */
 
@@ -7480,7 +7473,7 @@ PHP_FUNCTION(db2_client_info)
                 default:
                     break;
             }
-            ADD_PROPERTY_STRINGL(return_value, "ODBC_SQL_CONFORMANCE", (char *)buffer255, strlen((char *)buffer255), 1);
+            add_property_stringl(return_value, "ODBC_SQL_CONFORMANCE", (char *)buffer255, strlen((char *)buffer255));
         }
 
 #ifndef PASE    /* i5/OS APPL_CODEPAGE handled natively */
