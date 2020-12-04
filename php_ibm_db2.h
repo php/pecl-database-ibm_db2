@@ -97,14 +97,6 @@ typedef uint32_t uintptr_t;
 #include "TSRM.h"
 #endif
 
-#ifndef TSRMLS_D
-#define TSRMLS_D void
-#define TSRMLS_DC
-#define TSRMLS_C
-#define TSRMLS_CC
-#define TSRMLS_FETCH()
-#endif
-
 /* strlen(" SQLCODE=") added in */
 #define DB2_MAX_ERR_MSG_LEN (SQL_MAX_MESSAGE_LENGTH + SQL_SQLSTATE_SIZE + 10)
 
