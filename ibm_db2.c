@@ -42,9 +42,6 @@ res = (stmt_type) zend_fetch_resource(Z_RES_P(*stmt),resource_type_name,le_stmt)
 if(res == NULL)\
 RETURN_FALSE;
 
-#define ZEND_REGISTER_RESOURCE_NEW(return_value, stmt_res, le_stmt_struct) \
-RETURN_RES(zend_register_resource( stmt_res, le_stmt_struct))
-
 #define ZEND_FETCH_RESOURCE_2(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type1, resource_type2)\
 rsrc = (rsrc_type) zend_fetch_resource2(Z_RES_P(*passed_id),resource_type_name,resource_type1,resource_type2); \
 if(rsrc == NULL)\
@@ -3241,7 +3238,7 @@ PHP_FUNCTION(db2_connect)
             return;
         }
         else {
-            ZEND_REGISTER_RESOURCE_NEW(return_value, conn_res,  le_pconn_struct);
+            RETURN_RES(zend_register_resource(conn_res, le_pconn_struct));
         }
     }
     else {
@@ -3260,7 +3257,7 @@ PHP_FUNCTION(db2_connect)
             RETVAL_FALSE;
             return;
         } else {
-            ZEND_REGISTER_RESOURCE_NEW(return_value, conn_res, le_conn_struct);
+            RETURN_RES(zend_register_resource(conn_res, le_conn_struct));
         }
 #ifdef PASE /* ini file switch all to pconnect */
     }
@@ -3282,7 +3279,7 @@ PHP_FUNCTION(db2_pconnect)
         return;
     }
     else {
-        ZEND_REGISTER_RESOURCE_NEW(return_value, conn_res,  le_pconn_struct);
+        RETURN_RES(zend_register_resource(conn_res, le_pconn_struct));
     }
 }
 /* }}} */
@@ -3696,7 +3693,7 @@ PHP_FUNCTION(db2_column_privileges)
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
         _php_db2_incr_stmt_struct(stmt_res);
 #endif /* PASE */
-        ZEND_REGISTER_RESOURCE_NEW(return_value, stmt_res, le_stmt_struct);
+        RETURN_RES(zend_register_resource(stmt_res, le_stmt_struct));
     } else {
         RETURN_FALSE;
     }
@@ -3763,7 +3760,7 @@ PHP_FUNCTION(db2_columns)
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
         _php_db2_incr_stmt_struct(stmt_res);
 #endif /* PASE */
-        ZEND_REGISTER_RESOURCE_NEW(return_value, stmt_res, le_stmt_struct);
+        RETURN_RES(zend_register_resource(stmt_res, le_stmt_struct));
     }
 }
 /* }}} */
@@ -3829,7 +3826,7 @@ PHP_FUNCTION(db2_foreign_keys)
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
         _php_db2_incr_stmt_struct(stmt_res);
 #endif /* PASE */
-        ZEND_REGISTER_RESOURCE_NEW(return_value, stmt_res, le_stmt_struct);
+        RETURN_RES(zend_register_resource(stmt_res, le_stmt_struct));
     } else {
         RETURN_FALSE;
     }
@@ -3893,7 +3890,7 @@ PHP_FUNCTION(db2_primary_keys)
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
         _php_db2_incr_stmt_struct(stmt_res);
 #endif /* PASE */
-        ZEND_REGISTER_RESOURCE_NEW(return_value, stmt_res, le_stmt_struct);
+        RETURN_RES(zend_register_resource(stmt_res, le_stmt_struct));
     } else {
         RETURN_FALSE;
     }
@@ -3959,7 +3956,7 @@ PHP_FUNCTION(db2_procedure_columns)
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
         _php_db2_incr_stmt_struct(stmt_res);
 #endif /* PASE */
-        ZEND_REGISTER_RESOURCE_NEW(return_value, stmt_res, le_stmt_struct);
+        RETURN_RES(zend_register_resource(stmt_res, le_stmt_struct));
     } else {
         RETURN_FALSE;
     }
@@ -4021,7 +4018,7 @@ PHP_FUNCTION(db2_procedures)
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
         _php_db2_incr_stmt_struct(stmt_res);
 #endif /* PASE */
-        ZEND_REGISTER_RESOURCE_NEW(return_value, stmt_res, le_stmt_struct);
+        RETURN_RES(zend_register_resource(stmt_res, le_stmt_struct));
     } else {
         RETURN_FALSE;
     }
@@ -4086,7 +4083,7 @@ PHP_FUNCTION(db2_special_columns)
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
         _php_db2_incr_stmt_struct(stmt_res);
 #endif /* PASE */
-        ZEND_REGISTER_RESOURCE_NEW(return_value, stmt_res, le_stmt_struct);
+        RETURN_RES(zend_register_resource(stmt_res, le_stmt_struct));
     } else {
         RETURN_FALSE;
     }
@@ -4154,7 +4151,7 @@ PHP_FUNCTION(db2_statistics)
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
         _php_db2_incr_stmt_struct(stmt_res);
 #endif /* PASE */
-        ZEND_REGISTER_RESOURCE_NEW(return_value, stmt_res, le_stmt_struct);
+        RETURN_RES(zend_register_resource(stmt_res, le_stmt_struct));
     } else {
         RETURN_FALSE;
     }
@@ -4222,7 +4219,7 @@ PHP_FUNCTION(db2_table_privileges)
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
         _php_db2_incr_stmt_struct(stmt_res);
 #endif /* PASE */
-        ZEND_REGISTER_RESOURCE_NEW(return_value, stmt_res, le_stmt_struct);
+        RETURN_RES(zend_register_resource(stmt_res, le_stmt_struct));
     } else {
         RETURN_FALSE;
     }
@@ -4293,7 +4290,7 @@ PHP_FUNCTION(db2_tables)
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
         _php_db2_incr_stmt_struct(stmt_res);
 #endif /* PASE */
-        ZEND_REGISTER_RESOURCE_NEW(return_value, stmt_res, le_stmt_struct);
+        RETURN_RES(zend_register_resource(stmt_res, le_stmt_struct));
     } else {
         RETURN_FALSE;
     }
@@ -4447,7 +4444,7 @@ PHP_FUNCTION(db2_exec)
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
         _php_db2_incr_stmt_struct(stmt_res);
 #endif /* PASE */
-        ZEND_REGISTER_RESOURCE_NEW(return_value, stmt_res, le_stmt_struct);
+        RETURN_RES(zend_register_resource(stmt_res, le_stmt_struct));
     }
 }
 /* }}} */
@@ -4522,7 +4519,7 @@ PHP_FUNCTION(db2_prepare)
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
         _php_db2_incr_stmt_struct(stmt_res);
 #endif /* PASE */
-        ZEND_REGISTER_RESOURCE_NEW(return_value, stmt_res, le_stmt_struct);
+        RETURN_RES(zend_register_resource(stmt_res, le_stmt_struct));
     }
 }
 /* }}} */
@@ -5547,7 +5544,7 @@ PHP_FUNCTION(db2_next_result)
 #ifdef PASE /* IBM i reuses handles. Connect close out of sync with le_stmt_struct dtor logic  */
         _php_db2_incr_stmt_struct(stmt_res);
 #endif /* PASE */
-        ZEND_REGISTER_RESOURCE_NEW(return_value, new_stmt_res, le_stmt_struct);
+        RETURN_RES(zend_register_resource(new_stmt_res, le_stmt_struct));
     } else {
         RETURN_FALSE;
     }
