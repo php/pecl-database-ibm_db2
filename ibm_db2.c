@@ -4998,9 +4998,20 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
         case IS_NULL:
             Z_LVAL_P(curr->value) = SQL_NULL_DATA;
             ZEND_Z_TYPE_P(curr->value) = IS_NULL;
+#ifdef PASE
+            /*
+             *  XXX: not quite right on PHP 7+ because int32* into zend_long (word size)
+             *  but might not matter if it's just a null bind
+             */
+            rc = SQLBindParameter(stmt_res->hstmt, curr->param_num,
+                    curr->param_type, SQL_C_DEFAULT, curr->data_type, curr->param_size,
+                    curr->scale, &(curr->value), 0, (SQLINTEGER *)&((curr->value)->value.lval));
+#else
+            /* SQLLEN is actually correct here since zend_long is word size */
             rc = SQLBindParameter(stmt_res->hstmt, curr->param_num,
                     curr->param_type, SQL_C_DEFAULT, curr->data_type, curr->param_size,
                     curr->scale, &(curr->value), 0, (SQLLEN *)&((curr->value)->value.lval));
+#endif
             if ( rc == SQL_ERROR ) {
                 _php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1);
             }
