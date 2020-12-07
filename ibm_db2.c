@@ -6008,7 +6008,15 @@ PHP_FUNCTION(db2_free_stmt)
 /* }}} */
 
 /* {{{ static RETCODE _php_db2_get_data(stmt_handle *stmt_res, int col_num, short ctype, void *buff, int in_length, SQLINTEGER *out_length) */
-static RETCODE _php_db2_get_data(stmt_handle *stmt_res, SQLUSMALLINT col_num, SQLSMALLINT ctype, SQLPOINTER buff, SQLLEN in_length, SQLLEN *out_length)
+static RETCODE _php_db2_get_data(stmt_handle *stmt_res, SQLUSMALLINT col_num, SQLSMALLINT ctype, SQLPOINTER buff,
+#ifdef PASE
+    SQLINTEGER in_length,
+    SQLINTEGER *out_length
+#else
+    SQLLEN in_length,
+    SQLLEN *out_length
+#endif
+	   )
 {
     RETCODE rc=SQL_SUCCESS;
 
@@ -6118,7 +6126,12 @@ PHP_FUNCTION(db2_result)
     RETCODE rc = 0;
     void    *out_ptr = NULL;
     char    *out_char_ptr = NULL;
-    SQLINTEGER in_length = 0, out_length=-10; /* Initialize out_length to some meaningless value */
+    /* Initialize out_length to some meaningless value */
+#ifdef PASE
+    SQLINTEGER in_length = 0, out_length=-10;
+#else
+    SQLLEN in_length = 0, out_length=-10;
+#endif
     SQLSMALLINT column_type, lob_bind_type= SQL_C_BINARY;
     SQLDOUBLE double_val = 0;
     SQLINTEGER long_val = 0;
