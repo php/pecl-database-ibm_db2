@@ -17,7 +17,8 @@
   | Authors: Sushant Koduru, Lynh Nguyen, Kanchana Padmanabhan,          |
   |          Dan Scott, Helmut Tessarek, Kellen Bombardier,              |
   |          Tony Cairns, Krishna Raman, Ambrish Bhargava,               |
-  |          Rahul Priyadarshi, Praveen Devarao,                         |
+  |          Rahul Priyadarshi, Praveen Devarao, Calvin Buckley,         |
+  |          Kevin Adler, Jesse Gorzinski                                |
   +----------------------------------------------------------------------+
 
   $Id$
