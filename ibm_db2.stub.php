@@ -1,6 +1,10 @@
 <?php
 
-/** @generate-function-entries */
+/**
+ * Stub for arginfo in PHP 8.
+ * @generate-function-entries
+ * @generate-legacy-arginfo
+ */
 
 function db2_connect(string $database, ?string $username, ?string $password, array $options = []): resource|false {}
 
@@ -20,21 +24,51 @@ function db2_pclose(resource $connection): bool {}
 
 function db2_column_privileges(resource $connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $column_name = null): resource {}
 
+/**
+ * @alias db2_column_privileges
+ */
+function db2_columnprivileges(resource $connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $column_name = null): resource {}
+
 function db2_columns(resource $connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $column_name = null): resource {}
 
 function db2_foreign_keys(resource $connection, ?string $qualifier, ?string $schema, string $table_name): resource {}
 
+/**
+ * @alias db2_foreign_keys
+ */
+function db2_foreignkeys(resource $connection, ?string $qualifier, ?string $schema, string $table_name): resource {}
+
 function db2_primary_keys(resource $connection, ?string $qualifier, ?string $schema, string $table_name): resource {}
 
+/**
+ * @alias db2_primary_keys
+ */
+function db2_primarykeys(resource $connection, ?string $qualifier, ?string $schema, string $table_name): resource {}
+
 function db2_procedure_columns(resource $connection, ?string $qualifier, string $schema, string $procedure, ?string $parameter): resource {}
+
+/**
+ * @alias db2_procedure_columns
+ */
+function db2_procedurecolumns(resource $connection, ?string $qualifier, string $schema, string $procedure, ?string $parameter): resource {}
 
 function db2_procedures(resource $connection, ?string $qualifier, string $schema, string $procedure): resource {}
 
 function db2_special_columns(resource $connection, ?string $qualifier, string $schema, string $table_name, int $scope): resource {}
 
+/**
+ * @alias db2_special_columns
+ */
+function db2_specialcolumns(resource $connection, ?string $qualifier, string $schema, string $table_name, int $scope): resource {}
+
 function db2_statistics(resource $connection, ?string $qualifier, ?string $schema, string $table_name, bool|int $unique): resource {}
 
 function db2_table_privileges(resource $connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null): resource {}
+
+/**
+ * @alias db2_table_privileges
+ */
+function db2_tableprivileges(resource $connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null): resource {}
 
 function db2_tables(resource $connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $table_type = null): resource {}
 
@@ -99,6 +133,11 @@ function db2_free_result(resource $stmt): bool {}
 
 function db2_set_option(resource $resource, array $options, int $type): bool {}
 
+/**
+ * @alias db2_set_option
+ */
+function db2_setoption(resource $resource, array $options, int $type): bool {}
+
 function db2_client_info(resource $connection): object|false {}
 
 function db2_server_info(resource $connection): object|false {}
@@ -108,5 +147,10 @@ function db2_escape_string(string $string_literal): string {}
 function db2_lob_read(resource $stmt, int $colnum, int $length): string|false {}
 
 function db2_get_option(resource $stmt, string $option): string|false {}
+
+/**
+ * @alias db2_get_option
+ */
+function db2_getoption(resource $stmt, string $option): string|false {}
 
 function db2_last_insert_id(resource $stmt): string {}
