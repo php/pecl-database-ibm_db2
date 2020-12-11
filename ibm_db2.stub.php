@@ -2,155 +2,339 @@
 
 /**
  * Stub for arginfo in PHP 8.
+ * XXX: How do we represent optionals without defaults?
  * @generate-function-entries
  * @generate-legacy-arginfo
  */
 
-function db2_connect(string $database, ?string $username, ?string $password, array $options = []): resource|false {}
+/**
+ * @param resource $connection
+ * @return resource|false
+ */
+function db2_connect(string $database, ?string $username, ?string $password, array $options = []) {}
 
-function db2_commit(resource $connection): bool {}
+/**
+ * @param resource $connection
+ */
+function db2_commit($connection): bool {}
 
-function db2_pconnect(string $database, ?string $username, ?string $password, array $options = []): resource|false {}
+/**
+ * @param resource $connection
+ * @return resource|false
+ */
+function db2_pconnect(string $database, ?string $username, ?string $password, array $options = []) {}
 
-function db2_autocommit(resource $connection, ?int $value = null): int|bool {}
+/**
+ * @param resource $connection
+ */
+function db2_autocommit($connection, ?int $value = null): int|bool {}
 
-function db2_bind_param(resource $connection, int $parameter_number, string $variable_name, ?int $parameter_type, int $data_type = 0, int $precision = -1, int $scale = 0): bool {}
+/**
+ * @param resource $connection
+ */
+function db2_bind_param($connection, int $parameter_number, string $variable_name, ?int $parameter_type, int $data_type = 0, int $precision = -1, int $scale = 0): bool {}
 
-function db2_close(resource $connection): bool {}
+/**
+ * @param resource $connection
+ */
+function db2_close($connection): bool {}
 
 #ifdef PASE
-function db2_pclose(resource $connection): bool {}
+/**
+ * @param resource $connection
+ */
+function db2_pclose( $connection): bool {}
 #endif
 
-function db2_column_privileges(resource $connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $column_name = null): resource {}
+/**
+ * @param resource $connection
+ * @return resource
+ */
+function db2_column_privileges($connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $column_name = null) {}
 
 /**
+ * @param resource $connection
+ * @return resource
  * @alias db2_column_privileges
  */
-function db2_columnprivileges(resource $connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $column_name = null): resource {}
-
-function db2_columns(resource $connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $column_name = null): resource {}
-
-function db2_foreign_keys(resource $connection, ?string $qualifier, ?string $schema, string $table_name): resource {}
+function db2_columnprivileges($connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $column_name = null) {}
 
 /**
+ * @param resource $connection
+ * @return resource
+ */
+function db2_columns($connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $column_name = null) {}
+
+/**
+ * @param resource $connection
+ * @return resource
+ */
+function db2_foreign_keys($connection, ?string $qualifier, ?string $schema, string $table_name) {}
+
+/**
+ * @param resource $connection
+ * @return resource
  * @alias db2_foreign_keys
  */
-function db2_foreignkeys(resource $connection, ?string $qualifier, ?string $schema, string $table_name): resource {}
-
-function db2_primary_keys(resource $connection, ?string $qualifier, ?string $schema, string $table_name): resource {}
+function db2_foreignkeys($connection, ?string $qualifier, ?string $schema, string $table_name) {}
 
 /**
+ * @param resource $connection
+ * @return resource
+ */
+function db2_primary_keys($connection, ?string $qualifier, ?string $schema, string $table_name) {}
+
+/**
+ * @param resource $connection
+ * @return resource
  * @alias db2_primary_keys
  */
-function db2_primarykeys(resource $connection, ?string $qualifier, ?string $schema, string $table_name): resource {}
-
-function db2_procedure_columns(resource $connection, ?string $qualifier, string $schema, string $procedure, ?string $parameter): resource {}
+function db2_primarykeys($connection, ?string $qualifier, ?string $schema, string $table_name) {}
 
 /**
+ * @param resource $connection
+ * @return resource
+ */
+function db2_procedure_columns($connection, ?string $qualifier, string $schema, string $procedure, ?string $parameter) {}
+
+/**
+ * @param resource $connection
+ * @return resource
  * @alias db2_procedure_columns
  */
-function db2_procedurecolumns(resource $connection, ?string $qualifier, string $schema, string $procedure, ?string $parameter): resource {}
-
-function db2_procedures(resource $connection, ?string $qualifier, string $schema, string $procedure): resource {}
-
-function db2_special_columns(resource $connection, ?string $qualifier, string $schema, string $table_name, int $scope): resource {}
+function db2_procedurecolumns($connection, ?string $qualifier, string $schema, string $procedure, ?string $parameter) {}
 
 /**
+ * @param resource $connection
+ * @return resource
+ */
+function db2_procedures($connection, ?string $qualifier, string $schema, string $procedure) {}
+
+/**
+ * @param resource $connection
+ * @return resource
+ */
+function db2_special_columns($connection, ?string $qualifier, string $schema, string $table_name, int $scope) {}
+
+/**
+ * @param resource $connection
+ * @return resource
  * @alias db2_special_columns
  */
-function db2_specialcolumns(resource $connection, ?string $qualifier, string $schema, string $table_name, int $scope): resource {}
-
-function db2_statistics(resource $connection, ?string $qualifier, ?string $schema, string $table_name, bool|int $unique): resource {}
-
-function db2_table_privileges(resource $connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null): resource {}
+function db2_specialcolumns(resource $connection, ?string $qualifier, string $schema, string $table_name, int $scope) {}
 
 /**
+ * @param resource $connection
+ * @return resource
+ */
+function db2_statistics($connection, ?string $qualifier, ?string $schema, string $table_name, bool|int $unique) {}
+
+/**
+ * @param resource $connection
+ * @return resource
+ */
+function db2_table_privileges($connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null) {}
+
+/**
+ * @param resource $connection
+ * @return resource
  * @alias db2_table_privileges
  */
-function db2_tableprivileges(resource $connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null): resource {}
+function db2_tableprivileges($connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null) {}
 
-function db2_tables(resource $connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $table_type = null): resource {}
+/**
+ * @param resource $connection
+ * @return resource
+ */
+function db2_tables($connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $table_type = null) {}
 
-function db2_exec(resource $connection, string $statement, array $options = []): resource|false {}
+/**
+ * @param resource $connection
+ * @return resource|false
+ */
+function db2_exec($connection, string $statement, array $options = []) {}
 
-function db2_prepare(resource $connection, string $statement, array $options = []): resource|false {}
+/**
+ * @param resource $connection
+ * @return resource|false
+ */
+function db2_prepare($connection, string $statement, array $options = []) {}
 
-function db2_execute(resource $stmt, array $options = []): bool {}
+/**
+ * @param resource $stmt
+ */
+function db2_execute($stmt, array $options = []): bool {}
 
 #ifndef PASE
 /* XXX: Not documented and not supported on PASE. */
-function db2_execute_many(resource $stmt, array $options = []): int|false {}
-#endif
-
-function db2_stmt_errormsg(?resource $stmt = null): string {}
-
-function db2_stmt_error(?resource $stmt = null): string {}
-
-function db2_conn_errormsg(?resource $connection = null): string {}
-
-function db2_conn_error(?resource $connection = null): string {}
-
-function db2_next_result(resource $stmt): resource|false {}
-
-function db2_num_fields(resource $stmt): int|false {}
-
-function db2_num_rows(resource $stmt): int|false {}
-
-function db2_field_name(resource $stmt, int|string $column): string|false {}
-
-function db2_field_display_size(resource $stmt, int|string $column): int|false {}
-
-function db2_field_num(resource $stmt, int|string $column): int|false {}
-
-function db2_field_precision(resource $stmt, int|string $column): int|false {}
-
-function db2_field_scale(resource $stmt, int|string $column): int|false {}
-
-function db2_field_type(resource $stmt, int|string $column): string|false {}
-
-function db2_field_width(resource $stmt, int|string $column): int|false {}
-
-function db2_cursor_type(resource $stmt): int {}
-
-function db2_rollback(resource $connection): bool {}
-
-function db2_free_stmt(resource $stmt): bool {}
-
-function db2_result(resource $stmt, int|string $column): object|null {}
-
-function db2_fetch_row(resource $stmt, ?int $row_number = null): bool {}
-
-function db2_fetch_assoc(resource $stmt, ?int $row_number = null): array|false {}
-
-function db2_fetch_array(resource $stmt, ?int $row_number = null): array|false {}
-
-function db2_fetch_both(resource $stmt, ?int $row_number = null): array|false {}
-
-function db2_fetch_object(resource $stmt, ?int $row_number = null): object|false {}
-
-function db2_free_result(resource $stmt): bool {}
-
-function db2_set_option(resource $resource, array $options, int $type): bool {}
 
 /**
+ * @param resource $stmt
+ */
+function db2_execute_many($stmt, array $options = []): int|false {}
+#endif
+
+/**
+ * @param resource $stmt
+ */
+function db2_stmt_errormsg($stmt = null): string {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_stmt_error($stmt = null): string {}
+
+/**
+ * @param resource $connection
+ */
+function db2_conn_errormsg($connection = null): string {}
+
+/**
+ * @param resource $connection
+ */
+function db2_conn_error($connection = null): string {}
+
+/**
+ * @param resource $stmt
+ * @return resource|false
+ */
+function db2_next_result($stmt) {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_num_fields($stmt): int|false {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_num_rows($stmt): int|false {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_field_name($stmt, int|string $column): string|false {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_field_display_size($stmt, int|string $column): int|false {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_field_num($stmt, int|string $column): int|false {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_field_precision($stmt, int|string $column): int|false {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_field_scale($stmt, int|string $column): int|false {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_field_type($stmt, int|string $column): string|false {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_field_width($stmt, int|string $column): int|false {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_cursor_type($stmt): int {}
+
+/**
+ * @param resource $connection
+ */
+function db2_rollback($connection): bool {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_free_stmt($stmt): bool {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_result($stmt, int|string $column): object|null {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_fetch_row($stmt, ?int $row_number = null): bool {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_fetch_assoc($stmt, ?int $row_number = null): array|false {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_fetch_array($stmt, ?int $row_number = null): array|false {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_fetch_both($stmt, ?int $row_number = null): array|false {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_fetch_object($stmt, ?int $row_number = null): object|false {}
+
+/**
+ * @param resource $stmt
+ */
+function db2_free_result($stmt): bool {}
+
+/**
+ * @param resource $resource
+ */
+function db2_set_option($resource, array $options, int $type): bool {}
+
+/**
+ * @param resource $resource
  * @alias db2_set_option
  */
-function db2_setoption(resource $resource, array $options, int $type): bool {}
+function db2_setoption($resource, array $options, int $type): bool {}
 
-function db2_client_info(resource $connection): object|false {}
+/**
+ * @param resource $connection
+ */
+function db2_client_info($connection): object|false {}
 
-function db2_server_info(resource $connection): object|false {}
+/**
+ * @param resource $connection
+ */
+function db2_server_info($connection): object|false {}
 
 function db2_escape_string(string $string_literal): string {}
 
-function db2_lob_read(resource $stmt, int $colnum, int $length): string|false {}
-
-function db2_get_option(resource $stmt, string $option): string|false {}
+/**
+ * @param resource $stmt
+ */
+function db2_lob_read($stmt, int $colnum, int $length): string|false {}
 
 /**
+ * @param resource $resource
+ */
+function db2_get_option($resource, string $option): string|false {}
+
+/**
+ * @param resource $resource
  * @alias db2_get_option
  */
-function db2_getoption(resource $stmt, string $option): string|false {}
+function db2_getoption($resource, string $option): string|false {}
 
-function db2_last_insert_id(resource $stmt): string {}
+/**
+ * @param resource $resource
+ */
+function db2_last_insert_id($resource): string {}
