@@ -200,6 +200,10 @@ typedef struct _stmt_handle_struct {
 
 /* {{{ ZEND_BEGIN_ARG_INFO
 */
+
+#if PHP_MAJOR_VERSION >= 8
+#include <ibm_db2_arginfo.h>
+#else
 /* XXX: */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_connect, 0, 0, 3)
 	ZEND_ARG_INFO(0, database)
@@ -252,15 +256,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_column_privileges, 0, 0, 1)
 	ZEND_ARG_INFO(0, column_name)
 ZEND_END_ARG_INFO()
 
-/* XXX: Must duplicate for aliases? */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_columnprivileges, 0, 0, 1)
-	ZEND_ARG_INFO(0, connection)
-	ZEND_ARG_INFO(0, qualifier)
-	ZEND_ARG_INFO(0, schema)
-	ZEND_ARG_INFO(0, table_name)
-	ZEND_ARG_INFO(0, column_name)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_columns, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, qualifier)
@@ -276,13 +271,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_foreign_keys, 0, 0, 4)
 	ZEND_ARG_INFO(0, table_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_foreignkeys, 0, 0, 4)
-	ZEND_ARG_INFO(0, connection)
-	ZEND_ARG_INFO(0, qualifier)
-	ZEND_ARG_INFO(0, schema)
-	ZEND_ARG_INFO(0, table_name)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_primary_keys, 0, 0, 4)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, qualifier)
@@ -290,22 +278,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_primary_keys, 0, 0, 4)
 	ZEND_ARG_INFO(0, table_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_primarykeys, 0, 0, 4)
-	ZEND_ARG_INFO(0, connection)
-	ZEND_ARG_INFO(0, qualifier)
-	ZEND_ARG_INFO(0, schema)
-	ZEND_ARG_INFO(0, table_name)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_procedure_columns, 0, 0, 5)
-	ZEND_ARG_INFO(0, connection)
-	ZEND_ARG_INFO(0, qualifier)
-	ZEND_ARG_INFO(0, schema)
-	ZEND_ARG_INFO(0, procedure)
-	ZEND_ARG_INFO(0, parameter)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_procedurecolumns, 0, 0, 5)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, qualifier)
 	ZEND_ARG_INFO(0, schema)
@@ -328,14 +301,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_special_columns, 0, 0, 5)
 	ZEND_ARG_INFO(0, scope)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_specialcolumns, 0, 0, 5)
-	ZEND_ARG_INFO(0, connection)
-	ZEND_ARG_INFO(0, qualifier)
-	ZEND_ARG_INFO(0, schema)
-	ZEND_ARG_INFO(0, table_name)
-	ZEND_ARG_INFO(0, scope)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_statistics, 0, 0, 5)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, qualifier)
@@ -345,13 +310,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_statistics, 0, 0, 5)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_table_privileges, 0, 0, 1)
-	ZEND_ARG_INFO(0, connection)
-	ZEND_ARG_INFO(0, qualifier)
-	ZEND_ARG_INFO(0, schema)
-	ZEND_ARG_INFO(0, table_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_tableprivileges, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, qualifier)
 	ZEND_ARG_INFO(0, schema)
@@ -501,12 +459,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_set_option, 0, 0, 3)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_setoption, 0, 0, 3)
-	ZEND_ARG_INFO(0, resource)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_fetch_object, 0, 0, 1)
 	ZEND_ARG_INFO(0, stmt)
 	ZEND_ARG_INFO(0, row_number)
@@ -535,14 +487,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_get_option, 0, 0, 2)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_getoption, 0, 0, 2)
-	ZEND_ARG_INFO(0, resource)
-	ZEND_ARG_INFO(0, option)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_last_insert_id, 0, 0, 1)
 	ZEND_ARG_INFO(0, resource)
 ZEND_END_ARG_INFO()
+#endif
 
 /* }}} */
 
