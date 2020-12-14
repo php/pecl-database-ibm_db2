@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Stub for arginfo in PHP 8.
+ * Stub for arginfo in PHP 8
  * XXX: How do we represent optionals without defaults?
  * @generate-function-entries
  * @generate-legacy-arginfo
@@ -263,7 +263,7 @@ function db2_free_stmt($stmt): bool {}
 /**
  * @param resource $stmt
  */
-function db2_result($stmt, int|string $column): object|null {}
+function db2_result($stmt, int|string $column): mixed|null {}
 
 /**
  * @param resource $stmt
