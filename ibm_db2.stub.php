@@ -32,7 +32,7 @@ function db2_autocommit($connection, ?int $value = null): int|bool {}
 /**
  * @param resource $connection
  */
-function db2_bind_param($connection, int $parameter_number, string $variable_name, ?int $parameter_type, int $data_type = 0, int $precision = -1, int $scale = 0): bool {}
+function db2_bind_param($connection, int $parameter_number, string $variable_name, int $parameter_type = DB2_PARAM_IN, int $data_type = 0, int $precision = -1, int $scale = 0): bool {}
 
 /**
  * @param resource $connection

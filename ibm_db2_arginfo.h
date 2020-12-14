@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 63152809ed3cbc1758bf8b74972e4a2faa92185f */
+ * Stub hash: 6178723de1b801eade1e4e7251805f53f100fee3 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_connect, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 0)
@@ -19,11 +19,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_db2_autocommit, 0, 1, MAY_BE_LON
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, value, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_db2_bind_param, 0, 4, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_db2_bind_param, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_TYPE_INFO(0, parameter_number, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, variable_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, parameter_type, IS_LONG, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, parameter_type, IS_LONG, 0, "DB2_PARAM_IN")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, data_type, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, precision, IS_LONG, 0, "-1")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 0, "0")
