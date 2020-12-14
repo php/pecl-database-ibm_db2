@@ -572,6 +572,7 @@ static void _php_db2_free_result_struct(stmt_handle* handle)
             if( prev_ptr->param_type != DB2_PARAM_OUT && prev_ptr->param_type != DB2_PARAM_INOUT ) {
                 if (prev_ptr->value) {
                     zval_ptr_dtor(prev_ptr->value);
+                    efree(prev_ptr->value);
                 }
             }
             efree(prev_ptr);
