@@ -2389,12 +2389,14 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
                     }
                     SQLFreeHandle( SQL_HANDLE_STMT, try_stmt_res->hstmt);
                     _php_db2_free_result_struct(try_stmt_res);
+                    efree(try_stmt_res);
                 /* 1.9.7 - IBM i level 3: try allocate new statement (check allocate) */
                 } else if (IBM_DB2_G(i5_check_pconnect) >= 3) {
                     try_stmt_res = _db2_new_stmt_struct(conn_res);
                     rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &(try_stmt_res->hstmt));
                     SQLFreeHandle( SQL_HANDLE_STMT, try_stmt_res->hstmt);
                     _php_db2_free_result_struct(try_stmt_res);
+                    efree(try_stmt_res);
                 /* 1.9.7 - IBM i level 2: try conn get info (check meta data) */
                 } else if (IBM_DB2_G(i5_check_pconnect) >=2 ) {
                     memset(server, 0, sizeof(server));
