@@ -30,10 +30,10 @@ Cloudscape, and Apache Derby databases.</description>
   <email>tessus@php.net</email>
   <active>yes</active>
  </helper>
- <date>2020-12-02</date>
+ <date>2020-12-22</date>
  <time>05:15:47</time>
  <version>
-  <release>2.1.1</release>
+  <release>2.1.2</release>
   <api>2.0.1</api>
  </version>
  <stability>
@@ -42,8 +42,11 @@ Cloudscape, and Apache Derby databases.</description>
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-* 2020-12-02: 2.1.1
-- Fix build regression on LUW with db2_execute_many
+* 2020-12-22: 2.1.2
+- Fix memory leaks
+- Remove PHP 5 compatibility stubs and ifdefs
+- Fix compile warnings
+- Use PHP 8 arginfo generator, with generated fallbacks for PHP 7
  </notes>
  <contents>
   <dir name="/">
