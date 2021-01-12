@@ -5708,10 +5708,35 @@ static RETCODE _php_db2_get_data2(stmt_handle *stmt_res, SQLUSMALLINT col_num, S
     }
 #ifdef PASE /* trim i5/OS SQLGetSubString DBCLOB cases extra nulls -- no harm to simply remove */
     else if (*out_length > 1 && stmt_res->column_info[col_num-1].loc_type == SQL_DBCLOB_LOCATOR) {
-        int ib = *out_length - 1;
-        char * ibc = (char *) buff;
-        for (; ib && (ibc[ib] == 0x00 || ibc[ib] == 0x20); ib--) ibc[ib] = '\0';
-        *out_length = ib + 1;
+        /*
+         * CB 201210111: The combination of using *LOCAL (but DRDA to localhost
+         * is OK) and i5_dbcs_alloc causes garbage in addition to the nulls,
+         * usually 0x1A (ASCII replacement) and some @. I suspect there might
+         * be a buffer overrun kind of situation going on. However, this did
+         * impact users using i5_dbcs_alloc, so we'll just clean up the nulls.
+         * Tony wrote one, but it went backwards from the end, so the garbage
+         * after the first null would confuse it. Since the PASE version of the
+         * driver seems to treat DBCLOBs as strings, it should be OK as unlike
+         * a binary, trimming nulls should be safe.
+         */
+        char *str_buff = (char *) buff;
+        int i = 0, first_null;
+        while (str_buff[i] != '\0' && i < *out_length) {
+            i++;
+        }
+        first_null = i;
+        while (i < *out_length) {
+            str_buff[i++] = '\0';
+        }
+        *out_length = first_null;
+        /* avoid a regression in db2_statistics tests, trim end spaces */
+        for (i = first_null - 1; i >= 0; i--) {
+            if (str_buff[i] != ' ') {
+                *out_length = i + 1; /* XXX: ok to assume +1? */
+                break;
+            }
+            str_buff[i] = '\0';
+        }
     }
 #endif /* PASE */
     SQLFreeHandle(SQL_HANDLE_STMT, new_hstmt);
