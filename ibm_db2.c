@@ -6016,11 +6016,11 @@ PHP_FUNCTION(db2_result)
                     RETURN_NULL();
                 }
                 out_char_ptr = (SQLPOINTER)ecalloc(1, in_length+2);
-                out_char_ptr[in_length+1] = '\0';
                 if ( out_char_ptr == NULL ) {
                     php_error_docref(NULL, E_WARNING, "Cannot Allocate Memory");
                     RETURN_FALSE;
                 }
+                out_char_ptr[in_length+1] = '\0';
                 rc = _php_db2_get_data(stmt_res, col_num+1, lob_bind_type, out_char_ptr+1, in_length, &out_length);
                 out_char_ptr[0] = i5oshack;
                 if ( rc == SQL_ERROR ) {
