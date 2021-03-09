@@ -5852,12 +5852,29 @@ PHP_FUNCTION(db2_result)
                 if(column_type == SQL_BIGINT) {
                     in_length++;
                 }
-                out_ptr = (SQLPOINTER)ecalloc(1, in_length);
+                /*
+                 * CB 20210128: SQL/CLI bug caused by a PTF makes SQLGetData  |
+                 * return more data than what was provided from it - seems to
+                 * be almost the data it would have returned /plus/ the input
+                 * length. To compensate, we'll allocate twice as much, but
+                 * only provide the real length. This is awful and dumb, but
+                 * it might be necessary to prevent a buffer overflow.
+                 */
+                out_ptr = (SQLPOINTER)ecalloc(1, in_length * 2);
                 if ( out_ptr == NULL ) {
                     php_error_docref(NULL, E_WARNING, "Cannot Allocate Memory");
                     RETURN_FALSE;
                 }
+                memset(out_ptr, 0, in_length * 2);
                 rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_CHAR, out_ptr, in_length, &out_length);
+                if (out_length > (in_length * 2)) {
+                    php_error_docref(NULL, E_WARNING, "SQLGetData returned more data than what was provided; possible memory corruption");
+                    /* should abort here */
+                }
+                if (out_length > in_length) {
+                    /* yup. let's just chop it off and hope it doesn't get too worse */
+                    ((char*)out_ptr)[in_length + 1] = '\0';
+                }
                 if ( rc == SQL_ERROR ) {
                     RETURN_FALSE;
                 }
