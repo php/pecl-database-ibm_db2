@@ -1081,8 +1081,12 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
             default:
                 break;
         }
-    } else {
-        php_error_docref(NULL, E_WARNING, "SQLGetDiagRec failed (is the driver working?)");
+    /*
+     * Some conversion errors in tests will return -1 and poke this function,
+     * but there won't be any SQL errors to get, so don't cause a false alarm
+     */
+    } else if (sqlrc != SQL_NO_DATA_FOUND) {
+        php_error_docref(NULL, E_WARNING, "SQLGetDiagRec returned %d (is the driver working?)", sqlrc);
     }
 }
 /* }}} */
