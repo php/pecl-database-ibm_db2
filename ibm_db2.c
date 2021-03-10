@@ -5709,7 +5709,7 @@ static RETCODE _php_db2_get_data2(stmt_handle *stmt_res, SQLUSMALLINT col_num, S
 #ifdef PASE /* trim i5/OS SQLGetSubString DBCLOB cases extra nulls -- no harm to simply remove */
     else if (*out_length > 1 && stmt_res->column_info[col_num-1].loc_type == SQL_DBCLOB_LOCATOR) {
         /*
-         * CB 201210111: The combination of using *LOCAL (but DRDA to localhost
+         * CB 20210111: The combination of using *LOCAL (but DRDA to localhost
          * is OK) and i5_dbcs_alloc causes garbage in addition to the nulls,
          * usually 0x1A (ASCII replacement) and some @. I suspect there might
          * be a buffer overrun kind of situation going on. However, this did
