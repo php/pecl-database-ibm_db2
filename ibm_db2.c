@@ -1016,14 +1016,15 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
     SQLINTEGER sqlcode = 0;
     SQLSMALLINT length = 0;
     SQLCHAR *p = NULL;
+    SQLRETURN sqlrc;
 
     memset(msg, '\0', SQL_MAX_MESSAGE_LENGTH + 1);
     memset(sqlstate, '\0', SQL_SQLSTATE_SIZE + 1);
     memset(errMsg, '\0', DB2_MAX_ERR_MSG_LEN);
 
-    if ( SQLGetDiagRec(hType, handle, recno, sqlstate, &sqlcode, msg,
-            SQL_MAX_MESSAGE_LENGTH + 1, &length)  == SQL_SUCCESS ) {
-
+    sqlrc = SQLGetDiagRec(hType, handle, recno, sqlstate, &sqlcode, msg,
+            SQL_MAX_MESSAGE_LENGTH + 1, &length);
+    if (sqlrc == SQL_SUCCESS) {
 #ifdef PHP_WIN32
         if (msg[length-2] == '\r') {
             p = &msg[length-2];
@@ -1080,6 +1081,8 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
             default:
                 break;
         }
+    } else {
+        php_error_docref(NULL, E_WARNING, "SQLGetDiagRec failed (is the driver working?)");
     }
 }
 /* }}} */
