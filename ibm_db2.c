@@ -5853,12 +5853,16 @@ PHP_FUNCTION(db2_result)
                     in_length++;
                 }
                 /*
-                 * CB 20210128: SQL/CLI bug caused by a PTF makes SQLGetData  |
+                 * CB 20210128: SQL/CLI bug caused by a PTF makes SQLGetData
                  * return more data than what was provided from it - seems to
                  * be almost the data it would have returned /plus/ the input
                  * length. To compensate, we'll allocate twice as much, but
                  * only provide the real length. This is awful and dumb, but
                  * it might be necessary to prevent a buffer overflow.
+                 *
+                 * (20210309 update): The following i PTF may fix this issue,
+                 * according to a user report: SI75759
+                 * 5770SS1-OSP-DB-OTHER-INCORROUT USING SQLCLI AND CALLING SQLGETDATA A
                  */
                 out_ptr = (SQLPOINTER)ecalloc(1, in_length * 2);
                 if ( out_ptr == NULL ) {
