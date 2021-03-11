@@ -5859,6 +5859,7 @@ PHP_FUNCTION(db2_result)
                 if(column_type == SQL_BIGINT) {
                     in_length++;
                 }
+#ifdef PASE
                 /*
                  * CB 20210128: SQL/CLI bug caused by a PTF makes SQLGetData
                  * return more data than what was provided from it - seems to
@@ -5886,6 +5887,14 @@ PHP_FUNCTION(db2_result)
                     /* yup. let's just chop it off and hope it doesn't get too worse */
                     ((char*)out_ptr)[in_length + 1] = '\0';
                 }
+#else
+                out_ptr = (SQLPOINTER)ecalloc(1, in_length);
+                if ( out_ptr == NULL ) {
+                    php_error_docref(NULL, E_WARNING, "Cannot Allocate Memory");
+                    RETURN_FALSE;
+                }
+                rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_CHAR, out_ptr, in_length, &out_length);
+#endif
                 if ( rc == SQL_ERROR ) {
                     RETURN_FALSE;
                 }
