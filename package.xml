@@ -30,10 +30,10 @@ Cloudscape, and Apache Derby databases.</description>
   <email>tessus@php.net</email>
   <active>yes</active>
  </helper>
- <date>2021-03-10</date>
+ <date>2021-03-12</date>
  <time>05:15:47</time>
  <version>
-  <release>2.1.3</release>
+  <release>2.1.4</release>
   <api>2.0.1</api>
  </version>
  <stability>
@@ -42,14 +42,8 @@ Cloudscape, and Apache Derby databases.</description>
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-* 2021-03-10: 2.1.3
-- Report failures in SQLGetDiagRec. This should warn on many silent errors.
-- Workaround issue with using SQLGetSubString with a large buffer on a DBCLOB
-  with locator by trimming from first instead of last null byte.
-- Workaround bug in SQL/CLI caused by unknown PTF, which causes a buffer
-  overflow with SQLGetData on char-like values. The PTF causing the regression
-  is unidentified, but workaround PTFs seem to exist, including SI75759. The
-  workaround will likely be kept until most no longer have the defective PTF.
+* 2021-03-12: 2.1.4
+- Only apply the workaround for db2_result (SQLGetData) to PASE instead of LUW.
  </notes>
  <contents>
   <dir name="/">
