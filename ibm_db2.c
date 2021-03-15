@@ -878,9 +878,8 @@ PHP_MINFO_FUNCTION(ibm_db2)
 {
     char opbuffer[32];
     php_info_print_table_start();
-    php_info_print_table_header(2, "IBM DB2, Cloudscape and Apache Derby support", "enabled");
+    php_info_print_table_header(2, "IBM Db2 and compatible databases support", "enabled");
     php_info_print_table_row(2, "Module release", PHP_IBM_DB2_VERSION);
-    php_info_print_table_row(2, "Module revision", "$Revision$");
 
     switch (IBM_DB2_G(bin_mode)) {
         case DB2_BINARY:
