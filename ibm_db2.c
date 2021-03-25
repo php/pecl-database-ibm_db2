@@ -5878,13 +5878,20 @@ PHP_FUNCTION(db2_result)
                 }
                 memset(out_ptr, 0, in_length * 2);
                 rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_CHAR, out_ptr, in_length, &out_length);
+//fprintf(stderr, " ** strlen %d in_length %d out_length %d\n", strlen(out_ptr), in_length, out_length);
                 if (out_length > (in_length * 2)) {
                     php_error_docref(NULL, E_WARNING, "SQLGetData returned more data than what was provided; possible memory corruption");
                     /* should abort here */
                 }
-                if (out_length > in_length) {
-                    /* yup. let's just chop it off and hope it doesn't get too worse */
-                    ((char*)out_ptr)[in_length + 1] = '\0';
+                /*
+                 * CB 20210325: Truncate unconditionally; CLI may not null
+                 * terminate properly if CCSID is properly set (XXX)
+                 *
+                 * Size was already expanded by one, so reference the last byte
+                 * and make it terminated. Thanks, I hate it!
+                 */
+                if (in_length > 1) {
+                    ((char*)out_ptr)[in_length - 1] = '\0';
                 }
 #else
                 out_ptr = (SQLPOINTER)ecalloc(1, in_length);
