@@ -5878,7 +5878,6 @@ PHP_FUNCTION(db2_result)
                 }
                 memset(out_ptr, 0, in_length * 2);
                 rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_CHAR, out_ptr, in_length, &out_length);
-//fprintf(stderr, " ** strlen %d in_length %d out_length %d\n", strlen(out_ptr), in_length, out_length);
                 if (out_length > (in_length * 2)) {
                     php_error_docref(NULL, E_WARNING, "SQLGetData returned more data than what was provided; possible memory corruption");
                     /* should abort here */
