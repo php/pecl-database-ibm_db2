@@ -988,7 +988,7 @@ PHP_MINFO_FUNCTION(ibm_db2)
     if (IBM_DB2_G(i5_char_trim) > 0) {
         php_info_print_table_row(2, "Trim spaces character results (ibm_db2.i5_char_trim)", "1 - enabled");
     } else {
-        php_info_print_table_row(2, "rim spaces character results (ibm_db2.i5_char_trim)", "0 - disabled");
+        php_info_print_table_row(2, "Trim spaces character results (ibm_db2.i5_char_trim)", "0 - disabled");
     }
 #endif /* PASE */
     php_info_print_table_end();
