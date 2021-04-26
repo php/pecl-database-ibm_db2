@@ -4940,8 +4940,14 @@ PHP_FUNCTION(db2_execute)
                             bindlen = tmp_curr->bind_indicator;
                             origptr[bindlen] = '\0';
                             Z_STRLEN_P(tmp_curr->value) = bindlen;
-                            /* trim (IBM i may return 0x40 for EBCDIC space when not 1208 ccsid -- yes, db2 bug, just handle)*/
-                            for (;bindlen && (origptr[bindlen] == 0x20 || origptr[bindlen] == 0x40 || origptr[bindlen] == 0x00); bindlen--) {
+                            /*
+                             * trim (IBM i may return 0x40 for EBCDIC space when not 1208 ccsid -- yes, db2 bug, just handle)
+                             *
+                             * CB 20210426: when truncating, we might get an
+                             * empty string, so be sure we can nullify the
+                             * first character if needed
+                             */
+                            for (;bindlen >= 0 && (origptr[bindlen] == 0x20 || origptr[bindlen] == 0x40 || origptr[bindlen] == 0x00); bindlen--) {
                                 Z_STRLEN_P(tmp_curr->value) = bindlen;
                                 origptr[bindlen] = '\0';
                             }
