@@ -6072,12 +6072,15 @@ PHP_FUNCTION(db2_result)
                 rc = _php_db2_get_data(stmt_res, col_num+1, lob_bind_type, out_char_ptr+1, in_length, &out_length);
                 out_char_ptr[0] = i5oshack;
                 if ( rc == SQL_ERROR ) {
+                    efree(out_ptr);
                     RETURN_FALSE;
                 }
                 if (out_length == SQL_NULL_DATA) {
+                    efree(out_ptr);
                     RETURN_NULL();
                 }
                 RETVAL_STRINGL((char*)out_char_ptr,out_length);
+                efree(out_char_ptr);
 #else /* not  PASE */
                 rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_BINARY, NULL, 0, (SQLINTEGER *)&in_length);
                 if ( rc == SQL_ERROR ) {
@@ -6093,9 +6096,11 @@ PHP_FUNCTION(db2_result)
                 }
                 rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_BINARY, (SQLPOINTER)out_ptr, in_length, &out_length);
                 if (rc == SQL_ERROR) {
+                    efree(out_ptr);
                     RETURN_FALSE;
                 }
                 RETVAL_STRINGL((char*)out_ptr,out_length);
+                efree(out_ptr);
 #endif /* not  PASE */
                 break;
 
