@@ -7374,7 +7374,8 @@ PHP_FUNCTION(db2_get_option)
                 php_error_docref(NULL, E_WARNING, "Incorrect option string passed in");
                 RETURN_FALSE;
             }
-            RETURN_STRINGL(value, val_len);
+            RETVAL_STRINGL(value, val_len);
+            efree(value);
         } else {
             php_error_docref(NULL, E_WARNING, "Supplied parameter is invalid");
             RETURN_FALSE;
