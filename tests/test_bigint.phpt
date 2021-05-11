@@ -40,7 +40,7 @@ if ($conn) {
     }
 
     $drop_proc_sql = 'drop procedure update_bigint_col';
-    $stmt = @db2_exec(conn,drop_proc_sql);
+    $stmt = @db2_exec($conn, $drop_proc_sql);
 
     //Create procedure with 2 IN parameters of type bigint
     $create_proc_sql = "CREATE PROCEDURE update_bigint_col (IN param1 bigint, IN param2 bigint)
