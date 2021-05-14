@@ -44,7 +44,6 @@ test_V6_320_EscapeString.phpt
 test_V6_321_ResultFetchArraysLobsXMLTypes.phpt
 test_V6_6792_FieldTypeRetStrDatetimeTimestamp.phpt
 test_V6_9173_ProcedurePersistentConn.phpt
-test_V6_bigint.phpt
 test_V6_clob_special_char.phpt
 test_V6_connect_deallocator.phpt
 test_V6_execute_many.phpt
