@@ -3,7 +3,6 @@ $PASE_ALT_TEST = <<< SKIPPASE
 test_V6_002_ConnDbUncatalogedConn.phpt
 test_V6_039_FetchRowIndexPosNested_02.phpt
 test_V6_041_FetchArrayMany_01.phpt
-test_V6_053_SetAutocommit_02.phpt
 test_V6_066_TableObjects.phpt
 test_V6_080_ConnWrongDbAlias.phpt
 test_V6_090_ConnmsgWrongDbAlias.phpt
