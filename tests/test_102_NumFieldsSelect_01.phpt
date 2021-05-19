@@ -3,7 +3,6 @@ IBM-DB2: db2_num_fields() - select
 --SKIPIF--
 <?php
   require_once('skipif.inc');
-  require_once('skipif3.inc');
 ?>
 --FILE--
 <?php

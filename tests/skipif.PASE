@@ -8,7 +8,6 @@ test_V6_080_ConnWrongDbAlias.phpt
 test_V6_090_ConnmsgWrongDbAlias.phpt
 test_V6_091_ConnmsgWrongUser.phpt
 test_V6_092_ConnmsgWrongPwd.phpt
-test_V6_102_NumFieldsSelect_01.phpt
 test_V6_10353_MemLeak.phpt
 test_V6_10353.phpt
 test_V6_10931_LcaseTableName.phpt
