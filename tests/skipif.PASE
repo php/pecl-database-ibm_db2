@@ -19,8 +19,6 @@ test_V6_160_FetchBoth.phpt
 test_V6_161_FetchBothNestedSelects_01.phpt
 test_V6_162_FetchBothNestedSelects_02.phpt
 test_V6_180_StmtErrMsg.phpt
-test_V6_191_ColumnsTable_02.phpt
-test_V6_192_ColumnsTable_03.phpt
 test_V6_194_RetrieveCLOBColScrollable.phpt
 test_V6_195_InsertRetrieveXMLData_01.phpt
 test_V6_196_InsertRetrieveXMLData_02.phpt
