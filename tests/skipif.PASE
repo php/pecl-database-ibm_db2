@@ -1,21 +1,13 @@
 <?php
 $PASE_ALT_TEST = <<< SKIPPASE
 test_V6_002_ConnDbUncatalogedConn.phpt
-test_V6_023_ColumnPrivileges.phpt
 test_V6_039_FetchRowIndexPosNested_02.phpt
 test_V6_041_FetchArrayMany_01.phpt
-test_V6_053_SetAutocommit_02.phpt
-test_V6_060_Tables_01.phpt
-test_V6_061_Tables_02.phpt
-test_V6_062_Tables_03.phpt
-test_V6_064_Tables_05.phpt
-test_V6_065_FilterTableName.phpt
 test_V6_066_TableObjects.phpt
 test_V6_080_ConnWrongDbAlias.phpt
 test_V6_090_ConnmsgWrongDbAlias.phpt
 test_V6_091_ConnmsgWrongUser.phpt
 test_V6_092_ConnmsgWrongPwd.phpt
-test_V6_102_NumFieldsSelect_01.phpt
 test_V6_10353_MemLeak.phpt
 test_V6_10353.phpt
 test_V6_10931_LcaseTableName.phpt
@@ -27,8 +19,6 @@ test_V6_160_FetchBoth.phpt
 test_V6_161_FetchBothNestedSelects_01.phpt
 test_V6_162_FetchBothNestedSelects_02.phpt
 test_V6_180_StmtErrMsg.phpt
-test_V6_191_ColumnsTable_02.phpt
-test_V6_192_ColumnsTable_03.phpt
 test_V6_194_RetrieveCLOBColScrollable.phpt
 test_V6_195_InsertRetrieveXMLData_01.phpt
 test_V6_196_InsertRetrieveXMLData_02.phpt
@@ -44,8 +34,6 @@ test_V6_310_ClientInfo.phpt
 test_V6_320_EscapeString.phpt
 test_V6_321_ResultFetchArraysLobsXMLTypes.phpt
 test_V6_6792_FieldTypeRetStrDatetimeTimestamp.phpt
-test_V6_9173_ProcedurePersistentConn.phpt
-test_V6_bigint.phpt
 test_V6_clob_special_char.phpt
 test_V6_connect_deallocator.phpt
 test_V6_execute_many.phpt
