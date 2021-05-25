@@ -6391,6 +6391,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
                                 }
                                 rc = _php_db2_get_data2(stmt_res, i+1, lob_bind_type, (char *)out_ptr, tmp_length, tmp_length, &out_length);
                                 if (rc == SQL_ERROR) {
+                                    efree(out_ptr);
                                     RETURN_FALSE;
                                 }
 
