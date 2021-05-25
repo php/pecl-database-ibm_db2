@@ -7776,6 +7776,9 @@ PHP_FUNCTION( db2_execute_many )
             }
         } ZEND_HASH_FOREACH_END();
     } else {
+        efree(head_error_list);
+        efree(array_data_type);
+        efree(data_type);
         RETURN_LONG(0);
     }
     _free_param_cache_list(stmt_res);
