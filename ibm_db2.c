@@ -7240,9 +7240,10 @@ PHP_FUNCTION(db2_escape_string)
 
 
     /* reallocate to the real length */  
-    new_str = (char *)realloc(new_str, new_length + 1);  
+    new_str = (char *)erealloc(new_str, new_length + 1);
 
-    RETURN_STRINGL(new_str, new_length);
+    RETVAL_STRINGL(new_str, new_length);
+    efree(new_str);
 }    
 /* }}} */
 
