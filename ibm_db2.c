@@ -5982,8 +5982,8 @@ PHP_FUNCTION(db2_result)
                 }
                 rc = _php_db2_get_data2(stmt_res, col_num+1, SQL_C_CHAR, (void*)out_char_ptr, in_length, in_length+1, &out_length);
                 if (rc == SQL_ERROR) {
-                    RETURN_FALSE;
                     efree(out_char_ptr);
+                    RETURN_FALSE;
                 }
                 RETVAL_STRINGL(out_char_ptr, out_length);
                 efree(out_char_ptr);
