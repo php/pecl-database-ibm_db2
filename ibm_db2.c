@@ -7398,7 +7398,7 @@ PHP_FUNCTION(db2_last_insert_id)
     zval *connection = NULL;
     conn_handle *conn_res;
     int rc;
-    char *last_id = emalloc( MAX_IDENTITY_DIGITS );
+    char *last_id;
     char *sql;
     SQLHANDLE hstmt;
 #ifdef PASE
@@ -7415,6 +7415,10 @@ PHP_FUNCTION(db2_last_insert_id)
         ZEND_FETCH_RESOURCE_2(conn_res, conn_handle*, &connection, connection_id,
             "Connection Resource", le_conn_struct, le_pconn_struct);
         
+        last_id = emalloc( MAX_IDENTITY_DIGITS );
+        if (!last_id) {
+            RETURN_NULL();
+        }
         /* get a new statement handle */
         strcpy( last_id, "" );
         rc = SQLAllocHandle(SQL_HANDLE_STMT, conn_res->hdbc, &hstmt);
