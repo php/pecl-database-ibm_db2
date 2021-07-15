@@ -7221,7 +7221,7 @@ PHP_FUNCTION(db2_escape_string)
     }    
 
     /* allocate twice the source length first (worst case) */    
-    new_str = (char*)malloc(((length*2)+1)*sizeof(char));    
+    new_str = (char*)emalloc(((length*2)+1)*sizeof(char));
 
     source = str;    
     end = source + length;       
