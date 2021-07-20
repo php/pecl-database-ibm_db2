@@ -2694,11 +2694,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
     if (hKey != NULL) {
         if (! reused && rc == SQL_SUCCESS) {
             /* If we created a new persistent connection, add it to the persistent_list */
-            zend_resource newPersistentRes;
-            newPersistentRes.type = le_pconn_struct;
-            newPersistentRes.ptr = conn_res;
-            GC_SET_REFCOUNT(&newPersistentRes, 1);
-            if (zend_hash_str_update_mem(&EG(persistent_list), hKey, hKeyLen, &newPersistentRes, sizeof(newPersistentRes)) == NULL) {
+            if (zend_register_persistent_resource(hKey, hKeyLen, conn_res, le_pconn_struct) == NULL) {
                 rc = SQL_ERROR;
                 /* TBD: What error to return?, for now just generic SQL_ERROR */
             }
