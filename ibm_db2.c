@@ -1886,7 +1886,6 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
 static int _php_db2_parse_options ( zval *options, int type, void *handle )
 {
     int i = 0;
-    ulong num_idx;
     char *opt_key; /* Holds the Option Index Key */
     zval **data;
     zval **tc_pass = NULL;
@@ -4766,7 +4765,7 @@ PHP_FUNCTION(db2_execute)
     zval *val;
     zend_string *key,*key1;
     char str[1024] = {0};
-    ulong num_key;
+    zend_long num_key;
     SQLPOINTER paramValuePtr=NULL;
     SQLPOINTER valuePtr=NULL;
     SQLPOINTER valuePtr2=NULL;
@@ -7552,7 +7551,7 @@ PHP_FUNCTION( db2_execute_many )
     zend_string *key;
     zend_string *key1,*key2,*key3,*key4,*key5;
     zval *zv = NULL, *zv1 = NULL,*zv2,*zv3,*zv4,*zv5;
-    ulong num_key,num_key1,num_key2,num_key3,num_key4,num_key5;
+    zend_long num_key,num_key1,num_key2,num_key3,num_key4,num_key5;
     
     /* These are used to loop over the param cache*/
     param_node *tmp_curr, *prev_ptr, *curr_ptr;
