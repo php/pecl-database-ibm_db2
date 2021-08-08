@@ -6239,7 +6239,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
                 case SQL_DECFLOAT:
 #ifdef PASE /* i5/OS trim spaces */
                     if (stmt_res->s_i5_conn_parent->c_i5_char_trim > 0) {
-                        i5trim = strlen((char *)row_data->str_val);
+                        i5trim = out_length;
                         for(; i5trim >= 0; i5trim--) {
                             i5char = (char)(((char *)row_data->str_val)[i5trim]);
                             if (i5char == 0x00 || i5char == 0x20) {
@@ -6261,11 +6261,11 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 #endif /* PASE */
                     if ( op & DB2_FETCH_ASSOC ) {
                         add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name,
-                            (char *)row_data->str_val, strlen((char *)row_data->str_val));
+                            (char *)row_data->str_val, out_length);
                     }
                     if ( op & DB2_FETCH_INDEX ) {
                         add_index_stringl(return_value, i, (char *)row_data->str_val,
-                            strlen((char *)row_data->str_val));
+                            out_length);
                     }
                     break;
                 case SQL_SMALLINT:
