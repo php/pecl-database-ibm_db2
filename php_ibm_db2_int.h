@@ -15,6 +15,8 @@ typedef uint32_t uintptr_t;
 #endif
 #endif
 
+typedef unsigned long ulong;
+
 /* Needed for backward compatibility (SQL_ATTR_DBC_SYS_NAMING not defined prior to DB2 10.1.0.2) */
 #ifndef SQL_ATTR_DBC_SYS_NAMING
 #define SQL_ATTR_DBC_SYS_NAMING 3017
