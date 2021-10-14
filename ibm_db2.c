@@ -7357,6 +7357,22 @@ PHP_FUNCTION(db2_get_option)
                     _php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1);
                     RETURN_FALSE;
                 }
+#ifdef PASE
+            } else if(!STRCASECMP(option, "i5_naming")) {
+                rc = SQLGetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_DBC_SYS_NAMING, (SQLPOINTER)&val, 0, &val_len);
+                if ( rc == SQL_ERROR ) {
+                    _php_db2_check_sql_errors((SQLHDBC)conn_res->hdbc, SQL_HANDLE_DBC, rc, 1, NULL, -1, 1);
+                    RETURN_FALSE;
+                }
+                if(val == SQL_TRUE) {
+                    RETURN_TRUE;
+                } else {
+                    RETURN_FALSE;
+                }
+            /* TODO: case PDO_I5_ATTR_COMMIT: */
+            /* TODO: case PDO_I5_ATTR_JOB_SORT: */
+            /* prob no libl/curlib, since they're accessible by SQL */
+#endif
 #ifndef PASE  /* i5/OS no support yet */
             } else if(!STRCASECMP(option, "trustedcontext")) {
                 rc = SQLGetConnectAttr((SQLHDBC)conn_res->hdbc, SQL_ATTR_USE_TRUSTED_CONTEXT, (SQLPOINTER)&val, 0, &val_len);
