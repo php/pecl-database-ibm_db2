@@ -2354,6 +2354,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
         /* Check if we already have a connection for this userID & database combination */
         if (isPersistent) {
             zend_resource *entry;
+            /* 9 = strlen("__db2_") + strlen('.') + strlen(".") + null */
             hKeyLen = strlen(database) + strlen(uid) + strlen(password) + 9;
             hKey = (char *) ecalloc(1, hKeyLen);
 
