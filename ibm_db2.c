@@ -2354,10 +2354,11 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
         /* Check if we already have a connection for this userID & database combination */
         if (isPersistent) {
             zend_resource *entry;
-            hKeyLen = strlen(database) + strlen(uid) + 8;
+            hKeyLen = strlen(database) + strlen(uid) + strlen(password) + 9;
             hKey = (char *) ecalloc(1, hKeyLen);
 
-            sprintf(hKey, "__db2_%s.%s", uid, database);
+            /* XXX: How do we include the options (array) in here too? */
+            sprintf(hKey, "__db2_%s.%s.%s", uid, database, password);
             temp = zend_hash_str_find_ptr(&EG(persistent_list), hKey, hKeyLen );
             if ( temp && temp->type == le_pconn_struct) {   
                 conn_res = *pconn_res = (conn_handle *)temp->ptr;
