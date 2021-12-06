@@ -2386,7 +2386,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
                     }
                     /* bind col */
                     if (rc == SQL_SUCCESS) {
-                        rc = SQLBindCol((SQLHSTMT)try_stmt_res->hstmt, 1, SQL_CHAR, try_date, strlen(try_date), &try_date_len);
+                        rc = SQLBindCol((SQLHSTMT)try_stmt_res->hstmt, 1, SQL_CHAR, try_date, 32, &try_date_len);
                     }
                     /* fetch data */
                     if (rc == SQL_SUCCESS) {
