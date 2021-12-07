@@ -2368,8 +2368,8 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
         /* Check if we already have a connection for this userID & database combination */
         if (isPersistent) {
             zend_resource *entry;
-            /* 17 = strlen("FFFFFFFF") + strlen("__db2_") + strlen(".") + strlen(".") + null */
-            hKeyLen = strlen(database) + strlen(uid) + 17;
+            hKeyLen = strlen(database) + strlen(uid) +
+                sizeof("__db2_..FFFFFFFF"); /* constant part; includes null */
             hKey = (char *) ecalloc(1, hKeyLen);
 
             /* XXX: How do we include the options (array) in here too? */
