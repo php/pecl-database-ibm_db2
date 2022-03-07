@@ -37,9 +37,42 @@ jobs:
         run: ./configure --with-IBM_DB2=$PWD/clidriver
       - name: make
         run: make V=1
-      # XXX: No tests until DB2 Docker container is set up (see Travis)
-      #- name: Test dbase
-      #  run: make test TESTS=tests
+      - name: Set up Db2 LUW in Docker
+        # XXX: Should we be caching the Docker image? Are we creating the necessary things?
+        # Adapted from the Travis setup with the changes used for the current
+        # version of the Db2 container.
+        run: |
+          set -x
+          cat <<EOF > db2cli.ini
+          [SAMPLE]
+          Hostname=localhost
+          Protocol=TCPIP
+          Port=60000
+          Database=sample
+          EOF
+          mkdir database
+          docker pull ibmcom/db2
+          docker run --name db2 --privileged=true -p 60000:50000 -e DB2INST1_PASSWORD=password -e LICENSE=accept -e DBNAME=sample -v database:/database -itd ibmcom/db2
+          docker ps -as
+          while true
+          do
+            if (docker logs db2 | grep 'Setup has completed')
+            then
+              break
+            fi
+            sleep 20
+          done
+      - name: Tests
+        # make test is insufficient to load PDO
+        # Most of these are either cribbed from the old Travis configuration,
+        # or required for the tests to use the DSN.
+        # Note that connection.inc defaults should be mostly sufficient.
+        run: |
+          export TEST_PHP_ARGS="-n -d extension=modules/ibm_db2.so"
+          export IBM_DB2_TEST_SKIP_CONNECT_FAILURE=0
+          export DB2CLIINIPATH=$PWD
+          export REPORT_EXIT_STATUS=1
+          php run-tests.php -P --show-diff tests
   windows:
     defaults:
       run:
