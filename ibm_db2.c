@@ -351,8 +351,21 @@ static void _php_db2_set_symbol(char * varname, zval *var)
 }
 /* }}} */
 
+/* {{{ Murmur hash implementation (for persistent key hash)
+ */
 
+static unsigned int _php_db2_MurmurOAAT32 (const char * key)
+{
+    unsigned int h = 3323198485;
+    for (;*key;++key) {
+        h ^= *key;
+        h *= 0x5bd1e995;
+        h ^= h >> 15;
+    }
+    return h;
+}
 
+/* }}} */
 
 #ifdef PASE /* IBM i meta change ""->NULL */
 static void _php_db2_meta_helper(SQLCHAR **qualifier, size_t *qualifier_len,
@@ -2313,6 +2326,7 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
     int reused = 0;
     int hKeyLen = 0;
     char *hKey = NULL;
+    unsigned int password_hashed;
     char server[2048];
     int attr = SQL_TRUE;
     size_t database_len;
@@ -2354,10 +2368,13 @@ static int _php_db2_connect_helper( INTERNAL_FUNCTION_PARAMETERS, conn_handle **
         /* Check if we already have a connection for this userID & database combination */
         if (isPersistent) {
             zend_resource *entry;
-            hKeyLen = strlen(database) + strlen(uid) + 8;
+            hKeyLen = strlen(database) + strlen(uid) +
+                sizeof("__db2_..FFFFFFFF"); /* constant part; includes null */
             hKey = (char *) ecalloc(1, hKeyLen);
 
-            sprintf(hKey, "__db2_%s.%s", uid, database);
+            /* XXX: How do we include the options (array) in here too? */
+            password_hashed = _php_db2_MurmurOAAT32(password);
+            snprintf(hKey, hKeyLen, "__db2_%s.%s.%08x", uid, database, password_hashed);
             temp = zend_hash_str_find_ptr(&EG(persistent_list), hKey, hKeyLen );
             if ( temp && temp->type == le_pconn_struct) {   
                 conn_res = *pconn_res = (conn_handle *)temp->ptr;
