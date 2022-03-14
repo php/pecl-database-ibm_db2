@@ -37,6 +37,21 @@ jobs:
         run: ./configure --with-IBM_DB2=$PWD/clidriver
       - name: make
         run: make V=1
+      - name: Cache container
+        id: cache-docker
+        uses: actions/cache@v2
+        with:
+          path: image-cache
+          key: ${{ runner.os }}-image-cache
+      - name: Download container
+        if: steps.cache-docker.outputs.cache-hit != 'true'
+        run: |
+          docker pull ibmcom/db2
+          mkdir image-cache
+          docker save -o image-cache/db2.tar ibmcom/db2
+      - name: Restore container from cache
+        if: steps.cache-docker.outputs.cache-hit == 'true'
+        run: docker load -i image-cache/db2.tar
       - name: Set up Db2 LUW in Docker
         # XXX: Should we be caching the Docker image? Are we creating the necessary things?
         # Adapted from the Travis setup with the changes used for the current
@@ -51,7 +66,6 @@ jobs:
           Database=sample
           EOF
           mkdir database
-          docker pull ibmcom/db2
           docker run --name db2 --privileged=true -p 60000:50000 -e DB2INST1_PASSWORD=password -e LICENSE=accept -e DBNAME=sample -v database:/database -itd ibmcom/db2
           docker ps -as
           while true
