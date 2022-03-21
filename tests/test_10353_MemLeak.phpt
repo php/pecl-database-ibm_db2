@@ -4,6 +4,7 @@ IBM-DB2: PECL bug 10353 -- Memory leak testing
 <?php
   require_once('skipif.inc');
   if(version_compare(PHP_VERSION, '7.0.0', '<') == 1) die("skip: Test segfaults on PHP 5.6");
+  if(ZEND_DEBUG_BUILD == false) die("skip: test is allegedly pointless on release builds");
 ?>
 --FILE--
 <?php
@@ -97,6 +98,7 @@ if ($row) {
 
 /* Testing db2_foreign_keys leaks */
 $stmt = db2_foreign_keys($conn, NULL, NULL, NULL);
+/* XXX: This will fail with a TypeError in PHP 8.x instead */
 $row = db2_fetch_array($stmt);
 if ($row) {
 	echo "Shouldn't be here\n";

@@ -1,0 +1,135 @@
+name: Build and Test
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  # XXX: macOS
+  ubuntu:
+    strategy:
+      matrix:
+          version: ['7.3', '7.4', '8.0']
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Cache DB2 library
+        id: cache-clidriver
+        uses: actions/cache@v2
+        with:
+          path: clidriver
+          key: ${{ runner.os }}-clidriver
+      - name: Install DB2 library
+        if: steps.cache-clidriver.outputs.cache-hit != 'true'
+        run: |
+          wget https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/linuxx64_odbc_cli.tar.gz
+          tar xvzf linuxx64_odbc_cli.tar.gz
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{matrix.version}}
+      - name: phpize
+        run: phpize
+      - name: configure
+        run: ./configure --with-IBM_DB2=$PWD/clidriver
+      - name: make
+        run: make V=1
+      - name: Cache container
+        id: cache-docker
+        uses: actions/cache@v2
+        with:
+          path: image-cache
+          key: ${{ runner.os }}-image-cache
+      - name: Download container
+        if: steps.cache-docker.outputs.cache-hit != 'true'
+        run: |
+          docker pull ibmcom/db2
+          mkdir image-cache
+          docker save -o image-cache/db2.tar ibmcom/db2
+      - name: Restore container from cache
+        if: steps.cache-docker.outputs.cache-hit == 'true'
+        run: docker load -i image-cache/db2.tar
+      - name: Set up Db2 LUW in Docker
+        # XXX: Should we be caching the Docker image? Are we creating the necessary things?
+        # Adapted from the Travis setup with the changes used for the current
+        # version of the Db2 container.
+        run: |
+          set -x
+          cat <<EOF > db2cli.ini
+          [SAMPLE]
+          Hostname=localhost
+          Protocol=TCPIP
+          Port=60000
+          Database=sample
+          EOF
+          mkdir database
+          docker run --name db2 --privileged=true -p 60000:50000 -e DB2INST1_PASSWORD=password -e LICENSE=accept -e DBNAME=sample -v database:/database -itd ibmcom/db2
+          docker ps -as
+          while true
+          do
+            if (docker logs db2 | grep 'Setup has completed')
+            then
+              break
+            fi
+            sleep 20
+          done
+      - name: Tests
+        # make test is insufficient to load PDO
+        # Most of these are either cribbed from the old Travis configuration,
+        # or required for the tests to use the DSN.
+        # Note that connection.inc defaults should be mostly sufficient.
+        run: |
+          export TEST_PHP_ARGS="-n -d extension=modules/ibm_db2.so"
+          export IBM_DB2_TEST_SKIP_CONNECT_FAILURE=0
+          export DB2CLIINIPATH=$PWD
+          export REPORT_EXIT_STATUS=1
+          php run-tests.php -P --show-diff tests
+  windows:
+    defaults:
+      run:
+        shell: cmd
+    strategy:
+      matrix:
+          version: ["7.4", "8.0", "8.1"]
+          arch: [x64]
+          ts: [ts]
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Cache DB2 library
+        id: cache-clidriver
+        uses: actions/cache@v2
+        with:
+          path: clidriver
+          key: ${{ runner.os }}-clidriver
+      - name: Install DB2 library
+        if: steps.cache-clidriver.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri 'https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/ntx64_odbc_cli.zip' -OutFile 'ntx64_odbc_cli.zip'
+          Expand-Archive 'ntx64_odbc_cli.zip' -DestinationPath '.\'
+      - name: Setup PHP
+        id: setup-php
+        uses: cmb69/setup-php-sdk@v0.2
+        with:
+          version: ${{matrix.version}}
+          arch: ${{matrix.arch}}
+          ts: ${{matrix.ts}}
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{matrix.arch}}
+          toolset: ${{steps.setup-php.outputs.toolset}}
+      - name: phpize
+        run: phpize
+      - name: configure
+        run: configure --with-ibm_db2=%cd%\clidriver --with-prefix=${{steps.setup-php.outputs.prefix}}
+      - name: make
+        run: nmake
+      # XXX: Can we run Docker containers in a Windows runner? That'll be required for tests
+      #- name: test
+      #  run: nmake test TESTS=tests
