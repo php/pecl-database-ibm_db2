@@ -87,6 +87,8 @@ jobs:
           export DB2CLIINIPATH=$PWD
           export REPORT_EXIT_STATUS=1
           php run-tests.php -P --show-diff tests
+      - name: Verify package
+        run: pecl package-validate
   windows:
     defaults:
       run:
