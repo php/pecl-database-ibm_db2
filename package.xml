@@ -151,7 +151,6 @@
     <file baseinstalldir="ibm_db2" name="test_092_ConnmsgWrongPwd.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_100_SelectDeleteInsertFieldCount.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_101_InsertDeleteFieldCount.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_102_NumFieldsSelect_01.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_103_NumFieldsSelect_02.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_110_FieldNum.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_111_FieldNumAddCol.phpt" role="test" />
@@ -254,21 +253,13 @@
     <file baseinstalldir="ibm_db2" name="test_execute_many.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_bigint.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_002_ConnDbUncatalogedConn.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_023_ColumnPrivileges.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_039_FetchRowIndexPosNested_02.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_041_FetchArrayMany_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_053_SetAutocommit_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_060_Tables_01.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_061_Tables_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_062_Tables_03.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_064_Tables_05.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_065_FilterTableName.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_066_TableObjects.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_080_ConnWrongDbAlias.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_090_ConnmsgWrongDbAlias.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_091_ConnmsgWrongUser.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_092_ConnmsgWrongPwd.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_102_NumFieldsSelect_01.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_10353.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_10353_MemLeak.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_10931_LcaseTableName.phpt" role="test" />
@@ -280,8 +271,6 @@
     <file baseinstalldir="ibm_db2" name="test_V6_161_FetchBothNestedSelects_01.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_162_FetchBothNestedSelects_02.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_180_StmtErrMsg.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_191_ColumnsTable_02.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_192_ColumnsTable_03.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_194_RetrieveCLOBColScrollable.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_195_InsertRetrieveXMLData_01.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_196_InsertRetrieveXMLData_02.phpt" role="test" />
@@ -298,8 +287,6 @@
     <file baseinstalldir="ibm_db2" name="test_V6_320_EscapeString.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_321_ResultFetchArraysLobsXMLTypes.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_6792_FieldTypeRetStrDatetimeTimestamp.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_9173_ProcedurePersistentConn.phpt" role="test" />
-    <file baseinstalldir="ibm_db2" name="test_V6_bigint.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_clob_special_char.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_connect_deallocator.phpt" role="test" />
     <file baseinstalldir="ibm_db2" name="test_V6_execute_many.phpt" role="test" />
