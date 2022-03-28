@@ -2,6 +2,10 @@
 
 Interface for PHP to DB2 for z/OS, DB2 for LUW, DB2 for i.
 
+## Pre-requisites
+
+The minimum PHP version supported by driver is PHP 7.3 and the latest version supported is PHP 8.1.
+
 ## IBM i users
 
 When running on IBM i, `IBM_DB2` doesn't link with the Db2 LUW client library,
