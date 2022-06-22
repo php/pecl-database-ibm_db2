@@ -24,7 +24,7 @@ $result = @db2_exec($conn, $create);
 $create = 'CREATE TABLE t.t4( c1 integer, c2 varchar(40))';
 $result = @db2_exec($conn, $create);
 
-$result = db2_tables($conn, NULL, '%', "T3");
+$result = @db2_tables($conn, NULL, '%', "T3");
 
 $columns = db2_num_fields($result);
 

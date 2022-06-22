@@ -11,7 +11,7 @@ $conn = db2_connect($db,$username,$password);
 
 if ($conn) 
 {
-   $result = db2_columns($conn,NULL,NULL,"EMPLOYEE");
+   $result = @db2_columns($conn,NULL,NULL,"EMPLOYEE");
    while ($row = db2_fetch_array($result))
    {
       $str = $row[1] ."/". $row[3];	

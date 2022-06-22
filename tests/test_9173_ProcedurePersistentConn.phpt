@@ -12,7 +12,7 @@ require_once('connection.inc');
 $conn = db2_pconnect($database, $user, $password);
 
 if ($conn) {
-	$stmt = db2_procedures($conn, NULL, 'SYS%', '%%');
+	$stmt = @db2_procedures($conn, NULL, 'SYS%', '%%');
 
 	$row = db2_fetch_assoc($stmt);
 	var_dump($row);

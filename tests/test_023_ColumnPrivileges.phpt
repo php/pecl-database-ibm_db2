@@ -11,7 +11,7 @@ $conn = db2_connect($database, $user, $password);
 
 if ($conn != 0)
 {
-	$stmt = db2_column_privileges($conn, NULL, NULL, 'ANIMALS');
+	@$stmt = db2_column_privileges($conn, NULL, NULL, 'ANIMALS');
 	$row = db2_fetch_array($stmt);
 	print $row[2] . "\n";
 	print $row[3] . "\n";

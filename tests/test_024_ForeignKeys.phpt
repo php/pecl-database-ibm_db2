@@ -20,7 +20,7 @@ if ($conn != 0)
 	$statement = "INSERT INTO test_foreign_keys VALUES (1)";
 	$result = db2_exec($conn, $statement);
 
-	$stmt = db2_foreign_keys($conn, NULL, NULL, 'TEST_PRIMARY_KEYS');
+	@$stmt = db2_foreign_keys($conn, NULL, NULL, 'TEST_PRIMARY_KEYS');
 	$row = db2_fetch_array($stmt);
 	echo $row[2] . "\n";
 	echo $row[3] . "\n";

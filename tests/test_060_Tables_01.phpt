@@ -26,7 +26,7 @@ $result = @db2_exec($conn, $create);
 
 if ($conn)
 {
-   $result = db2_tables($conn,NULL,strtoupper('t'));
+   $result = @db2_tables($conn,NULL,strtoupper('t'));
    $i = 0;
    while ($row=db2_fetch_both($result))
    {			
