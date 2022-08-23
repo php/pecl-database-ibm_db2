@@ -11,7 +11,7 @@ $conn = db2_connect($database, $user, $password);
 
 $server = db2_server_info( $conn );
 
-$result = db2_tables($conn, NULL, strtoupper($user), 'ANIM%');
+$result = @db2_tables($conn, NULL, strtoupper($user), 'ANIM%');
 
 $t[0]=""; $t[1]=""; $t[2]=""; $t[3]="";
 while ($row = db2_fetch_object($result)) {

@@ -9,7 +9,7 @@ require_once('connection.inc');
 
 $conn = db2_connect($db,$user,$password);
 
-$result = db2_tables($conn, NULL, "SYSIBM", "", "VIEW");
+$result = @db2_tables($conn, NULL, "SYSIBM", "", "VIEW");
 
 print_r ($result);
 

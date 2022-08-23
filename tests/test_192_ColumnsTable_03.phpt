@@ -10,7 +10,7 @@ require_once('connection.inc');
 $conn = db2_connect($db,$username,$password);
 
 if ($conn) {
-	$result = db2_columns($conn,NULL,strtoupper($username),"EMP_RESUME");	
+	$result = @db2_columns($conn,NULL,strtoupper($username),"EMP_RESUME");	
 	$i = 0;
 	while ($row = db2_fetch_both($result)) {
 		if ($row['COLUMN_NAME'] != 'EMP_ROWID' && $i < 3) {
