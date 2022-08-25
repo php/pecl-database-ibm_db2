@@ -90,6 +90,15 @@ jobs:
           php run-tests.php -P --show-diff tests
       - name: Verify package
         run: pecl package-validate
+      - name: Verify XML and header version are in sync
+        # pecl.php.org runs a similar test, but pecl package-validate doesn't,
+        # reinvent the wheel here
+        run: |
+          XML_VERSION=$(pecl info package.xml | perl -ne "m/^Release Version *([\\.0-9a-z]*) .*$/ && print \"\$1\\n\"" -)
+          echo "package.xml version is \"$XML_VERSION\""
+          HEADER_VERSION=$(perl -ne "m/^#define.*PHP_IBM_DB2_VERSION.*\"(.*)\"$/ && print \"\$1\\n\"" php_ibm_db2.h)
+          echo "php_ibm_db2.h version is \"$HEADER_VERSION\""
+          test "$HEADER_VERSION" = "$XML_VERSION"
   windows:
     defaults:
       run:
