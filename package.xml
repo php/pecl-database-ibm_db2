@@ -44,10 +44,10 @@
   <email>tessus@php.net</email>
   <active>yes</active>
  </helper>
- <date>2021-09-30</date>
+ <date>2022-08-24</date>
  <time>05:15:47</time>
  <version>
-  <release>2.1.5</release>
+  <release>2.1.6</release>
   <api>2.0.1</api>
  </version>
  <stability>
@@ -56,13 +56,12 @@
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-* 2021-09-30: 2.1.5
-- Use the new persistent resource API introduced in 7.3 (PHP 7.3 is new minreq)
-- Fix truncation issues in db2_result
-- Fix typo with character trim
-- Fix issues with trim returning empty string if it should only return one char
-- Fix leaks with various functions (result, get_option, escape_string, etc.)
-- Fix build issue with ulong on some platforms
+* 2022-08-24: 2.1.6
+- Allows fetching the current naming mode with db2_get_option on IBM i.
+- Uses the password (obfuscated in memory) as part of the persistent resource hash key. This means the password must be the same to reuse a persistent connection.
+- Fixes build issues with 64-bit Windows.
+- Fixes crashes with level 4 i5_check_pconnect.
+- Cleans up CI for modern IBM i and PHP 8.1.
  </notes>
  <contents>
   <dir name="/">
