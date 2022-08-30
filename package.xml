@@ -44,10 +44,10 @@
   <email>tessus@php.net</email>
   <active>yes</active>
  </helper>
- <date>2022-08-24</date>
+ <date>2022-08-30</date>
  <time>05:15:47</time>
  <version>
-  <release>2.1.6</release>
+  <release>2.1.7</release>
   <api>2.0.1</api>
  </version>
  <stability>
@@ -56,12 +56,7 @@
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-* 2022-08-24: 2.1.6
-- Allows fetching the current naming mode with db2_get_option on IBM i.
-- Uses the password (obfuscated in memory) as part of the persistent resource hash key. This means the password must be the same to reuse a persistent connection.
-- Fixes build issues with 64-bit Windows.
-- Fixes crashes with level 4 i5_check_pconnect.
-- Cleans up CI for modern IBM i and PHP 8.1.
+  Corrects a packaging mistake in 2.1.6.
  </notes>
  <contents>
   <dir name="/">
