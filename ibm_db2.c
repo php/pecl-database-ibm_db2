@@ -6265,6 +6265,11 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
                             i5trim++;
                             break;
                         }
+                        // CB 20221227: fix from Luca for all-space/empty strings
+                        // ugly, but works
+                        if (i5trim < 0) {
+                            i5trim = 0;
+                        }
                         if ( op & DB2_FETCH_ASSOC ) {
                             add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name,
                                 (char *)row_data->str_val, i5trim);
