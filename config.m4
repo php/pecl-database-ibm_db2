@@ -71,6 +71,7 @@ if test "$PHP_IBM_DB2" != "no"; then
     ], "-L$i/lib" )
   done
 
+  dnl XXX: Should convert defines from PASE to __PASE__, in line with IBM GCC
   if test "$IBM_DB2_PASE" = "yes" ; then
     PHP_NEW_EXTENSION(ibm_db2, ibm_db2.c, $ext_shared,,-DPASE)
   else
