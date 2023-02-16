@@ -11,7 +11,7 @@ $conn = db2_connect($database, $user, $password);
 
 $server = db2_server_info( $conn );
 
-if ($server) {
+if ($server instanceof \stdClass) {
     echo "DBMS_NAME: "; 		var_dump( $server->DBMS_NAME );	 
     echo "DBMS_VER: "; 			var_dump( $server->DBMS_VER );	 
     echo "DB_CODEPAGE: "; 		var_dump( $server->DB_CODEPAGE );	 
