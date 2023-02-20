@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e952caf6e14487291104ab1f1fdd7f268cc8a6bc */
+ * Stub hash: 068c5c0eb15d14238885a5bacfe55e6cfac5cb6a */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_connect, 0, 0, 3)
 	ZEND_ARG_INFO(0, database)
@@ -21,10 +21,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_bind_param, 0, 0, 3)
 	ZEND_ARG_INFO(0, connection)
-	ZEND_ARG_INFO(0, parameter_number)
-	ZEND_ARG_INFO(0, variable_name)
-	ZEND_ARG_INFO(0, parameter_type)
-	ZEND_ARG_INFO(0, data_type)
+	ZEND_ARG_INFO(0, parameterNumber)
+	ZEND_ARG_INFO(0, variableName)
+	ZEND_ARG_INFO(0, parameterType)
+	ZEND_ARG_INFO(0, dataType)
 	ZEND_ARG_INFO(0, precision)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
@@ -41,8 +41,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_column_privileges, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, qualifier)
 	ZEND_ARG_INFO(0, schema)
-	ZEND_ARG_INFO(0, table_name)
-	ZEND_ARG_INFO(0, column_name)
+	ZEND_ARG_INFO(0, tableName)
+	ZEND_ARG_INFO(0, columnName)
 ZEND_END_ARG_INFO()
 
 #define arginfo_db2_columnprivileges arginfo_db2_column_privileges
@@ -53,7 +53,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_foreign_keys, 0, 0, 4)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, qualifier)
 	ZEND_ARG_INFO(0, schema)
-	ZEND_ARG_INFO(0, table_name)
+	ZEND_ARG_INFO(0, tableName)
 ZEND_END_ARG_INFO()
 
 #define arginfo_db2_foreignkeys arginfo_db2_foreign_keys
@@ -83,7 +83,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_special_columns, 0, 0, 5)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, qualifier)
 	ZEND_ARG_INFO(0, schema)
-	ZEND_ARG_INFO(0, table_name)
+	ZEND_ARG_INFO(0, tableName)
 	ZEND_ARG_INFO(0, scope)
 ZEND_END_ARG_INFO()
 
@@ -93,7 +93,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_statistics, 0, 0, 5)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, qualifier)
 	ZEND_ARG_INFO(0, schema)
-	ZEND_ARG_INFO(0, table_name)
+	ZEND_ARG_INFO(0, tableName)
 	ZEND_ARG_INFO(0, unique)
 ZEND_END_ARG_INFO()
 
@@ -101,7 +101,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_table_privileges, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, qualifier)
 	ZEND_ARG_INFO(0, schema)
-	ZEND_ARG_INFO(0, table_name)
+	ZEND_ARG_INFO(0, tableName)
 ZEND_END_ARG_INFO()
 
 #define arginfo_db2_tableprivileges arginfo_db2_table_privileges
@@ -110,8 +110,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_tables, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, qualifier)
 	ZEND_ARG_INFO(0, schema)
-	ZEND_ARG_INFO(0, table_name)
-	ZEND_ARG_INFO(0, table_type)
+	ZEND_ARG_INFO(0, tableName)
+	ZEND_ARG_INFO(0, tableType)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_exec, 0, 0, 2)
@@ -181,7 +181,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_fetch_row, 0, 0, 1)
 	ZEND_ARG_INFO(0, stmt)
-	ZEND_ARG_INFO(0, row_number)
+	ZEND_ARG_INFO(0, rowNumber)
 ZEND_END_ARG_INFO()
 
 #define arginfo_db2_fetch_assoc arginfo_db2_fetch_row
@@ -207,12 +207,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_db2_server_info arginfo_db2_commit
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_escape_string, 0, 0, 1)
-	ZEND_ARG_INFO(0, string_literal)
+	ZEND_ARG_INFO(0, stringLiteral)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_lob_read, 0, 0, 3)
 	ZEND_ARG_INFO(0, stmt)
-	ZEND_ARG_INFO(0, colnum)
+	ZEND_ARG_INFO(0, columnNumber)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 

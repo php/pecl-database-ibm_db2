@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e952caf6e14487291104ab1f1fdd7f268cc8a6bc */
+ * Stub hash: 068c5c0eb15d14238885a5bacfe55e6cfac5cb6a */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_connect, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 0)
@@ -21,10 +21,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_db2_bind_param, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, connection)
-	ZEND_ARG_TYPE_INFO(0, parameter_number, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, variable_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, parameter_type, IS_LONG, 0, "DB2_PARAM_IN")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, data_type, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO(0, parameterNumber, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, variableName, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, parameterType, IS_LONG, 0, "DB2_PARAM_IN")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dataType, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, precision, IS_LONG, 0, "-1")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
@@ -41,8 +41,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_column_privileges, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, qualifier, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, schema, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, table_name, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, column_name, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, tableName, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, columnName, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_db2_columnprivileges arginfo_db2_column_privileges
@@ -53,7 +53,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_foreign_keys, 0, 0, 4)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_TYPE_INFO(0, qualifier, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, schema, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, table_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, tableName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_db2_foreignkeys arginfo_db2_foreign_keys
@@ -83,7 +83,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_special_columns, 0, 0, 5)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_TYPE_INFO(0, qualifier, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, schema, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, table_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, tableName, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, scope, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -93,7 +93,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_statistics, 0, 0, 5)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_TYPE_INFO(0, qualifier, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, schema, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, table_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, tableName, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, unique, MAY_BE_BOOL|MAY_BE_LONG, NULL)
 ZEND_END_ARG_INFO()
 
@@ -101,7 +101,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_table_privileges, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, qualifier, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, schema, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, table_name, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, tableName, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_db2_tableprivileges arginfo_db2_table_privileges
@@ -110,8 +110,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_tables, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, qualifier, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, schema, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, table_name, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, table_type, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, tableName, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, tableType, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_exec, 0, 0, 2)
@@ -135,13 +135,13 @@ ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_db2_stmt_errormsg, 0, 0, IS_STRING, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, stmt, "null")
+	ZEND_ARG_INFO(0, stmt)
 ZEND_END_ARG_INFO()
 
 #define arginfo_db2_stmt_error arginfo_db2_stmt_errormsg
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_db2_conn_errormsg, 0, 0, IS_STRING, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, connection, "null")
+	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
 #define arginfo_db2_conn_error arginfo_db2_conn_errormsg
@@ -193,12 +193,12 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_db2_fetch_row, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, stmt)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, row_number, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, rowNumber, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_db2_fetch_assoc, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, stmt)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, row_number, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, rowNumber, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_db2_fetch_array arginfo_db2_fetch_assoc
@@ -207,7 +207,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_db2_fetch_object, 0, 1, stdClass, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, stmt)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, row_number, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, rowNumber, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_db2_free_result arginfo_db2_free_stmt
@@ -227,12 +227,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_db2_server_info arginfo_db2_client_info
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_db2_escape_string, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, string_literal, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, stringLiteral, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_db2_lob_read, 0, 3, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, stmt)
-	ZEND_ARG_TYPE_INFO(0, colnum, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, columnNumber, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 

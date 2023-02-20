@@ -32,7 +32,7 @@ function db2_autocommit($connection, int $value = UNKNOWN): int|bool {}
 /**
  * @param resource $connection
  */
-function db2_bind_param($connection, int $parameter_number, string $variable_name, int $parameter_type = DB2_PARAM_IN, int $data_type = 0, int $precision = -1, int $scale = 0): bool {}
+function db2_bind_param($connection, int $parameterNumber, string $variableName, int $parameterType = DB2_PARAM_IN, int $dataType = 0, int $precision = -1, int $scale = 0): bool {}
 
 /**
  * @param resource $connection
@@ -50,46 +50,46 @@ function db2_pclose($connection): bool {}
  * @param resource $connection
  * @return resource
  */
-function db2_column_privileges($connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $column_name = null) {}
+function db2_column_privileges($connection, ?string $qualifier = null, ?string $schema = null, ?string $tableName = null, ?string $columnName = null) {}
 
 /**
  * @param resource $connection
  * @return resource
  * @alias db2_column_privileges
  */
-function db2_columnprivileges($connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $column_name = null) {}
+function db2_columnprivileges($connection, ?string $qualifier = null, ?string $schema = null, ?string $tableName = null, ?string $columnName = null) {}
 
 /**
  * @param resource $connection
  * @return resource
  */
-function db2_columns($connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $column_name = null) {}
+function db2_columns($connection, ?string $qualifier = null, ?string $schema = null, ?string $tableName = null, ?string $columnName = null) {}
 
 /**
  * @param resource $connection
  * @return resource
  */
-function db2_foreign_keys($connection, ?string $qualifier, ?string $schema, string $table_name) {}
+function db2_foreign_keys($connection, ?string $qualifier, ?string $schema, string $tableName) {}
 
 /**
  * @param resource $connection
  * @return resource
  * @alias db2_foreign_keys
  */
-function db2_foreignkeys($connection, ?string $qualifier, ?string $schema, string $table_name) {}
+function db2_foreignkeys($connection, ?string $qualifier, ?string $schema, string $tableName) {}
 
 /**
  * @param resource $connection
  * @return resource
  */
-function db2_primary_keys($connection, ?string $qualifier, ?string $schema, string $table_name) {}
+function db2_primary_keys($connection, ?string $qualifier, ?string $schema, string $tableName) {}
 
 /**
  * @param resource $connection
  * @return resource
  * @alias db2_primary_keys
  */
-function db2_primarykeys($connection, ?string $qualifier, ?string $schema, string $table_name) {}
+function db2_primarykeys($connection, ?string $qualifier, ?string $schema, string $tableName) {}
 
 /**
  * @param resource $connection
@@ -114,39 +114,39 @@ function db2_procedures($connection, ?string $qualifier, string $schema, string 
  * @param resource $connection
  * @return resource
  */
-function db2_special_columns($connection, ?string $qualifier, string $schema, string $table_name, int $scope) {}
+function db2_special_columns($connection, ?string $qualifier, string $schema, string $tableName, int $scope) {}
 
 /**
  * @param resource $connection
  * @return resource
  * @alias db2_special_columns
  */
-function db2_specialcolumns($connection, ?string $qualifier, string $schema, string $table_name, int $scope) {}
+function db2_specialcolumns($connection, ?string $qualifier, string $schema, string $tableName, int $scope) {}
 
 /**
  * @param resource $connection
  * @return resource
  */
-function db2_statistics($connection, ?string $qualifier, ?string $schema, string $table_name, bool|int $unique) {}
+function db2_statistics($connection, ?string $qualifier, ?string $schema, string $tableName, bool|int $unique) {}
 
 /**
  * @param resource $connection
  * @return resource
  */
-function db2_table_privileges($connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null) {}
+function db2_table_privileges($connection, ?string $qualifier = null, ?string $schema = null, ?string $tableName = null) {}
 
 /**
  * @param resource $connection
  * @return resource
  * @alias db2_table_privileges
  */
-function db2_tableprivileges($connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null) {}
+function db2_tableprivileges($connection, ?string $qualifier = null, ?string $schema = null, ?string $tableName = null) {}
 
 /**
  * @param resource $connection
  * @return resource
  */
-function db2_tables($connection, ?string $qualifier = null, ?string $schema = null, ?string $table_name = null, ?string $table_type = null) {}
+function db2_tables($connection, ?string $qualifier = null, ?string $schema = null, ?string $tableName = null, ?string $tableType = null) {}
 
 /**
  * @param resource $connection
@@ -177,22 +177,22 @@ function db2_execute_many($stmt, array $options = []): int|false {}
 /**
  * @param resource|null $stmt
  */
-function db2_stmt_errormsg($stmt = null): string {}
+function db2_stmt_errormsg($stmt = UNKNOWN): string {}
 
 /**
  * @param resource|null $stmt
  */
-function db2_stmt_error($stmt = null): string {}
+function db2_stmt_error($stmt = UNKNOWN): string {}
 
 /**
  * @param resource|null $connection
  */
-function db2_conn_errormsg($connection = null): string {}
+function db2_conn_errormsg($connection = UNKNOWN): string {}
 
 /**
  * @param resource|null $connection
  */
-function db2_conn_error($connection = null): string {}
+function db2_conn_error($connection = UNKNOWN): string {}
 
 /**
  * @param resource $stmt
@@ -268,27 +268,27 @@ function db2_result($stmt, int|string $column): mixed|null {}
 /**
  * @param resource $stmt
  */
-function db2_fetch_row($stmt, ?int $row_number = null): bool {}
+function db2_fetch_row($stmt, ?int $rowNumber = null): bool {}
 
 /**
  * @param resource $stmt
  */
-function db2_fetch_assoc($stmt, ?int $row_number = null): array|false {}
+function db2_fetch_assoc($stmt, ?int $rowNumber = null): array|false {}
 
 /**
  * @param resource $stmt
  */
-function db2_fetch_array($stmt, ?int $row_number = null): array|false {}
+function db2_fetch_array($stmt, ?int $rowNumber = null): array|false {}
 
 /**
  * @param resource $stmt
  */
-function db2_fetch_both($stmt, ?int $row_number = null): array|false {}
+function db2_fetch_both($stmt, ?int $rowNumber = null): array|false {}
 
 /**
  * @param resource $stmt
  */
-function db2_fetch_object($stmt, ?int $row_number = null): \stdClass|false {}
+function db2_fetch_object($stmt, ?int $rowNumber = null): \stdClass|false {}
 
 /**
  * @param resource $stmt
@@ -316,12 +316,12 @@ function db2_client_info($connection): \stdClass|false {}
  */
 function db2_server_info($connection): \stdClass|false {}
 
-function db2_escape_string(string $string_literal): string {}
+function db2_escape_string(string $stringLiteral): string {}
 
 /**
  * @param resource $stmt
  */
-function db2_lob_read($stmt, int $colnum, int $length): string|false {}
+function db2_lob_read($stmt, int $columnNumber, int $length): string|false {}
 
 /**
  * @param resource $resource
