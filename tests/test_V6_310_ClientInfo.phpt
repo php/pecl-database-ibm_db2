@@ -11,7 +11,7 @@ $conn = db2_connect($database, $user, $password);
 
 $client = db2_client_info( $conn );
 
-if ($client) {
+if ($client instanceof \stdClass) {
     echo "DRIVER_NAME: "; 		var_dump( $client->DRIVER_NAME );	 
     echo "DRIVER_VER: "; 		var_dump( $client->DRIVER_VER );	 
     echo "DATA_SOURCE_NAME: "; 		var_dump( $client->DATA_SOURCE_NAME );	 
@@ -34,4 +34,3 @@ DRIVER_VER: string(%d) %s
 DATA_SOURCE_NAME: string(%d) %s
 DRIVER_ODBC_VER: string(%d) %s
 ODBC_SQL_CONFORMANCE: string(%d) %s
-
