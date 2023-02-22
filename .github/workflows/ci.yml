@@ -31,6 +31,17 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{matrix.version}}
+      - name: Checkout "php/php-src"
+        uses: actions/checkout@v3
+        with:
+          repository: php/php-src
+          ref: php-8.2.0
+          path: php-src
+      - name: Verify headers
+        if: "${{ matrix.version >= '8.0' }}"
+        run: |
+          HEADERS_IN_SYNC=$(php php-src/build/gen_stub.php .)
+          if [[ ! -z $HEADERS_IN_SYNC ]]; then echo 'Headers are not in sync with "ibm_db2.stub.php".' && exit 1; fi;
       - name: phpize
         run: phpize
       - name: configure
