@@ -4,7 +4,7 @@
  * Stub for arginfo in PHP 8
  * XXX: How do we represent optionals without defaults?
  * @generate-function-entries
- * @generate-legacy-arginfo
+ * @generate-legacy-arginfo 70000
  */
 
 /**
@@ -27,7 +27,7 @@ function db2_pconnect(string $database, ?string $username, ?string $password, ar
 /**
  * @param resource $connection
  */
-function db2_autocommit($connection, ?int $value = null): int|bool {}
+function db2_autocommit($connection, int $value = UNKNOWN): int|bool {}
 
 /**
  * @param resource $connection
@@ -43,7 +43,7 @@ function db2_close($connection): bool {}
 /**
  * @param resource $connection
  */
-function db2_pclose( $connection): bool {}
+function db2_pclose($connection): bool {}
 #endif
 
 /**
@@ -121,7 +121,7 @@ function db2_special_columns($connection, ?string $qualifier, string $schema, st
  * @return resource
  * @alias db2_special_columns
  */
-function db2_specialcolumns(resource $connection, ?string $qualifier, string $schema, string $table_name, int $scope) {}
+function db2_specialcolumns($connection, ?string $qualifier, string $schema, string $table_name, int $scope) {}
 
 /**
  * @param resource $connection
@@ -175,22 +175,22 @@ function db2_execute_many($stmt, array $options = []): int|false {}
 #endif
 
 /**
- * @param resource $stmt
+ * @param resource|null $stmt
  */
 function db2_stmt_errormsg($stmt = null): string {}
 
 /**
- * @param resource $stmt
+ * @param resource|null $stmt
  */
 function db2_stmt_error($stmt = null): string {}
 
 /**
- * @param resource $connection
+ * @param resource|null $connection
  */
 function db2_conn_errormsg($connection = null): string {}
 
 /**
- * @param resource $connection
+ * @param resource|null $connection
  */
 function db2_conn_error($connection = null): string {}
 
