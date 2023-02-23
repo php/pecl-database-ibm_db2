@@ -288,7 +288,7 @@ function db2_fetch_both($stmt, ?int $row_number = null): array|false {}
 /**
  * @param resource $stmt
  */
-function db2_fetch_object($stmt, ?int $row_number = null): object|false {}
+function db2_fetch_object($stmt, ?int $row_number = null): \stdClass|false {}
 
 /**
  * @param resource $stmt
@@ -309,12 +309,12 @@ function db2_setoption($resource, array $options, int $type): bool {}
 /**
  * @param resource $connection
  */
-function db2_client_info($connection): object|false {}
+function db2_client_info($connection): \stdClass|false {}
 
 /**
  * @param resource $connection
  */
-function db2_server_info($connection): object|false {}
+function db2_server_info($connection): \stdClass|false {}
 
 function db2_escape_string(string $string_literal): string {}
 

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3e863612a7a676e042e024f6778b791bd086abe5 */
+ * Stub hash: e952caf6e14487291104ab1f1fdd7f268cc8a6bc */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_connect, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 0)
@@ -205,7 +205,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_db2_fetch_both arginfo_db2_fetch_assoc
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_db2_fetch_object, 0, 1, MAY_BE_OBJECT|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_db2_fetch_object, 0, 1, stdClass, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, stmt)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, row_number, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
@@ -220,7 +220,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_db2_setoption arginfo_db2_set_option
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_db2_client_info, 0, 1, MAY_BE_OBJECT|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_db2_client_info, 0, 1, stdClass, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
