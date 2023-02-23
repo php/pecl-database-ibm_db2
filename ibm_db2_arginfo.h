@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6178723de1b801eade1e4e7251805f53f100fee3 */
+ * Stub hash: 3e863612a7a676e042e024f6778b791bd086abe5 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_connect, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 0)
@@ -16,7 +16,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_db2_autocommit, 0, 1, MAY_BE_LONG|MAY_BE_BOOL)
 	ZEND_ARG_INFO(0, connection)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, value, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_db2_bind_param, 0, 3, _IS_BOOL, 0)
@@ -87,13 +87,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_special_columns, 0, 0, 5)
 	ZEND_ARG_TYPE_INFO(0, scope, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_specialcolumns, 0, 0, 5)
-	ZEND_ARG_OBJ_INFO(0, connection, resource, 0)
-	ZEND_ARG_TYPE_INFO(0, qualifier, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, schema, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, table_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, scope, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_db2_specialcolumns arginfo_db2_special_columns
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_statistics, 0, 0, 5)
 	ZEND_ARG_INFO(0, connection)
