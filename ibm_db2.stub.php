@@ -337,4 +337,4 @@ function db2_getoption($resource, string $option): string|false {}
 /**
  * @param resource $resource
  */
-function db2_last_insert_id($resource): string {}
+function db2_last_insert_id($resource): ?string {}

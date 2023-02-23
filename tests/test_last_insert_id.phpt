@@ -22,7 +22,7 @@ if ($conn) {
 
 	/* Checking when no insert has been executed. */	
 	$ret =  db2_last_insert_id($conn);
-	if($ret) {
+	if (null !== $ret) {
 		echo "Last Insert ID is : " . $ret . "\n";
 	} else {
 		echo "No Last insert ID.\n";
@@ -31,7 +31,7 @@ if ($conn) {
 	/* Inserting many rows from VALUES clause */
 	$stmt = db2_exec($conn, $insertMany);
 	$ret =  db2_last_insert_id($conn);
-	if($ret) {
+	if (null !== $ret) {
 		echo "Last Insert ID is : " . $ret . "\n";
 	} else {
 		echo "No Last insert ID.\n";
@@ -40,7 +40,7 @@ if ($conn) {
 	/* Checking for single row inserted. */
 	$stmt = db2_exec($conn, $insertTable);
 	$ret =  db2_last_insert_id($conn);
-	if($ret) {
+	if (null !== $ret) {
 		echo "Last Insert ID is : " . $ret . "\n";
 	} else {
 		echo "No Last insert ID.\n";
@@ -50,7 +50,7 @@ if ($conn) {
 	for ($i = 0;$i < 5;$i++) {
 		$stmt = db2_exec($conn, $insertTable);
 		$ret =  db2_last_insert_id($conn);
-		if($ret) {
+		if (null !== $ret) {
 			echo "Last Insert ID is : " . $ret . "\n";
 		} else {
 			echo "No Last insert ID.\n";
@@ -78,7 +78,7 @@ if ($conn) {
 
 	$stmt = db2_exec($conn, $insertTable);
 	$ret =  db2_last_insert_id($conn);
-	if($ret) {
+	if (null !== $ret) {
 		echo "Last Insert ID is : " . $ret . "\n";
 	} else {
 		echo "No Last insert ID.\n";
