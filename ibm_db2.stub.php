@@ -163,7 +163,7 @@ function db2_prepare($connection, string $statement, array $options = []) {}
 /**
  * @param resource $stmt
  */
-function db2_execute($stmt, array $options = []): bool {}
+function db2_execute($stmt, array $parameters = []): bool {}
 
 #ifndef PASE
 /* XXX: Not documented and not supported on PASE. */
