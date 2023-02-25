@@ -1,17 +1,38 @@
 # IBM_DB2
 
-Interface for PHP to DB2 for z/OS, DB2 for LUW, DB2 for i.
+Interface for PHP to DB2 for z/OS, DB2 for LUW. [Db2 for IBM i support is deprecated](#new-implementations).
 
 ## Pre-requisites
 
 The minimum PHP version supported by driver is PHP 7.3 and the latest version supported is PHP 8.2.
 
-## IBM i users
+## LUW/z/Db2 Connect users
 
-When running on IBM i, `IBM_DB2` doesn't link with the Db2 LUW client library,
-but instead with libdb400, which provides a PASE wrapper for SQL/CLI. The
-differences between SQL/CLI in IBM i and the LUW driver are wrapped for you.
-You don't need Db2 Connect on IBM i as a result.
+[CLI driver](https://www.ibm.com/support/pages/db2-odbc-cli-driver-download-and-installation-information) MUST be installed
+in your system. You can find and download the latest versions from [here](https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/).
+
+`php`, `gcc`, `make` and `tar` should be installed in your system.
+
+You may not find `gcc`, `make`, `tar` in some of the docker images (like Amazon Linux2).
+In such cases use below command to install `gcc`, etc.
+
+```shell
+yum install make gcc
+```
+
+## Db2 for IBM i
+
+### New implementations
+
+**NOTICE**: IBM [recommends](https://www.ibm.com/support/pages/node/883624) that if you are working on a new [Db2 for IBM i](https://www.ibm.com/support/pages/db2-ibm-i)
+connection, you MUST use the [PDO_ODBC](https://www.php.net/manual/en/ref.pdo-odbc.php) or the [ODBC](https://www.php.net/manual/en/book.uodbc.php)
+extensions instead with the [ODBC Driver for IBM i Access Client Solutions](https://www.ibm.com/support/pages/odbc-driver-ibm-i-access-client-solutions).
+
+### Existing implementations
+
+If you are using this extension with an existing connection running on IBM i, `IBM_DB2` doesn't link with the Db2 LUW client
+library, but instead with libdb400, which provides a PASE wrapper for SQL/CLI. The differences between SQL/CLI in IBM i and
+the LUW driver are wrapped for you. You don't need Db2 Connect on IBM i as a result.
 
 To install, make sure you have the new Yum-based OSS environment. Install PHP,
 plus any dependencies like so:
@@ -23,21 +44,6 @@ yum install sqlcli-devel gcc make-gnu
 Tony Cairns' [replacement libdb400](https://bitbucket.org/litmis/db2sock/src/master/db2/)
 is not yet tested, but may be desirable due to its greater debugging features.
 
-## LUW/z/Db2 Connect users
-
-CLIDRIVER should be installed in your system.
-If not installed Download from the below link.
-
-<a name="downloadCli"></a> [DOWNLOAD CLI DRIVER](https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/)
-
-PHP, gcc, make, tar should be installed in your system.
-
-You may not find gcc, make, tar in some of the docker containers (Example Amazon Linux2).
-In such cases use below command to install gcc etc.
-
-```shell
-yum install make gcc
-```
 ## How to install php ibm_db2 extension in Linux/Mac.
 
 If `IBM_DB_HOME` and `LD_LIBRARY_PATH` environment variable not set then set them with installed CLIDRIVER.
