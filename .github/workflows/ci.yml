@@ -31,18 +31,19 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{matrix.version}}
-      - name: Checkout "php/php-src"
-        if: "${{ matrix.version >= '8.0' }}"
-        uses: actions/checkout@v3
-        with:
-          repository: php/php-src
-          ref: php-8.2.0
-          path: php-src
       - name: Verify headers
         if: "${{ matrix.version >= '8.0' }}"
         run: |
-          HEADERS_IN_SYNC=$(php php-src/build/gen_stub.php .)
-          if [[ ! -z $HEADERS_IN_SYNC ]]; then echo 'Headers are not in sync with "ibm_db2.stub.php".' && exit 1; fi;
+          wget https://github.com/nikic/PHP-Parser/archive/refs/tags/v4.15.1.tar.gz
+          tar xvzf v4.15.1.tar.gz
+          rm v4.15.1.tar.gz
+          wget https://raw.githubusercontent.com/php/php-src/php-8.2.3/build/gen_stub.php
+          HEADERS_IN_SYNC=$(php gen_stub.php .)
+          if [[ ! -z $HEADERS_IN_SYNC ]]; then
+            echo 'Headers are not in sync with "ibm_db2.stub.php".' && exit 1;
+          else
+            echo 'Headers are in sync with "ibm_db2.stub.php".'
+          fi;
       - name: phpize
         run: phpize
       - name: configure
