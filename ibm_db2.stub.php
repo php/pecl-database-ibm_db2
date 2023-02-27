@@ -321,7 +321,7 @@ function db2_escape_string(string $string_literal): string {}
 /**
  * @param resource $stmt
  */
-function db2_lob_read($stmt, int $colnum, int $length): string|false {}
+function db2_lob_read($stmt, int $column_number, int $length): string|false {}
 
 /**
  * @param resource $resource

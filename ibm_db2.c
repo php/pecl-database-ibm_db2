@@ -7280,11 +7280,11 @@ PHP_FUNCTION(db2_lob_read)
     stmt_handle *stmt_res;
     int rc, i = 0;
     SQLINTEGER out_length;
-    zend_long length=BUFSIZ, colnum = 1;
+    zend_long length=BUFSIZ, column_number = 1;
     void *out_ptr = NULL;
 
     /* Parse out the parameters */
-    if (zend_parse_parameters(argc, "rll", &stmt, &colnum, &length) == FAILURE) {
+    if (zend_parse_parameters(argc, "rll", &stmt, &column_number, &length) == FAILURE) {
         return;
     }
 
@@ -7304,7 +7304,7 @@ PHP_FUNCTION(db2_lob_read)
 #else
     out_ptr = (SQLPOINTER)ecalloc(1, ++length);
 #endif /* PASE */
-    rc = SQLGetData((SQLHSTMT)stmt_res->hstmt, colnum, SQL_C_CHAR, (SQLPOINTER)out_ptr, length, &out_length);
+    rc = SQLGetData((SQLHSTMT)stmt_res->hstmt, column_number, SQL_C_CHAR, (SQLPOINTER)out_ptr, length, &out_length);
     if ( rc == SQL_NO_DATA_FOUND ) {
         _php_db2_check_sql_errors(stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1);
         efree(out_ptr);
