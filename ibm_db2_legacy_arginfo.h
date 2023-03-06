@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 827c25789a2304ec0b4b9d2faec51850bc442f0c */
+ * Stub hash: 0e66cf0b41d69fa0aa1514436de097e2b9d53adf */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_connect, 0, 0, 3)
 	ZEND_ARG_INFO(0, database)

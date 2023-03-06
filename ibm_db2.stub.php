@@ -127,7 +127,7 @@ function db2_specialcolumns($connection, ?string $qualifier, string $schema, str
  * @param resource $connection
  * @return resource
  */
-function db2_statistics($connection, ?string $qualifier, ?string $schema, string $table_name, bool|int $unique) {}
+function db2_statistics($connection, ?string $qualifier, ?string $schema, string $table_name, bool $unique) {}
 
 /**
  * @param resource $connection

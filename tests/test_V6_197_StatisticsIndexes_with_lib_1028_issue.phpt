@@ -16,7 +16,7 @@ if ($conn) {
 	$rc = db2_exec($conn, "CREATE INDEX index1 ON index_test (id)");
 
 	echo "Test first index table:\n";
-    $result = db2_statistics($conn,NULL,$username,"INDEX_TEST",1);
+    $result = db2_statistics($conn,NULL,$username,"INDEX_TEST",true);
     $row = db2_fetch_array($result);
     echo $row[2] . "\n";  // TABLE_NAME
     echo $row[3] . "\n";  // NON_UNIQUE
@@ -29,7 +29,7 @@ if ($conn) {
 	$rc = db2_exec($conn, "CREATE INDEX index2 ON index_test2 (data)");
 
 	echo "Test second index table:\n";
-    $result = db2_statistics($conn,NULL,$username,"INDEX_TEST2",1);
+    $result = db2_statistics($conn,NULL,$username,"INDEX_TEST2",true);
     $row = db2_fetch_array($result);
     echo $row[2] . "\n";  // TABLE_NAME
     echo $row[3] . "\n";  // NON_UNIQUE
@@ -37,7 +37,7 @@ if ($conn) {
     echo $row[8] . "\n";  // COLUMN_NAME
 
 	echo "Test non-existent table:\n";
-    $result = db2_statistics($conn,NULL,$username,"NON_EXISTENT_TABLE",1);
+    $result = db2_statistics($conn,NULL,$username,"NON_EXISTENT_TABLE",true);
     $row = db2_fetch_array($result);
     if ($row) {
        echo "Non-Empty\n";

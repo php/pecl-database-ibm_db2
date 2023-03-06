@@ -52,7 +52,7 @@ if ($row) {
 }
 
 /* Testing db2_statistics leaks */
-$stmt = db2_statistics($conn, NULL, NULL, NULL, 1);
+$stmt = db2_statistics($conn, NULL, NULL, NULL, true);
 $row = db2_fetch_array($stmt);
 if ($row) {
 	echo "Shouldn't be here\n";
