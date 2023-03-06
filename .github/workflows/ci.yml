@@ -13,6 +13,18 @@ jobs:
       matrix:
           version: ['7.3', '7.4', '8.0', '8.1', '8.2']
     runs-on: ubuntu-latest
+    services:
+      ibm_db2:
+        image: "icr.io/db2_community/db2:11.5.8.0"
+        env:
+          DB2INST1_PASSWORD: "password"
+          LICENSE: "accept"
+          DBNAME: "sample"
+        options: "--privileged=true"
+        ports:
+          - "60000:50000"
+        volumes:
+          - database:/database
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -50,25 +62,7 @@ jobs:
         run: ./configure --with-IBM_DB2=$PWD/clidriver
       - name: make
         run: make V=1
-      - name: Cache container
-        id: cache-docker
-        uses: actions/cache@v2
-        with:
-          path: image-cache
-          key: ${{ runner.os }}-image-cache
-      - name: Download container
-        if: steps.cache-docker.outputs.cache-hit != 'true'
-        run: |
-          docker pull icr.io/db2_community/db2:11.5.8.0
-          mkdir image-cache
-          docker save -o image-cache/db2.tar icr.io/db2_community/db2:11.5.8.0
-      - name: Restore container from cache
-        if: steps.cache-docker.outputs.cache-hit == 'true'
-        run: docker load -i image-cache/db2.tar
       - name: Set up Db2 LUW in Docker
-        # XXX: Should we be caching the Docker image? Are we creating the necessary things?
-        # Adapted from the Travis setup with the changes used for the current
-        # version of the Db2 container.
         run: |
           set -x
           cat <<EOF > db2cli.ini
@@ -79,16 +73,8 @@ jobs:
           Database=sample
           EOF
           mkdir database
-          docker run --name db2 --privileged=true -p 60000:50000 -e DB2INST1_PASSWORD=password -e LICENSE=accept -e DBNAME=sample -v database:/database -itd icr.io/db2_community/db2:11.5.8.0
-          docker ps -as
-          while true
-          do
-            if (docker logs db2 | grep 'Setup has completed')
-            then
-              break
-            fi
-            sleep 20
-          done
+      - name: "Perform healthcheck on db2 service"
+        run: "docker logs -f ${{ job.services.ibm_db2.id }} | sed '/(*) Setup has completed./ q'"
       - name: Tests
         # make test is insufficient to load PDO
         # Most of these are either cribbed from the old Travis configuration,
