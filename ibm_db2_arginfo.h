@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 827c25789a2304ec0b4b9d2faec51850bc442f0c */
+ * Stub hash: 0e66cf0b41d69fa0aa1514436de097e2b9d53adf */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_connect, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 0)
@@ -94,7 +94,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_statistics, 0, 0, 5)
 	ZEND_ARG_TYPE_INFO(0, qualifier, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, schema, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, table_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_MASK(0, unique, MAY_BE_BOOL|MAY_BE_LONG, NULL)
+	ZEND_ARG_TYPE_INFO(0, unique, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_db2_table_privileges, 0, 0, 1)
