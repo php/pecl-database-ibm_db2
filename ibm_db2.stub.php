@@ -268,7 +268,7 @@ function db2_result($stmt, int|string $column): mixed|null {}
 /**
  * @param resource $stmt
  */
-function db2_fetch_row($stmt, int $row_number = UNKNOWN): bool {}
+function db2_fetch_row($stmt, int $row_number = -1): bool {}
 
 /**
  * @param resource $stmt

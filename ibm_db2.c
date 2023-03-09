@@ -6528,7 +6528,7 @@ PHP_FUNCTION(db2_fetch_row)
 {
     int argc = ZEND_NUM_ARGS();
     int stmt_id = -1;
-    zend_long row_number;
+    zend_long row_number = -1;
     zval *stmt = NULL;
     stmt_handle* stmt_res = NULL;
     int rc;
