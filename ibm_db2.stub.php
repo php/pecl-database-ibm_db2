@@ -268,27 +268,27 @@ function db2_result($stmt, int|string $column): mixed|null {}
 /**
  * @param resource $stmt
  */
-function db2_fetch_row($stmt, ?int $row_number = null): bool {}
+function db2_fetch_row($stmt, int $row_number = UNKNOWN): bool {}
 
 /**
  * @param resource $stmt
  */
-function db2_fetch_assoc($stmt, ?int $row_number = null): array|false {}
+function db2_fetch_assoc($stmt, int $row_number = -1): array|false {}
 
 /**
  * @param resource $stmt
  */
-function db2_fetch_array($stmt, ?int $row_number = null): array|false {}
+function db2_fetch_array($stmt, int $row_number = -1): array|false {}
 
 /**
  * @param resource $stmt
  */
-function db2_fetch_both($stmt, ?int $row_number = null): array|false {}
+function db2_fetch_both($stmt, int $row_number = -1): array|false {}
 
 /**
  * @param resource $stmt
  */
-function db2_fetch_object($stmt, ?int $row_number = null): \stdClass|false {}
+function db2_fetch_object($stmt, int $row_number = -1): \stdClass|false {}
 
 /**
  * @param resource $stmt
