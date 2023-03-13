@@ -11,7 +11,7 @@
  * @param resource $connection
  * @return resource|false
  */
-function db2_connect(string $database, ?string $username, #[\SensitiveParameter] ?string $password, array $options = []) {}
+function db2_connect(#[\SensitiveParameter] string $database, ?string $username, #[\SensitiveParameter] ?string $password, array $options = []) {}
 
 /**
  * @param resource $connection
@@ -22,7 +22,7 @@ function db2_commit($connection): bool {}
  * @param resource $connection
  * @return resource|false
  */
-function db2_pconnect(string $database, ?string $username, #[\SensitiveParameter] ?string $password, array $options = []) {}
+function db2_pconnect(#[\SensitiveParameter] string $database, ?string $username, #[\SensitiveParameter] ?string $password, array $options = []) {}
 
 /**
  * @param resource $connection
