@@ -2122,6 +2122,15 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
                 }
                 break;
 
+            case SQL_BOOLEAN:
+                rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
+                    SQL_C_LONG, &row_data->i_val, sizeof(row_data->i_val),
+                    (SQLINTEGER *)(&stmt_res->row_data[i].out_length));
+                if ( rc == SQL_ERROR ) {
+                    _php_db2_check_sql_errors((SQLHSTMT)stmt_res->hstmt, SQL_HANDLE_STMT, rc, 1, NULL, -1, 1);
+                }
+                break;
+
             case SQL_SMALLINT:
                 rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
                     SQL_C_DEFAULT, &row_data->s_val, sizeof(row_data->s_val),
@@ -4444,6 +4453,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
     }
 
     switch ( curr->data_type ) {
+        case SQL_BOOLEAN:
         case SQL_SMALLINT:
         case SQL_INTEGER:
         case SQL_REAL:
@@ -5481,6 +5491,9 @@ PHP_FUNCTION(db2_field_type)
         RETURN_FALSE;
     }
     switch (stmt_res->column_info[col].type) {
+        case SQL_BOOLEAN:
+            str_val = "boolean";
+            break;
         case SQL_SMALLINT:
         case SQL_INTEGER:
         case SQL_BIGINT:
@@ -5931,6 +5944,8 @@ PHP_FUNCTION(db2_result)
                 }
                 break;
 
+            /* BOOLEAN can't be represented as true/false because false is considered an error */
+            case SQL_BOOLEAN:
             case SQL_SMALLINT:
             case SQL_INTEGER:
                 rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_LONG, (SQLPOINTER)&long_val, sizeof(long_val), &out_length);
@@ -6288,6 +6303,14 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
                     if ( op & DB2_FETCH_INDEX ) {
                         add_index_stringl(return_value, i, (char *)row_data->str_val,
                             strlen((char *)row_data->str_val));
+                    }
+                    break;
+                case SQL_BOOLEAN:
+                    if ( op & DB2_FETCH_ASSOC ) {
+                        add_assoc_bool(return_value, (char *)stmt_res->column_info[i].name, row_data->i_val);
+                    }
+                    if ( op & DB2_FETCH_INDEX ) {
+                        add_index_bool(return_value, i, row_data->i_val);
                     }
                     break;
                 case SQL_SMALLINT:
