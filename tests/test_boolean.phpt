@@ -36,11 +36,11 @@ if (!$conn) {
 	exit;
 }
 
-$s = db2_exec("values (true, false)");
+$s = db2_exec($conn, "values (true, false)");
 $r = db2_fetch_array($s);
 var_dump($r);
 
-$s = db2_exec("values (true, false)");
+$s = db2_exec($conn, "values (true, false)");
 db2_fetch_row($s);
 var_dump(db2_result($s, 0));
 var_dump(db2_result($s, 1));
