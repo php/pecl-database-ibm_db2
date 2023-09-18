@@ -5532,6 +5532,7 @@ PHP_FUNCTION(db2_field_type)
             str_val = "timestamp";
             break;
         default:
+fprintf(stderr, " ! Type that's string: %d\n", stmt_res->column_info[col].type);
             str_val = "string";
             break;
     }
