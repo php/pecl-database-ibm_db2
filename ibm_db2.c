@@ -2123,6 +2123,7 @@ static int _php_db2_bind_column_helper(stmt_handle *stmt_res)
                 break;
 
             case SQL_BOOLEAN:
+            case SQL_BIT:
                 rc = SQLBindCol((SQLHSTMT)stmt_res->hstmt, (SQLUSMALLINT)(i + 1),
                     SQL_C_LONG, &row_data->i_val, sizeof(row_data->i_val),
                     (SQLINTEGER *)(&stmt_res->row_data[i].out_length));
@@ -4454,6 +4455,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
 
     switch ( curr->data_type ) {
         case SQL_BOOLEAN:
+        case SQL_BIT:
         case SQL_SMALLINT:
         case SQL_INTEGER:
         case SQL_REAL:
@@ -5492,6 +5494,7 @@ PHP_FUNCTION(db2_field_type)
     }
     switch (stmt_res->column_info[col].type) {
         case SQL_BOOLEAN:
+        case SQL_BIT:
             str_val = "boolean";
             break;
         case SQL_SMALLINT:
@@ -5946,6 +5949,7 @@ PHP_FUNCTION(db2_result)
 
             /* BOOLEAN can't be represented as true/false because false is considered an error */
             case SQL_BOOLEAN:
+            case SQL_BIT:
             case SQL_SMALLINT:
             case SQL_INTEGER:
                 rc = _php_db2_get_data(stmt_res, col_num+1, SQL_C_LONG, (SQLPOINTER)&long_val, sizeof(long_val), &out_length);
@@ -6306,6 +6310,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
                     }
                     break;
                 case SQL_BOOLEAN:
+                case SQL_BIT:
                     if ( op & DB2_FETCH_ASSOC ) {
                         add_assoc_bool(return_value, (char *)stmt_res->column_info[i].name, row_data->i_val);
                     }
