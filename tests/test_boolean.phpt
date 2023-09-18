@@ -56,6 +56,6 @@ array(2) {
   [1]=>
   bool(false)
 }
-bool(true)
-bool(false)
+int(1)
+int(0)
 boolean
