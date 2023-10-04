@@ -15,15 +15,15 @@ if (!$conn) {
 $info = db2_server_info($conn);
 if ($info->DBMS_NAME == "AS") { // IBM i
 	// DBMS_VER is VVRRM string
-	$major = $info["DBMS_VER"][1];
-	$minor = $info["DBMS_VER"][3];
-	$mod = $info["DBMS_VER"][4];
+	$major = $info->DBMS_VER[1];
+	$minor = $info->DBMS_VER[3];
+	$mod = $info->DBMS_VER[4];
 	if (!version_compare("$major.$minor.$mod", "7.5.0", ">=")) {
 		die("skip IBM i version too old");
 	}
 } else { // Should cover i.e. DB2/LINUX
 	// DBMS_VER is VV.RR.MMMM, version_compore should work directly
-	if (!version_compare($info["DBMS_VER"], "9.7.0", ">=")) {
+	if (!version_compare($info->DBMS_VER, "9.7.0", ">=")) {
 		die("skip DB2 version too old");
 	}
 }
