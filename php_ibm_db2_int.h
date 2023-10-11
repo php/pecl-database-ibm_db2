@@ -15,6 +15,14 @@ typedef uint32_t uintptr_t;
 #endif
 #endif
 
+/*
+ * Added in IBM i 7.5, also in LUW 11.1 MP1/FP1
+ * see: https://www.ibm.com/docs/en/db2/11.1?topic=database-mod-pack-fix-pack-updates#c0061179__FP1
+ */
+#ifndef SQL_BOOLEAN
+#define SQL_BOOLEAN 16
+#endif
+
 /* Needed for backward compatibility (SQL_ATTR_DBC_SYS_NAMING not defined prior to DB2 10.1.0.2) */
 #ifndef SQL_ATTR_DBC_SYS_NAMING
 #define SQL_ATTR_DBC_SYS_NAMING 3017
