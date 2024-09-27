@@ -61,12 +61,6 @@ return
 
 #define ZEND_Z_TYPE_PP(entry) ZEND_Z_TYPE_P(*entry) 
 
-#if PHP_VERSION_ID >= 70000 && PHP_VERSION_ID < 70300
-#define GC_ADDREF(p)            ++GC_REFCOUNT(p)
-#define GC_DELREF(p)            --GC_REFCOUNT(p)
-#define GC_SET_REFCOUNT(p, rc)  GC_REFCOUNT(p) = rc
-#endif
-
 /* True global resources - no need for thread safety here */
 static int le_conn_struct, le_stmt_struct, le_pconn_struct;
 
