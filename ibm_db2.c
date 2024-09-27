@@ -6230,7 +6230,16 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
                 stmt_res->column_info[i].name = (SQLCHAR *)zend_str_tolower_dup((char *)stmt_res->column_info[i].name, strlen((char *)stmt_res->column_info[i].name));
                 break;
             case DB2_CASE_UPPER:
+#if PHP_VERSION_ID >= 80200
+				/*
+				 * For some reason, zend_str_tolower_dup has existed for a
+				 * while, but the upper version hasn't. We seems to need an
+				 * ifdef here unfortunately.
+				 */
                 stmt_res->column_info[i].name = (SQLCHAR *)zend_str_toupper_dup((char *)stmt_res->column_info[i].name, strlen((char *)stmt_res->column_info[i].name));
+#else
+                stmt_res->column_info[i].name = (SQLCHAR *)php_strtoupper((char *)stmt_res->column_info[i].name, strlen((char *)stmt_res->column_info[i].name));
+#endif
                 break;
             case DB2_CASE_NATURAL:
             default:
