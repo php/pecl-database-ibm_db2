@@ -6233,10 +6233,10 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
         loc_length = stmt_res->column_info[i].loc_ind;
         switch(stmt_res->s_case_mode) {
             case DB2_CASE_LOWER:
-                stmt_res->column_info[i].name = (SQLCHAR *)php_strtolower((char *)stmt_res->column_info[i].name, strlen((char *)stmt_res->column_info[i].name));
+                stmt_res->column_info[i].name = (SQLCHAR *)zend_str_tolower_dup((char *)stmt_res->column_info[i].name, strlen((char *)stmt_res->column_info[i].name));
                 break;
             case DB2_CASE_UPPER:
-                stmt_res->column_info[i].name = (SQLCHAR *)php_strtoupper((char *)stmt_res->column_info[i].name, strlen((char *)stmt_res->column_info[i].name));
+                stmt_res->column_info[i].name = (SQLCHAR *)zend_str_toupper_dup((char *)stmt_res->column_info[i].name, strlen((char *)stmt_res->column_info[i].name));
                 break;
             case DB2_CASE_NATURAL:
             default:
