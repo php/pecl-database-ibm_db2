@@ -315,7 +315,6 @@
    <file baseinstalldir="ibm_db2" name="ibm_db2.stub.php" role="src" />
    <file baseinstalldir="ibm_db2" name="ibm_db2_arginfo.h" role="src" />
    <file baseinstalldir="ibm_db2" name="ibm_db2_legacy_arginfo.h" role="src" />
-   <file baseinstalldir="ibm_db2" name="ibm_db2.dsp" role="src" />
    <file baseinstalldir="ibm_db2" name="php_ibm_db2.h" role="src" />
    <file baseinstalldir="ibm_db2" name="php_ibm_db2_int.h" role="src" />
    <file baseinstalldir="ibm_db2" name="TODO" role="doc" />
