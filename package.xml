@@ -44,10 +44,10 @@
   <email>tessus@php.net</email>
   <active>yes</active>
  </helper>
- <date>2023-11-15</date>
+ <date>2024-10-28</date>
  <time>05:15:47</time>
  <version>
-  <release>2.2.0</release>
+  <release>2.2.1</release>
   <api>2.0.1</api>
  </version>
  <stability>
@@ -56,11 +56,7 @@
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-  - Support for PHP 8.3
-  - Support for boolean data type (IBM i 7.5, Db2/LUW 9.6)
-  - Passwords and connection strings are marked as sensitive parameters
-  - Build system improvements for finding driver library
-  - CI and test suite improvements
+  - Support for PHP 8.4
  </notes>
  <contents>
   <dir name="/">
