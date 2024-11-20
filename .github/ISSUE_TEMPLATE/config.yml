@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+    - name: IBM DB2 on the PHP Bug Tracking System
+      url: https://bugs.php.net/search.php?cmd=display&direction=DESC&limit=30&package_name[]=ibm_db2
+      about: 'Questions tagged with "doctrine-dbal" on StackOverflow'
+    - name: IBM DB2 on StackOverflow
+      url: https://stackoverflow.com/questions/tagged/db2
+      about: 'Questions tagged with "db2" on StackOverflow'

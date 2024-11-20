@@ -1,10 +1,10 @@
 # phpize stuff
+/config.*
 .libs
 Makefile*
 *.m4
 autom4te.cache
 build
-config.*
 configure*
 ibm_db2.la
 ibm_db2.lo
