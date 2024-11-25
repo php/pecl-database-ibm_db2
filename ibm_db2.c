@@ -4578,6 +4578,11 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
                     paramValuePtr = (SQLPOINTER)(Z_STRVAL_P(curr->value));
                     break;
                 case SQL_VARCHAR:
+                case SQL_WVARCHAR:
+                case SQL_VARGRAPHIC:
+                case SQL_LONGVARCHAR:
+                case SQL_WLONGVARCHAR:
+                case SQL_LONGVARGRAPHIC:
                     valueType = SQL_C_CHAR;
                     if (origlen != -1) {
                         curr->bind_indicator = origlen;
