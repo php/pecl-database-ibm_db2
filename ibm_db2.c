@@ -1971,7 +1971,13 @@ static int _php_db2_get_result_set_info(stmt_handle *stmt_res)
                 return -1;
             }
         } else {
-            stmt_res->column_info[i].name = (SQLCHAR *)estrdup(tmp_name);
+            /*
+             * CB20241114: In some cases on i (i.e. QP2SHELL w/ CCSID 65535),
+             * SQL/CLI might not add a null terminator, and garbage can appear
+             * at the end of column names. However, name_length is still
+             * correct, so we truncate with that when copying the name.
+             */
+            stmt_res->column_info[i].name = (SQLCHAR *)estrndup(tmp_name, name_length);
         }
         switch (stmt_res->column_info[i].type) {
             /* BIGINT 9223372036854775807  (2^63-1) string convert */
