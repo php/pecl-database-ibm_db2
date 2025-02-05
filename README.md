@@ -68,7 +68,7 @@ yum install pam
    pecl install ibm_db2
    ```
         
-2. Open the `php.ini` file in an editor of your choice. Edit the extension entry in the
+2. Open the `php.ini` file in an editor of your choice. Edit the Dynamic Extensions entry in the
    `php.ini` file in the `<local_php_directory>/php/lib` directory to reference the PHP driver:
 
    ```ini
@@ -91,7 +91,7 @@ yum install pam
 2. Download the DLLs for PHP 7.x and 8.x from [the ibmdb repository](https://github.com/ibmdb/php_ibm_db2).
    Select the build for the PHP that matches the version, architecture, and thread model.
 
-3. Open the `php.ini` file in an editor of your choice. Edit the extension entry in the
+3. Open the `php.ini` file in an editor of your choice. Edit the Dynamic Extensions entry in the
    `php.ini` file in the `<local_php_directory>\php\lib` directory to reference the driver:
 
     ```ini
