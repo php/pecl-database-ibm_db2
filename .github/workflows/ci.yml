@@ -11,7 +11,7 @@ jobs:
   ubuntu:
     strategy:
       matrix:
-          version: ['7.3.', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
+          version: ['7.3', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
     runs-on: ubuntu-latest
     services:
       ibm_db2:
