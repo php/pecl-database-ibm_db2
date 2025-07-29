@@ -4758,7 +4758,7 @@ static void _free_param_cache_list(stmt_handle *stmt_res) {
         if (prev_ptr->value != NULL) {
             if ( ZEND_Z_TYPE_P(prev_ptr->value) == IS_STRING ) {
                 if((Z_STR_P(prev_ptr->value)) != NULL || Z_STRLEN_P(prev_ptr->value) != 0) {
-                    if (!IS_INTERNED((Z_STR_P(prev_ptr->value)))) {
+                    if (!ZSTR_IS_INTERNED((Z_STR_P(prev_ptr->value)))) {
                         zend_string_release((Z_STR_P(prev_ptr->value)));
                     }
                 }
