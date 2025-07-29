@@ -4289,7 +4289,7 @@ static int _php_db2_bind_pad(param_node *curr, int nullterm, int isvarying, int 
      * each string (or atom) is allocated once and never changed (immutable)
      * aka, not useful for INOUT and OUT parameters obviously
      */
-    if (IS_INTERNED(Z_STR_P(*data))) {
+    if (ZSTR_IS_INTERNED(Z_STR_P(*data))) {
 		/* Need use macro assignment to avoid leak in php 7. (Thanks Dimitry) 
 		 * Z_STR_P(*data) = zend_string_init(Z_STRVAL_P(*data), Z_STRLEN_P(*data), 0);
 		 */
