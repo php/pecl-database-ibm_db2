@@ -44,10 +44,10 @@
   <email>tessus@php.net</email>
   <active>yes</active>
  </helper>
- <date>2024-10-28</date>
+ <date>2025-09-24</date>
  <time>05:15:47</time>
  <version>
-  <release>2.2.2</release>
+  <release>2.3.0</release>
   <api>2.0.1</api>
  </version>
  <stability>
@@ -56,8 +56,9 @@
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-  - Support for PHP 8.4
-  - Update header version
+  - Support for PHP 8.5
+  - Fix garbage in column names on IBM i
+  - Fix binding empty strings with WVARCHAR
  </notes>
  <contents>
   <dir name="/">
