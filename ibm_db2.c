@@ -6171,6 +6171,7 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
     unsigned char *out_ptr;
     int i5trim = 0;
     int i5char;
+    size_t string_length;
     if (zend_parse_parameters(argc, "r|l", &stmt, &row_number) == FAILURE) {
         return;
     }
@@ -6287,9 +6288,20 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
                 case SQL_DECIMAL:
                 case SQL_NUMERIC:
                 case SQL_DECFLOAT:
+                    /* CB20251003: Sometimes SQL/CLI (at least on IBM i) may
+                     * return junk at the end of a buffer. If that's the case,
+                     * we should trust out_length. However, it seems we do want
+                     * to truncate at the first nul character like strlen does,
+                     * (see tests/test_6572_SQLStringsContNULLChar.phpt), so
+                     * pick the lower number between the two. Alternatively,
+                     * maybe we could consider changing the behaviour around
+                     * nul characters? It would make sense for binaries...
+                     */
+                    string_length = strlen((char *)row_data->str_val);
+                    string_length = out_length < string_length ? out_length : string_length;
 #ifdef PASE /* i5/OS trim spaces */
                     if (stmt_res->s_i5_conn_parent->c_i5_char_trim > 0) {
-                        i5trim = out_length;
+                        i5trim = string_length;
                         for(; i5trim >= 0; i5trim--) {
                             i5char = (char)(((char *)row_data->str_val)[i5trim]);
                             if (i5char == 0x00 || i5char == 0x20) {
@@ -6316,11 +6328,11 @@ static void _php_db2_bind_fetch_helper(INTERNAL_FUNCTION_PARAMETERS, int op)
 #endif /* PASE */
                     if ( op & DB2_FETCH_ASSOC ) {
                         add_assoc_stringl(return_value, (char *)stmt_res->column_info[i].name,
-                            (char *)row_data->str_val, out_length);
+                            (char *)row_data->str_val, string_length);
                     }
                     if ( op & DB2_FETCH_INDEX ) {
                         add_index_stringl(return_value, i, (char *)row_data->str_val,
-                            out_length);
+                            string_length);
                     }
                     break;
                 case SQL_BOOLEAN:
