@@ -44,10 +44,10 @@
   <email>tessus@php.net</email>
   <active>yes</active>
  </helper>
- <date>2025-09-24</date>
+ <date>2025-10-30</date>
  <time>05:15:47</time>
  <version>
-  <release>2.3.0</release>
+  <release>2.3.1</release>
   <api>2.0.1</api>
  </version>
  <stability>
@@ -56,9 +56,10 @@
  </stability>
  <license>Apache License 2.0</license>
  <notes>
-  - Support for PHP 8.5
-  - Fix garbage in column names on IBM i
-  - Fix binding empty strings with WVARCHAR
+  - Try to use out_length for bound character columns when smaller than strlen.
+    This is to work around an issue on IBM i where SQL/CLI returns garbage after out_length.
+    Note that strlen is still used to keep existing behaviour with nulls in strings;
+    binary bound columns are also not affected.
  </notes>
  <contents>
   <dir name="/">
