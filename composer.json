@@ -1,0 +1,19 @@
+{
+    "name": "pecl/ibm_db2",
+    "type": "php-ext",
+    "license": "Apache-2.0",
+    "description": "Extension for IBM Db2 (LUW/i/z) and other compatible databases",
+    "require": {
+        "php": ">= 7.3.0"
+    },
+    "php-ext": {
+        "extension-name": "ibm_db2",
+        "configure-options": [
+            {
+                "name": "with-IBM_DB2",
+                "description": "Enable ibm_db2 support. DIR is the path to the DB2 install prefix.",
+                "needs-value": true
+            }
+        ]
+    }
+}
