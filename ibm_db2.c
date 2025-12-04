@@ -1310,6 +1310,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
         } else {
             php_error_docref(NULL, E_WARNING, "ROWCOUNT statement attribute can only be set on statement resources");
         }
+#ifndef PASE  /* i5/OS no support yet */
     } else if (!STRCASECMP(opt_key, "trustedcontext")) {
         if (type == SQL_HANDLE_DBC ) { /* Checking for connection resource */
             if(((conn_handle*)handle)->handle_active == 0) { /* Checking for live connection */
@@ -1385,6 +1386,7 @@ static void _php_db2_assign_options( void *handle, int type, char *opt_key, zval
         } else {
             php_error_docref(NULL, E_WARNING, "TRUSTED PASSWORD attribute can only be set on connection resources");
         }
+#endif
     } else if (!STRCASECMP(opt_key, "query_timeout")) {
         if (type == SQL_HANDLE_STMT) {
             rc = SQLSetStmtAttr((SQLHSTMT)((stmt_handle*)handle)->hstmt, SQL_ATTR_QUERY_TIMEOUT, (SQLPOINTER)(uintptr_t)option_num, SQL_IS_UINTEGER );
