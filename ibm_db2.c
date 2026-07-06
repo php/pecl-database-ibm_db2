@@ -61,6 +61,10 @@ return
 
 #define ZEND_Z_TYPE_PP(entry) ZEND_Z_TYPE_P(*entry) 
 
+#if PHP_VERSION_ID >= 80600
+#define INI_STR(ini) zend_ini_string_literal(ini)
+#endif
+
 /* True global resources - no need for thread safety here */
 static int le_conn_struct, le_stmt_struct, le_pconn_struct;
 
@@ -3138,8 +3142,14 @@ PHP_FUNCTION(db2_bind_param)
                 break;
 
             default:
+#if PHP_VERSION_ID >= 80600
+				/* UPGRADING.INTERNALS says this should throw after */
+				zend_wrong_param_count();
+				RETURN_THROWS();
+#else
                 WRONG_PARAM_COUNT;
                 RETURN_FALSE;
+#endif
         }
         /* end Switch */
 
