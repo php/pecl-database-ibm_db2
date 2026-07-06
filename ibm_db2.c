@@ -1049,7 +1049,7 @@ static void _php_db2_check_sql_errors( SQLHANDLE handle, SQLSMALLINT hType, int 
         sprintf((char *)errMsg, "%s SQLCODE=%d", msg, (int)sqlcode);
 #ifdef PASE /* 1.9.7 - IBM i consultant request log additional information into php.log */
         if (IBM_DB2_G(i5_log_verbose) > 0) {
-            php_error_docref(NULL, E_WARNING, (char *)errMsg);
+            php_error_docref(NULL, E_WARNING, "%s", (char *)errMsg);
         }
 #endif /* PASE */
         switch (rc) {
