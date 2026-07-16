@@ -4695,7 +4695,7 @@ static int _php_db2_execute_helper(stmt_handle *stmt_res, zval **data, int bind_
             if (_php_db2_hash_find_ind(curr->varname, strlen(curr->varname), &temp, &bind_data, &symbol_table_used) != FAILURE ) {
                 rc = _php_db2_bind_data( stmt_res, curr, bind_data);
                 if ( rc == SQL_ERROR ) {
-                    php_error_docref(NULL, E_WARNING, "Binding Error 1");
+                    php_error_docref(NULL, E_WARNING, "Error binding $%s from cached parameters", curr->varname);
                     return rc;
                 }
                 curr = curr->next;
@@ -4729,7 +4729,7 @@ static int _php_db2_execute_helper(stmt_handle *stmt_res, zval **data, int bind_
 
                 rc = _php_db2_bind_data( stmt_res, curr, data);
                 if ( rc == SQL_ERROR ) {
-                    php_error_docref(NULL, E_WARNING, "Binding Error 2");
+                    php_error_docref(NULL, E_WARNING, "Error binding parameter number %d", param_no);
                     return rc;
                 }
             } else {
@@ -4742,7 +4742,7 @@ static int _php_db2_execute_helper(stmt_handle *stmt_res, zval **data, int bind_
                 if ( curr != NULL ) {
                     rc = _php_db2_bind_data( stmt_res, curr, data);
                     if ( rc == SQL_ERROR ) {
-                        php_error_docref(NULL, E_WARNING, "Binding Error 2");
+                        php_error_docref(NULL, E_WARNING, "Error binding head cache node");
                         return rc;
                     }
                     stmt_res->current_node = curr->next;
@@ -4885,7 +4885,7 @@ PHP_FUNCTION(db2_execute)
                 */
                 rc = _php_db2_execute_helper(stmt_res, data, 0, bind_params);
                 if ( rc == SQL_ERROR) {
-                    php_error_docref(NULL, E_WARNING, "Binding Error");
+                    php_error_docref(NULL, E_WARNING, "Error binding additional params in execute");
                     RETURN_FALSE;
                 }
                 /* Move array ptr forward */
@@ -4910,7 +4910,7 @@ PHP_FUNCTION(db2_execute)
                 /* And bind sequentially */
                 rc = _php_db2_execute_helper(stmt_res, NULL, 1, 0);
                 if ( rc == SQL_ERROR ) {
-                    php_error_docref(NULL, E_WARNING, "Binding Error 3");
+                    php_error_docref(NULL, E_WARNING, "Error binding params in execute");
                     RETURN_FALSE;
                 }
             }
@@ -7847,7 +7847,7 @@ PHP_FUNCTION( db2_execute_many )
                     rc = SQLBindParameter(stmt_res->hstmt, curr->param_num, curr->param_type, valueType, curr->data_type, curr->param_size, curr->scale, (curr->value), 0, (SQLLEN *)&((curr->value)->value.lval));
                 }
                 if ( rc == SQL_ERROR ) {
-                    sprintf(error, "Binding Error1 : %s", IBM_DB2_G(__php_stmt_err_msg));
+                    sprintf(error, "Error binding params in execute many: %s", IBM_DB2_G(__php_stmt_err_msg));
                     _build_client_err_list(head_error_list, error);
                     err_count++;
                     break;
