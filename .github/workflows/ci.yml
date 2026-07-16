@@ -27,10 +27,10 @@ jobs:
           - database:/database
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Cache DB2 library
         id: cache-clidriver
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: clidriver
           key: ${{ runner.os }}-clidriver
@@ -110,10 +110,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Cache DB2 library
         id: cache-clidriver
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: clidriver
           key: ${{ runner.os }}-clidriver
