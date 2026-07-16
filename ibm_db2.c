@@ -4038,6 +4038,11 @@ PHP_FUNCTION(db2_exec)
         return;
     }
 
+    if (!stmt_string || stmt_string_len < 1) {
+        zend_argument_value_error(2, "must be a non-empty string");
+        return;
+    }
+
     if (connection) {
         ZEND_FETCH_RESOURCE_2(conn_res, conn_handle*, &connection, connection_id,
             "Connection Resource", le_conn_struct, le_pconn_struct);
@@ -4127,6 +4132,11 @@ PHP_FUNCTION(db2_prepare)
     int rc;
     if (zend_parse_parameters(argc, "rs|a", &connection, &stmt_string,
         &stmt_string_len, &options) == FAILURE) {
+        return;
+    }
+
+    if (!stmt_string || stmt_string_len < 1) {
+        zend_argument_value_error(2, "must be a non-empty string");
         return;
     }
 
