@@ -4350,6 +4350,7 @@ static int _php_db2_bind_pad(param_node *curr, int nullterm, int isvarying, int 
 
     /* something went very wrong with heap */
     if (Z_STRVAL_P(*data) == NULL ) {
+        php_error_docref(NULL, E_WARNING, "Pointer to string data for binding padding is null");
         return SQL_ERROR;
     }
 
@@ -4516,6 +4517,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
             break;
 
         default:
+            php_error_docref(NULL, E_WARNING, "Unknown SQL data type %d used for binding", curr->data_type);
             return SQL_ERROR;
     }
 
@@ -4525,6 +4527,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
     if ( curr->param_type == DB2_PARAM_FILE) {
         /* Only string types can be bound */
         if ( ZEND_Z_TYPE_PP(bind_data) != IS_STRING) {
+            php_error_docref(NULL, E_WARNING, "Only string types can be bound, got %s", zend_zval_type_name(*bind_data));
             return SQL_ERROR;
         }
         /* len = 0 */
@@ -4661,6 +4664,7 @@ static int _php_db2_bind_data( stmt_handle *stmt_res, param_node *curr, zval **b
             break;
 
         default:
+            php_error_docref(NULL, E_WARNING, "zval of type %s cannot be bound", zend_zval_type_name(curr->value));
             return SQL_ERROR;
     }
     return rc;
