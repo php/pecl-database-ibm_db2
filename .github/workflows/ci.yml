@@ -104,7 +104,7 @@ jobs:
         shell: cmd
     strategy:
       matrix:
-          version: ["8.1", "8.2", "8.3", "8.4"]
+          version: ["8.2", "8.3", "8.4", "8.5"]
           arch: [x64]
           ts: [ts]
     runs-on: windows-latest
@@ -125,9 +125,9 @@ jobs:
           Expand-Archive 'ntx64_odbc_cli.zip' -DestinationPath '.\'
       - name: Setup PHP
         id: setup-php
-        uses: php/setup-php-sdk@v0.10
+        uses: php/php-windows-builder/php@v1
         with:
-          version: ${{matrix.version}}
+          php-version: ${{matrix.version}}
           arch: ${{matrix.arch}}
           ts: ${{matrix.ts}}
       - name: Enable Developer Command Prompt
