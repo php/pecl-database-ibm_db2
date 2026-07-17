@@ -11,7 +11,7 @@ jobs:
   ubuntu:
     strategy:
       matrix:
-          version: ['7.3', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
+          version: ['7.3', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5', '8.6']
     runs-on: ubuntu-latest
     services:
       ibm_db2:
@@ -27,10 +27,10 @@ jobs:
           - database:/database
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
       - name: Cache DB2 library
         id: cache-clidriver
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: clidriver
           key: ${{ runner.os }}-clidriver
@@ -104,16 +104,16 @@ jobs:
         shell: cmd
     strategy:
       matrix:
-          version: ["8.1", "8.2", "8.3", "8.4"]
+          version: ["8.2", "8.3", "8.4", "8.5"]
           arch: [x64]
           ts: [ts]
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
       - name: Cache DB2 library
         id: cache-clidriver
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: clidriver
           key: ${{ runner.os }}-clidriver
@@ -123,24 +123,13 @@ jobs:
         run: |
           Invoke-WebRequest -Uri 'https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/ntx64_odbc_cli.zip' -OutFile 'ntx64_odbc_cli.zip'
           Expand-Archive 'ntx64_odbc_cli.zip' -DestinationPath '.\'
-      - name: Setup PHP
-        id: setup-php
-        uses: php/setup-php-sdk@v0.10
+      # The builder handles building, testing and artifact packaging/upload automatically
+      - name: Build and test the extension
+        uses: php/php-windows-builder/extension@v1
         with:
-          version: ${{matrix.version}}
-          arch: ${{matrix.arch}}
-          ts: ${{matrix.ts}}
-      - name: Enable Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: ${{matrix.arch}}
-          toolset: ${{steps.setup-php.outputs.toolset}}
-      - name: phpize
-        run: phpize
-      - name: configure
-        run: configure --with-ibm_db2=%cd%\clidriver --with-prefix=${{steps.setup-php.outputs.prefix}}
-      - name: make
-        run: nmake
-      # XXX: Can we run Docker containers in a Windows runner? That'll be required for tests
-      #- name: test
-      #  run: nmake test TESTS=tests
+          php-version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
+          ts: ${{ matrix.ts }}
+          args: --with-ibm_db2=%cd%\clidriver --with-prefix=${{steps.setup-php.outputs.prefix}}
+          run-tests: false # need to have db2 running!
+          test-runner-args: "--show-diff tests"
